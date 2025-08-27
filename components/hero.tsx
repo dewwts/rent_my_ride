@@ -1,44 +1,63 @@
-import { NextLogo } from "./next-logo";
-import { SupabaseLogo } from "./supabase-logo";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Search, MapPin, Calendar } from "lucide-react";
 
 export function Hero() {
   return (
-    <div className="flex flex-col gap-16 items-center">
-      <div className="flex gap-8 justify-center items-center">
-        <a
-          href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <SupabaseLogo />
-        </a>
-        <span className="border-l rotate-45 h-6" />
-        <a href="https://nextjs.org/" target="_blank" rel="noreferrer">
-          <NextLogo />
-        </a>
+    <div className="w-full max-w-5xl mx-auto text-center space-y-8">
+      {/* Hero Text - More minimal */}
+      <div className="space-y-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-black">
+          เช่ารถง่าย ใช้ได้จริง
+        </h1>
+        <p className="text-lg text-gray-600 max-w-xl mx-auto">
+          เลือกรถที่ใช่ สำหรับทุกการเดินทาง
+        </p>
       </div>
-      <h1 className="sr-only">Supabase and Next.js Starter Template</h1>
-      <p className="text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
-        The fastest way to build apps with{" "}
-        <a
-          href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-          target="_blank"
-          className="font-bold hover:underline"
-          rel="noreferrer"
-        >
-          Supabase
-        </a>{" "}
-        and{" "}
-        <a
-          href="https://nextjs.org/"
-          target="_blank"
-          className="font-bold hover:underline"
-          rel="noreferrer"
-        >
-          Next.js
-        </a>
-      </p>
-      <div className="w-full p-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-8" />
+
+      {/* Modern Search Bar - Simplified */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Location Input */}
+          <div className="flex-1 relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <MapPin className="h-5 w-5 text-gray-400" />
+            </div>
+            <Input
+              placeholder="เลือกสถานที่รับรถ"
+              className="pl-10 h-12 border-gray-200 focus:border-black focus:ring-0"
+            />
+          </div>
+
+          {/* Date Range */}
+          <div className="flex flex-col sm:flex-row gap-4 lg:flex-1">
+            <div className="relative flex-1">
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                <Calendar className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                type="date"
+                className="pl-10 h-12 border-gray-200 focus:border-black focus:ring-0"
+              />
+            </div>
+            <div className="relative flex-1">
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                <Calendar className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                type="date"
+                className="pl-10 h-12 border-gray-200 focus:border-black focus:ring-0"
+              />
+            </div>
+          </div>
+
+          {/* Search Button */}
+          <Button variant="default" size="lg">
+            <Search className="h-5 w-5 mr-2" />
+            ค้นหา
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

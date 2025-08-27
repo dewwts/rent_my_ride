@@ -12,17 +12,17 @@ export async function AuthButton() {
   const user = data?.claims;
 
   return user ? (
-    <div className="flex items-center gap-4">
-      Hey, {user.email}!
+    <div className="flex items-center gap-3">
+      <span className="text-sm text-gray-600 font-medium">สวัสดี, {user.email}!</span>
       <LogoutButton />
     </div>
   ) : (
     <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"}>
-        <Link href="/auth/login">Sign in</Link>
+      <Button asChild size="sm" variant="ghost">
+        <Link href="/auth/login">เข้าสู่ระบบ</Link>
       </Button>
-      <Button asChild size="sm" variant={"default"}>
-        <Link href="/auth/sign-up">Sign up</Link>
+      <Button asChild size="sm" variant="default">
+        <Link href="/auth/sign-up">สมัครสมาชิก</Link>
       </Button>
     </div>
   );
