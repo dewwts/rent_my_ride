@@ -49,7 +49,7 @@ export function SignUpForm({
     try {
       const { error } = await supabase.auth.signUp({
         email:data.email,
-        password:data.password_1,
+        password:data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
         },
@@ -88,20 +88,20 @@ export function SignUpForm({
                 <Input
                   id="password"
                   type="password"
-                  {...register('password_1')}
+                  {...register('password')}
                 />
-                {(errors.password_1) && <p className="text-red-500">{errors.password_1?.message}</p>}
+                {(errors.password) && <p className="text-red-500">{errors.password?.message}</p>}
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="repeat-password">รหัสผ่านอีกครั้ง</Label>
+                  <Label htmlFor="repeat-password">ยืนยันรหัสผ่าน</Label>
                 </div>
                 <Input
                   id="repeat-password"
                   type="password"
-                  {...register('password_2')}
+                  {...register('confirmPassowrd')}
                 />
-                {errors.password_2 && <p className="text-red-500">{errors.password_2.message}</p>}
+                {errors.confirmPassowrd && <p className="text-red-500">{errors.confirmPassowrd.message}</p>}
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>

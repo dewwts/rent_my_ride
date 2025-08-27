@@ -8,10 +8,10 @@ export const LoginSchema = z.object({
 export const RegisterSchema = z.object({
     // username:z.string().min(1,"Username is required"),
     email:z.email().min(1, "Email is required"),
-    password_1:z.string().min(6,{message:"Password must be at least 6 characters"}),
-    password_2:z.string()
+    password:z.string().min(6,{message:"Password must be at least 6 characters"}),
+    confirmPassowrd:z.string()
 })
-.refine((data)=> data.password_1 === data.password_2,{
+.refine((data)=> data.password === data.confirmPassowrd,{
     message: "Passwords do not match",
     path: ["password_2"],
 })
