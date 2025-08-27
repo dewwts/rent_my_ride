@@ -1,3 +1,1 @@
-export async function PUT(request, {params}) {
-    
-}
+import { NextRequest } from "next/server";
