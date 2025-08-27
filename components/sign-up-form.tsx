@@ -91,7 +91,7 @@ export function SignUpForm({
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="repeat-password">รหัสผ่านอีกครั้ง</Label>
+                  <Label htmlFor="repeat-password">ยืนยันรหัสผ่าน</Label>
                 </div>
                 <Input
                   id="repeat-password"
