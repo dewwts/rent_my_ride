@@ -1,0 +1,73 @@
+{
+	"info": {
+		"_postman_id": "bc3f5270-2661-4661-8751-ae09fae6eaac",
+		"name": "rent-my-ride",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39216471"
+	},
+	"item": [
+		{
+			"name": "update-user-role by admin",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"role\":\"user\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}api/user/04401146-4e51-444e-a481-ba1d3c56142f",
+					"host": [
+						"{{url}}api"
+					],
+					"path": [
+						"user",
+						"04401146-4e51-444e-a481-ba1d3c56142f"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "http://localhost:3000/",
+			"type": "string"
+		}
+	]
+}
