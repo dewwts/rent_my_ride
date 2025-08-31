@@ -17,3 +17,12 @@ export const RegisterSchema = z.object({
     message: "Passwords do not match",
     path: ["confirmPassword"],
 })
+
+export const ProfileSchema = z.object({
+    firstname:z.string().min(1,"Firstname is required"),
+    lastname:z.string().min(1,"Lastname is required"),
+    phone:z.string().regex(/^0\d{9}$/,
+        "รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง (ต้องเป็น 10 หลักขึ้นต้นด้วย 0)"
+    ),
+    address:z.string().min(1,"Address is required")
+})
