@@ -10,6 +10,11 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        prompt: ["var(--font-prompt)", "sans-serif"],
+        mitr: ["var(--font-mitr)", "sans-serif"],
+        zcool: ["var(--font-zcool)", "serif"],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { Prompt } from "next/font/google";
+import { Prompt, Mitr, ZCOOL_XiaoWei  } from "next/font/google";
 import "./globals.css";
+
+
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -18,6 +20,19 @@ const prompt = Prompt({
   subsets: ["latin", "thai"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
+const mitr = Mitr({
+  variable: "--font-mitr",
+  display: "swap",
+  subsets: ["latin", "thai"],
+  weight: ["200", "300", "400", "500", "600", "700"],
+});
+
+const zcool = ZCOOL_XiaoWei({
+  variable: "--font-zcool",
+  display: "swap",
+  subsets: ["latin"],
+  weight: "400",
+});
 
 export default function RootLayout({
   children,
@@ -26,7 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${prompt.className} antialiased bg-white text-black`}>
+      <body className={`${prompt.variable} ${mitr.variable} ${zcool.variable} antialiased bg-white text-black`}>
         {children}
       </body>
     </html>

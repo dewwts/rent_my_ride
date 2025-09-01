@@ -12,58 +12,29 @@ export function Header() {
         
         {/* Logo Text */}
         <Link href="/" className="flex items-center">
-          <span
-            className="font-[ZCOOL_XiaoWei] text-[40px] font-normal leading-[100%] tracking-normal"
-            style={{
-              fontFamily: "ZCOOL XiaoWei, serif",
-              fontWeight: 400,
-              fontStyle: "normal",
-              fontSize: "40px",
-              lineHeight: "100%",
-              letterSpacing: "0%",
-              width: "300px",
-              height: "40px",
-              opacity: 1,
-            }}
-          >
-            RENT MY RIDE
-          </span>
-        </Link>
+  <span className="font-zcool text-[40px] leading-[100%]">
+    RENT MY RIDE
+  </span>
+</Link>
 
-        {/* Navigation */}
-        <nav
-          className="hidden lg:flex items-center justify-center"
-          style={{
-            width: "517px",
-            height: "38px",
-            gap: "62px",
-            opacity: 1,
-          }}
-        >
-          {[
-            { href: "/", label: "หน้าหลัก" },
-            { href: "/cars", label: "เลือกรถ" },
-            { href: "/about", label: "เกี่ยวกับเรา" },
-            { href: "/contact", label: "ติดต่อ" },
-          ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="uppercase text-center"
-              style={{
-                fontFamily: "Mitr",
-                fontWeight: 300,
-                fontStyle: "normal",
-                fontSize: "24px",
-                lineHeight: "100%",
-                letterSpacing: "0%",
-              }}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
+<nav
+  className="hidden lg:flex items-center justify-center w-[517px] h-[38px] gap-[62px] opacity-100"
+>
+  {[
+    { href: "/", label: "หน้าหลัก" },
+    { href: "/cars", label: "เลือกรถ" },
+    { href: "/about", label: "เกี่ยวกับเรา" },
+    { href: "/contact", label: "ติดต่อ" },
+  ].map((item) => (
+    <Link
+      key={item.href}
+      href={item.href}
+      className="font-mitr font-light text-[24px] leading-[100%] uppercase text-center"
+    >
+      {item.label}
+    </Link>
+  ))}
+</nav>
         {/* Auth & Mobile Menu */}
         <div className="flex items-center gap-4">
           <div className="lg:hidden">
