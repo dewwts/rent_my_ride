@@ -23,8 +23,9 @@ export function Header() {
   {[
     { href: "/", label: "หน้าหลัก" },
     { href: "/cars", label: "เลือกรถ" },
-    { href: "/about", label: "เกี่ยวกับเรา" },
     { href: "/contact", label: "ติดต่อ" },
+    { href: "/about", label: "เกี่ยวกับเรา" },
+    
   ].map((item) => (
     <Link
       key={item.href}
@@ -37,11 +38,7 @@ export function Header() {
 </nav>
         {/* Auth & Mobile Menu */}
         <div className="flex items-center gap-4">
-          <div className="lg:hidden">
-            <button className="text-white">
-              <Menu className="h-6 w-6" />
-            </button>
-          </div>
+          
           {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
         </div>
       </div>
