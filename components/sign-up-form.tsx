@@ -51,15 +51,9 @@ export function SignUpForm({
           emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       });
-      if (error) {
-        if(error.message.includes("already registered") || error.message.includes("already exists")) {//เช็กว่าผู้ใช้มีอยู่แล้ว
-          setError("username or email already in use");
-        } else {
-          setError(error.message);
-        }
+      if (error) throw error;
       setIsLoading(false);
-        return;
-      }
+      
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
