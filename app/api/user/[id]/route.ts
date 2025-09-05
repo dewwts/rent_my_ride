@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 /**
  * @description API Route สำหรับอัปเดต Role ของผู้ใช้ (User) by admin
@@ -25,7 +25,16 @@ export async function PUT(request:NextRequest, {params}:{params:{id:String}}) {
                 status: 400 
             });
         }
-        const supabase = await createClient()
+        const supabase = createClient(
+            process.env.SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false
+                }
+            }
+        )
         console.log(userId);
         const {data:UpdatedProfile, error:updatedError} = await supabase
             .from('user_info')
