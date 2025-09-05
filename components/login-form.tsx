@@ -37,7 +37,18 @@ export function LoginForm({
         email,
         password,
       });
-      if (error) throw error;
+      if (error){
+    // ตรวจสอบข้อความ error จาก Supabase
+        if (
+          error.message === "Invalid login credentials" ||
+          error.message.includes("Invalid login credentials")
+        ) {
+          setError("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+        } else {
+          setError(error.message);
+        }
+        return;
+      }
       // Redirect to dashboard after successful login
       router.push("/dashboard");
     } catch (error: unknown) {
@@ -53,7 +64,7 @@ export function LoginForm({
         <CardHeader>
           <CardTitle className="text-2xl">เข้าสู่ระบบ</CardTitle>
           <CardDescription>
-            ใส่อีเมลล์ด้านล่างเพื่อเข้าสู่ระบบนะฮัฟฟ
+            ใส่อีเมลล์ด้านล่างเพื่อเข้าสู่ระบบ
           </CardDescription>
         </CardHeader>
         <CardContent>
