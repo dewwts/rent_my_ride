@@ -20,7 +20,9 @@ export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [username, setUsername] = useState("");
+  const[surname, setSurname] = useState("");
+  const[firstname, setFirstname] = useState("");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -42,13 +44,22 @@ export function SignUpForm({
 
     try {
       const { error } = await supabase.auth.signUp({
+        //username,
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       });
-      if (error) throw error;
+      if (error) {
+        if(error.message.includes("already registered") || error.message.includes("already exists")) {//เช็กว่าผู้ใช้มีอยู่แล้ว
+          setError("username or email already in use");
+        } else {
+          setError(error.message);
+        }
+      setIsLoading(false);
+        return;
+      }
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
@@ -68,14 +79,25 @@ export function SignUpForm({
           <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="username">ชื่อผู้ใช้</Label>
+                <Label htmlFor="Firstname">ชื่อ</Label>
                 <Input
-                  id="username"
+                  id="name"
                   type="text"
-                  placeholder="ชื่อผู้ใช้"
+                  placeholder="ชื่อ"
                   required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={firstname}
+                  onChange={(e) => setFirstname(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="Surname">นามสกุล</Label>
+                <Input
+                  id="surname"
+                  type="text"
+                  placeholder="นามสกุล"
+                  required
+                  value={surname}
+                  onChange={(e) => setSurname(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
