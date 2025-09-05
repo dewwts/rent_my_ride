@@ -9,42 +9,33 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "bg-black text-white rounded-xl hover:bg-gray-800 shadow-sm",
+        default: "bg-black text-white rounded-xl hover:bg-gray-800 shadow-sm",
         destructive:
           "bg-red-600 text-white rounded-xl hover:bg-red-700 shadow-sm",
         outline:
           "border border-gray-300 bg-white text-black rounded-xl hover:bg-gray-50 shadow-sm",
         secondary:
           "bg-gray-100 text-black rounded-xl hover:bg-gray-200 shadow-sm",
-        ghost:
-          "text-gray-600 hover:text-black rounded-lg",
-        link:
-          "text-black underline-offset-4 hover:underline p-0 h-auto",
-        nav:
-          "text-gray-600 hover:text-black hover:bg-gray-50 rounded-lg font-medium text-sm",
-        menu:
-          "p-2 hover:bg-gray-50 rounded-lg",
+        ghost: "text-gray-600 hover:text-black rounded-lg",
+        link: "text-black underline-offset-4 hover:underline p-0 h-auto",
+        nav: "text-gray-600 hover:text-black hover:bg-gray-50 rounded-lg font-medium text-sm",
+        menu: "p-2 hover:bg-gray-50 rounded-lg",
         "ghost-dark":
           "text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg font-medium text-sm",
-
-        // ✅ New variant without hover effect
-        plain:
-          "text-black font-medium p-0 h-auto",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-8 px-3 text-xs",
-        lg: "h-12 px-8 text-base",
-        icon: "h-10 w-10",
-        nav: "h-8 px-3 py-1",
+        default: "w-full sm:w-auto h-10 px-4 py-2 text-sm sm:h-10 sm:px-4 sm:py-2 md:h-11 md:px-6 md:text-base",
+        sm: "w-full sm:w-auto h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm",
+        lg: "w-full sm:w-auto h-12 px-6 text-base sm:h-14 sm:px-8 sm:text-lg",
+        icon: "h-10 w-10 sm:h-12 sm:w-12",
+        nav: "w-full sm:w-auto h-8 px-3 py-1 text-sm sm:h-9 sm:px-4 sm:py-2 sm:text-base",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 export interface ButtonProps
@@ -67,4 +58,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Logout-button";
 
-export { Button, buttonVariants };
+export { Button, buttonVariants };  
