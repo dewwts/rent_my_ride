@@ -18,6 +18,7 @@ export function LogoutButton() {
     <Button
       onClick={logout}
       variant="ghost"
+      size={"default"}
       className="flex items-center gap-2 text-base font-medium hover:underline"
     >
       ออกจากระบบ
