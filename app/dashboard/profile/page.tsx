@@ -4,6 +4,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import DashboardSidebar from "@/components/dashboard-sidebar";
+import InputField from "@/components/ui/inputfield"
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -14,53 +15,48 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center p-8 min-w-screen min-h-screen">
-        <h2 className="text-xl font-bold mb-4">หน้าโปรไฟล์</h2>
-        <form className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">ชื่อ</label>
-                <input type="text" placeholder="เลิฟรัก" className="border p-2 rounded" />
+    <div className="flex flex-col justify-center min-h-screen p-5 m-5">
+        <h2 className="text-3xl font-semibold mt-3 mb-4">หน้าโปรไฟล์</h2>
+        <div className="border-2 border-[#2B09F7] rounded-[8px] mt-2 mb-8">
+            <div className="flex flex-row items-center gap-8 m-5">
+                <div className="w-[112px] h-[112px] rounded-full overflow-hidden border">
+                    <img
+                    src="/twitter-image.png" // เปลี่ยนเป็น path ของรูปโปรไฟล์จริง
+                    alt="โปรไฟล์"
+                    className="w-full h-full object-cover"
+                    />
+                </div>
+
+                <div className="flex flex-row gap-6">
+                    <button className="px-4 py-2 bg-[#023047] text-white rounded-3xl hover:bg-blue-700 border-2 border-white">
+                    เปลี่ยนรูปโปรไฟล์
+                    </button>
+                    <button className="px-4 py-2 bg-white text-black rounded-3xl hover:bg-red-600 hover:text-white border-2 border-black">
+                    ลบรูปโปรไฟล์
+                    </button>
+                </div>
             </div>
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">สกุล</label>
-                <input type="text" placeholder="สงบใจ" className="border p-2 rounded" />
+        </div>
+
+        <div className="border-2 border-[#2B09F7] rounded-[8px] mt-2 mb-8">
+           <form className="grid grid-cols-2 gap-4 m-5">
+                <InputField label="ชื่อ" placeholder="เลิฟรัก" />
+                <InputField label="สกุล" placeholder="สงบใจ" />
+                <InputField label="ที่อยู่อีเมล์" type="email" placeholder="example@gmail.com" />
+                <InputField label="เบอร์โทรศัพท์" placeholder="0XX-XXX-XXXX" />
+                <InputField label="ที่อยู่" placeholder="170/3 สะพานขาว" />
+                <InputField label="แขวง / ตำบล" placeholder="สี่พระยา" />
+                <InputField label="เขต / อำเภอ" placeholder="บางรัก" />
+                <InputField label="จังหวัด" placeholder="กรุงเทพมหานคร" />
+                <InputField label="รหัสไปรษณีย์" placeholder="10500" />
+                <InputField label="ประเทศ" placeholder="ไทย" />
+            </form>
+            <div className="flex justify-center mb-4">
+                <button className="px-6 py-2 bg-white text-black rounded-3xl border-2 border-black hover:bg-[#023047] hover:text-white">
+                แก้ไขโปรไฟล์
+                </button>
             </div>
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">ที่อยู่อีเมล์</label>
-                <input type="email" placeholder="example@gmail.com" className="border p-2 rounded" />
-            </div>
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">เบอร์โทรศัพท์</label>
-                <input type="text" placeholder="0XX-XXX-XXXX" className="border p-2 rounded" />
-            </div>
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">ที่อยู่</label>
-                <input type="text" placeholder="170/3 สะพานขาว" className="border p-2 rounded" />
-            </div>
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">แขวง / ตำบล</label>
-                <input type="text" placeholder="สี่พระยา" className="border p-2 rounded" />
-            </div>
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">เขต / อำเภอ</label>
-                <input type="text" placeholder="บางรัก" className="border p-2 rounded" />
-            </div>
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">จังหวัด</label>
-                <input type="text" placeholder="กรุงเทพมหานคร" className="border p-2 rounded" />
-            </div>
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">รหัสไปรษณีย์</label>
-                <input type="text" placeholder="10500" className="border p-2 rounded" />
-            </div>
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">ประเทศ</label>
-                <input type="text" placeholder="ไทย" className="border p-2 rounded" />
-            </div>
-            <button className="col-span-2 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-            แก้ไขโปรไฟล์
-            </button>
-        </form>
+        </div>
     </div>
   );
 }

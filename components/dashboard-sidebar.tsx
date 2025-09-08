@@ -26,7 +26,7 @@ export default function DashboardSidebar() {
             }`}
           >
             {item.icon}
-            {item.label}
+            <span className="ml-2">{item.label}</span>
           </Link>
         ))}
       </nav>

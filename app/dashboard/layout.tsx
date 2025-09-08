@@ -11,7 +11,7 @@ export default function DashboardLayout({
             <Header />
             <div className="flex flex-row">
                 <DashboardSidebar />
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 font-mitr font-light ">{children}</main>
             </div>
             <Footer />
     </div>
