@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Prompt } from "next/font/google";
 import "./globals.css";
 
+// ✅ เพิ่ม Toaster เข้ามา
+import { Toaster } from "@/components/ui/toaster";
+
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
@@ -28,6 +31,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${prompt.className} antialiased bg-white text-black`}>
         {children}
+        {/* ✅ Toaster ตำแหน่ง global แสดง toast ทุกหน้าของแอป */}
+        <Toaster />
       </body>
     </html>
   );
