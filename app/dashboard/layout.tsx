@@ -13,7 +13,7 @@ export default function DashboardLayout({
                 <DashboardSidebar />
                 <main className="flex-1 font-mitr font-light ">{children}</main>
             </div>
-            <Footer />
+            <Footer noMargin/>
     </div>
   );
 }
