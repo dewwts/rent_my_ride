@@ -14,7 +14,7 @@ export default function DashboardSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-[350px] h-screen bg-white border-r p-4">
+    <aside className="w-[300px] bg-white border-r p-4">
       <h2 className="font-mitr font-light text-[16px] text-[#8C8C8C] ml-3 mt-3 mb-3">เกี่ยวกับรถ</h2>
       <nav className="flex flex-col gap-3 font-mitr font-light text-[15px] ml-3 mt-5">
         {menuItems.map((item) => (
