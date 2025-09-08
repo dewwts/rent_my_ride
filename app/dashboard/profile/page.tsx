@@ -18,7 +18,7 @@ export default async function ProfilePage() {
         <Header />
         <div className="flex flex-row">
             <DashboardSidebar />
-            <div>
+            <div className="flex flex-col justify-center items-center w-full">
                 <h2 className="text-xl font-bold mb-4">หน้าโปรไฟล์</h2>
                 <form className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col">
