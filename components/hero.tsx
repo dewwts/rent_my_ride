@@ -7,7 +7,7 @@ export function Hero() {
     <div className="w-full max-w-5xl mx-auto text-center space-y-8">
       {/* Hero Text - More minimal */}
       <div className="space-y-4">
-        <h1 className=" font-medium text-4xl md:text-5xl font-bold text-black">
+        <h1 className=" font-medium text-4xl md:text-5xl text-black">
           เช่ารถง่าย ใช้ได้จริง
         </h1>
         <p className="text-lg text-gray-600 max-w-xl mx-auto">
