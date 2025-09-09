@@ -19,6 +19,7 @@ import {z} from 'zod'
 import { LoginSchema } from "@/lib/schemas";
 import {useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
+import { useToast } from "@/components/ui/use-toast";
 
 
 type LoginFormValues = z.infer<typeof LoginSchema>
@@ -37,6 +38,7 @@ export function LoginForm({
   } = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
   });
+  const { toast } = useToast();
   const handleLogin = async (data: LoginFormValues) => {
     const supabase = createClient();
     setIsLoading(true);
@@ -48,10 +50,21 @@ export function LoginForm({
         password:data.password,
       });
       if (error) throw error;
+      toast({
+        title: "สำเร็จ",
+        description: "เข้าสู่ระบบเรียบร้อย",
+        variant: "success",
+      });
       // Redirect to dashboard after successful login
       router.push("/dashboard");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
+      toast({
+        title: "ผิดพลาด",
+        description:
+          error instanceof Error ? error.message : "ไม่สามารถเข้าสู่ระบบได้",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
