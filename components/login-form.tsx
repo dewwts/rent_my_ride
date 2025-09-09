@@ -1,8 +1,6 @@
 "use client";
-
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,99 +13,152 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {z} from 'zod'
+import { z } from "zod";
 import { LoginSchema } from "@/lib/schemas";
-import {useForm} from 'react-hook-form'
-import {zodResolver} from '@hookform/resolvers/zod'
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-
-type LoginFormValues = z.infer<typeof LoginSchema>
+type LoginFormValues = z.infer<typeof LoginSchema>;
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const router = useRouter();
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
+    mode: "onTouched",
   });
-  const handleLogin = async (data: LoginFormValues) => {
+
+  const onSubmit = async (data: LoginFormValues) => {
     const supabase = createClient();
     setIsLoading(true);
-    setError(null);
+    setMsg(null);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email:data.email,
-        password:data.password,
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
       });
       if (error) throw error;
-      // Redirect to dashboard after successful login
+
+      setMsg({ type: "success", text: "เข้าสู่ระบบสำเร็จ กำลังพาไปยังแดชบอร์ดของคุณ..." });
       router.push("/dashboard");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+    } catch (err) {
+      setMsg({
+        type: "error",
+        text: err instanceof Error ? err.message : "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้งภายหลัง",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  const disabled = isLoading || isSubmitting;
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">เข้าสู่ระบบ</CardTitle>
-          <CardDescription>
-            ใส่อีเมลล์ด้านล่างเพื่อเข้าสู่ระบบนะฮัฟฟ
+    <div
+      className={cn(
+        // center within the space *above* the footer
+        "flex items-center justify-center bg-white px-4",
+        className
+      )}
+      // subtract ~88px footer height; change if your footer differs
+      style={{ minHeight: "calc(100svh - 88px)" }}
+      {...props}
+    >
+      <Card className="w-full max-w-md rounded-xl border border-gray-200 shadow-md">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-xl font-bold text-center">เข้าสู่ระบบ</CardTitle>
+          <CardDescription className="text-center">
+            ใส่อีเมลและรหัสผ่านเพื่อเข้าสู่ระบบ
           </CardDescription>
         </CardHeader>
+
         <CardContent>
-          <form onSubmit={handleSubmit(handleLogin)}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">อีเมล์</Label>
-                <Input
-                  id="email"
-                  {...register('email')}
-                />
-                {errors.email && <p className=" text-red-500">{errors.email.message}</p>}
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+            <div className="grid gap-2">
+              <Label htmlFor="email">ที่อยู่อีเมล</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="john@example.com"
+                autoComplete="email"
+                {...register("email")}
+                disabled={disabled}
+                className="border-gray-300 focus-visible:ring-2 focus-visible:ring-black"
+              />
+              {errors.email && (
+                <p className="text-xs text-red-600">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">รหัสผ่าน</Label>
+                <Link href="/auth/forgot-password" className="text-xs hover:underline" style={{ color: "#219EBC" }}>
+                  ลืมรหัสผ่าน?
+                </Link>
               </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">รหัสผ่าน</Label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    ลืมรหัสผ่าน?
-                  </Link>
-                </div>
+              <div className="relative">
                 <Input
                   id="password"
-                  type="password"
-                  {...register('password')}
+                  type={showPw ? "text" : "password"}
+                  autoComplete="current-password"
+                  {...register("password")}
+                  disabled={disabled}
+                  className="border-gray-300 pr-10 focus-visible:ring-2 focus-visible:ring-black"
                 />
-                {errors.password && <p className=" text-red-500">{errors.password.message}</p>}
+                <button
+                  type="button"
+                  onClick={() => setShowPw((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-gray-700"
+                  aria-label={showPw ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+                  tabIndex={-1}
+                >
+                  {showPw ? "ซ่อน" : "แสดง"}
+                </button>
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
+              {errors.password && (
+                <p className="text-xs text-red-600">{errors.password.message}</p>
+              )}
             </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/auth/sign-up"
-                className="underline underline-offset-4"
+
+            {msg && (
+              <div
+                className={cn(
+                  "text-sm rounded-md p-2",
+                  msg.type === "success"
+                    ? "bg-green-50 text-green-700 border border-green-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                )}
               >
+                {msg.text}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={disabled}
+              className="w-full rounded-full bg-black text-white py-2.5 font-medium hover:bg-gray-900 transition active:scale-[.99]"
+            >
+              {disabled ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+            </button>
+
+            <p className="mt-2 text-center text-sm">
+              ยังไม่มีบัญชีผู้ใช้งาน?{" "}
+              <Link href="/auth/sign-up" className="font-medium hover:underline" style={{ color: "#219EBC" }}>
                 ลงทะเบียนเลย
               </Link>
-            </div>
+            </p>
           </form>
         </CardContent>
       </Card>
