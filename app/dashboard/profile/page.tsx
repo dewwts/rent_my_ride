@@ -1,13 +1,45 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { ProfileForm } from "@/components/profile-form";
 
-export default async function ProfilePage() {
-  const supabase = await createClient();
+export default function ProfilePage() {
+  const router = useRouter();
+  const supabase = createClient();
 
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims) {
-    redirect("/auth/login");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      setLoading(true);
+
+      const { data, error } = await supabase.auth.getUser();
+      if (!mounted) return;
+
+      if (error || !data?.user) {
+        // ไม่มี session → ส่งไปหน้า login
+        router.push("/auth/login");
+        return;
+      }
+
+      setLoading(false);
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [router, supabase]);
+
+  if (loading) {
+    return (
+      <main className="min-h-screen grid place-items-center p-6">
+        <p className="text-gray-600">กำลังตรวจสอบสิทธิ์เข้าใช้งาน…</p>
+      </main>
+    );
   }
 
   return (
@@ -37,7 +69,7 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      {/* Profile Form (connected to DB) */}
+
       <div className="border-2 border-[#2B09F7] rounded-[8px] mt-2 mb-8">
         <ProfileForm />
       </div>
