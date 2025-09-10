@@ -26,7 +26,6 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
-  const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const router = useRouter();
 
   const {
@@ -41,7 +40,6 @@ export function LoginForm({
   const onSubmit = async (data: LoginFormValues) => {
     const supabase = createClient();
     setIsLoading(true);
-    setMsg(null);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -50,13 +48,11 @@ export function LoginForm({
       });
       if (error) throw error;
 
-      setMsg({ type: "success", text: "เข้าสู่ระบบสำเร็จ กำลังพาไปยังแดชบอร์ดของคุณ..." });
+      // later: replace with toast success
       router.push("/dashboard");
     } catch (err) {
-      setMsg({
-        type: "error",
-        text: err instanceof Error ? err.message : "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้งภายหลัง",
-      });
+      // later: replace with toast error
+      console.error("Login error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -67,11 +63,9 @@ export function LoginForm({
   return (
     <div
       className={cn(
-        // center within the space *above* the footer
         "flex items-center justify-center bg-white px-4",
         className
       )}
-      // subtract ~88px footer height; change if your footer differs
       style={{ minHeight: "calc(100svh - 88px)" }}
       {...props}
     >
@@ -104,7 +98,11 @@ export function LoginForm({
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">รหัสผ่าน</Label>
-                <Link href="/auth/forgot-password" className="text-xs hover:underline" style={{ color: "#219EBC" }}>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-xs hover:underline"
+                  style={{ color: "#219EBC" }}
+                >
                   ลืมรหัสผ่าน?
                 </Link>
               </div>
@@ -132,19 +130,6 @@ export function LoginForm({
               )}
             </div>
 
-            {msg && (
-              <div
-                className={cn(
-                  "text-sm rounded-md p-2",
-                  msg.type === "success"
-                    ? "bg-green-50 text-green-700 border border-green-200"
-                    : "bg-red-50 text-red-700 border border-red-200"
-                )}
-              >
-                {msg.text}
-              </div>
-            )}
-
             <button
               type="submit"
               disabled={disabled}
@@ -155,7 +140,11 @@ export function LoginForm({
 
             <p className="mt-2 text-center text-sm">
               ยังไม่มีบัญชีผู้ใช้งาน?{" "}
-              <Link href="/auth/sign-up" className="font-medium hover:underline" style={{ color: "#219EBC" }}>
+              <Link
+                href="/auth/sign-up"
+                className="font-medium hover:underline"
+                style={{ color: "#219EBC" }}
+              >
                 ลงทะเบียนเลย
               </Link>
             </p>
