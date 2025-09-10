@@ -27,57 +27,85 @@ const ProfileSchema = z.object({
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
 
-/** ---------- helpers: address build/parse ---------- */
+/** ---------- helpers: address build/parse (order-agnostic) ---------- */
 const ADDRESS_SEP = " | ";
 
-function buildAddress(v: ProfileValues): string | null {
-  const parts = [
-    v.addr_line?.trim() ? v.addr_line : undefined,
-    v.subdistrict?.trim() ? `แขวง/ตำบล ${v.subdistrict}` : undefined,
-    v.district?.trim() ? `เขต/อำเภอ ${v.district}` : undefined,
-    v.province?.trim() ? `จังหวัด ${v.province}` : undefined,
-    v.postcode?.trim() || undefined,
-    v.country?.trim() || undefined,
-  ].filter(Boolean) as string[];
+// Thai prefixes
+const PFX = {
+  sub: "แขวง/ตำบล ",
+  dist: "เขต/อำเภอ ",
+  prov: "จังหวัด ",
+  post: "รหัสไปรษณีย์ ",
+  country: "ประเทศ ",
+};
 
-  if (parts.length === 0) return null; // <-- บันทึกเป็น null ถ้าว่างทั้งหมด
-  return parts.join(ADDRESS_SEP);
+function buildAddress(v: ProfileValues): string | null {
+  const parts: string[] = [];
+
+  // addr_line stays untagged as free text (first token)
+  if (v.addr_line?.trim()) parts.push(v.addr_line.trim());
+
+  if (v.subdistrict?.trim()) parts.push(PFX.sub + v.subdistrict.trim());
+  if (v.district?.trim()) parts.push(PFX.dist + v.district.trim());
+  if (v.province?.trim()) parts.push(PFX.prov + v.province.trim());
+  if (v.postcode?.trim()) parts.push(PFX.post + v.postcode.trim());
+  if (v.country?.trim()) parts.push(PFX.country + v.country.trim());
+
+  return parts.length ? parts.join(ADDRESS_SEP) : null;
 }
 
-function stripPrefix(s: string | undefined, prefix: string) {
-  if (!s) return "";
+function stripPrefix(s: string, prefix: string) {
   return s.startsWith(prefix) ? s.slice(prefix.length) : s;
 }
 
 function parseAddress(s: string | null | undefined) {
+  // Defaults
+  let addr_line = "";
+  let subdistrict = "";
+  let district = "";
+  let province = "";
+  let postcode = "";
+  let country = "";
+
   if (!s) {
-    return {
-      addr_line: "",
-      subdistrict: "",
-      district: "",
-      province: "",
-      postcode: "",
-      country: "",
-    };
+    return { addr_line, subdistrict, district, province, postcode, country };
   }
-  const parts = s.split(ADDRESS_SEP).map((x) => x.trim());
-  const [addr, sub, dist, prov, post, country] = [
-    parts[0] || "",
-    parts[1] || "",
-    parts[2] || "",
-    parts[3] || "",
-    parts[4] || "",
-    parts[5] || "",
-  ];
-  return {
-    addr_line: addr,
-    subdistrict: stripPrefix(sub, "แขวง/ตำบล "),
-    district: stripPrefix(dist, "เขต/อำเภอ "),
-    province: stripPrefix(prov, "จังหวัด "),
-    postcode: post,
-    country,
-  };
+
+  const tokens = s.split(ADDRESS_SEP).map(t => t.trim()).filter(Boolean);
+
+  // Collect any untagged pieces (treat first as addr_line, extras appended)
+  const freeTexts: string[] = [];
+
+  for (const t of tokens) {
+    if (t.startsWith(PFX.sub)) {
+      subdistrict = stripPrefix(t, PFX.sub);
+    } else if (t.startsWith(PFX.dist)) {
+      district = stripPrefix(t, PFX.dist);
+    } else if (t.startsWith(PFX.prov)) {
+      province = stripPrefix(t, PFX.prov);
+    } else if (t.startsWith(PFX.post)) {
+      postcode = stripPrefix(t, PFX.post);
+    } else if (t.startsWith(PFX.country)) {
+      country = stripPrefix(t, PFX.country);
+    } else {
+      // backward-compat: old format may have bare "10500" as postcode
+      if (/^\d{5}$/.test(t) && !postcode) {
+        postcode = t;
+      } else {
+        freeTexts.push(t);
+      }
+    }
+  }
+
+  if (freeTexts.length) {
+    // join multiple untagged chunks into addr_line
+    addr_line = freeTexts.join(" ");
+  }
+
+  return { addr_line, subdistrict, district, province, postcode, country };
 }
+/** ------------------------------------------------------------------- */
+
 /** --------------------------------------------------- */
 
 export function ProfileForm() {
