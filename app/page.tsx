@@ -97,6 +97,7 @@ export default function Home() {
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
       
+      
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Hero />
@@ -116,7 +117,7 @@ export default function Home() {
                 ดูทั้งหมด →
               </Button>
             </div>
-            
+            {/* dasdsadasdasda */}
             {/* Car Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {mockCars.map((car) => (

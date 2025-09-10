@@ -15,27 +15,37 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {z} from 'zod'
+import { LoginSchema } from "@/lib/schemas";
+import {useForm} from 'react-hook-form'
+import {zodResolver} from '@hookform/resolvers/zod'
+
+
+type LoginFormValues = z.infer<typeof LoginSchema>
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(LoginSchema),
+  });
+  const handleLogin = async (data: LoginFormValues) => {
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email:data.email,
+        password:data.password,
       });
       if (error){
     // ตรวจสอบข้อความ error จาก Supabase
@@ -68,18 +78,15 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleSubmit(handleLogin)}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">อีเมล์</Label>
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register('email')}
                 />
+                {errors.email && <p className=" text-red-500">{errors.email.message}</p>}
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
@@ -94,10 +101,9 @@ export function LoginForm({
                 <Input
                   id="password"
                   type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register('password')}
                 />
+                {errors.password && <p className=" text-red-500">{errors.password.message}</p>}
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
