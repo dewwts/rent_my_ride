@@ -30,15 +30,17 @@ type ProfileValues = z.infer<typeof ProfileSchema>;
 /** ---------- helpers: address build/parse ---------- */
 const ADDRESS_SEP = " | ";
 
-function buildAddress(v: ProfileValues) {
+function buildAddress(v: ProfileValues): string | null {
   const parts = [
-    v.addr_line,
-    v.subdistrict ? `แขวง/ตำบล ${v.subdistrict}` : undefined,
-    v.district ? `เขต/อำเภอ ${v.district}` : undefined,
-    v.province ? `จังหวัด ${v.province}` : undefined,
-    v.postcode,
-    v.country,
-  ].filter(Boolean);
+    v.addr_line?.trim() ? v.addr_line : undefined,
+    v.subdistrict?.trim() ? `แขวง/ตำบล ${v.subdistrict}` : undefined,
+    v.district?.trim() ? `เขต/อำเภอ ${v.district}` : undefined,
+    v.province?.trim() ? `จังหวัด ${v.province}` : undefined,
+    v.postcode?.trim() || undefined,
+    v.country?.trim() || undefined,
+  ].filter(Boolean) as string[];
+
+  if (parts.length === 0) return null; // <-- บันทึกเป็น null ถ้าว่างทั้งหมด
   return parts.join(ADDRESS_SEP);
 }
 
