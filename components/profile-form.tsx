@@ -2,30 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { z } from "zod";                      // <-- type-only
 import { createClient } from "@/lib/supabase/client";
+import { ProfileSchema } from "@/lib/schemas";      // <-- use shared schema
 
-const ProfileSchema = z.object({
-  firstname: z.string().min(1, "กรุณากรอกชื่อ"),
-  lastname: z.string().min(1, "กรุณากรอกนามสกุล"),
-  email: z.string().email("อีเมลไม่ถูกต้อง"), // read-only ใน UI แต่ต้อง valid
-  phone: z
-    .string()
-    .trim()
-    .transform((v) => (v ? v.replace(/\D/g, "") : "")) // เก็บเฉพาะตัวเลข
-    .refine((v) => v === "" || /^[0-9]{10,15}$/.test(v), {
-      message: "กรุณากรอกเบอร์ 10–15 หลัก (หรือปล่อยว่าง)",
-    }),
-  addr_line: z.string().optional(),
-  subdistrict: z.string().optional(),
-  district: z.string().optional(),
-  province: z.string().optional(),
-  postcode: z.string().optional(),
-  country: z.string().optional(),
-});
-
-type ProfileValues = z.infer<typeof ProfileSchema>;
+type ProfileValues = z.infer<typeof ProfileSchema>; // <-- infer from shared schema
 
 /** ---------- helpers: address build/parse (order-agnostic) ---------- */
 const ADDRESS_SEP = " | ";
@@ -127,7 +109,7 @@ export function ProfileForm() {
       firstname: "",
       lastname: "",
       email: "",
-      phone: "",          
+      phone: "",
       addr_line: "",
       subdistrict: "",
       district: "",
@@ -187,7 +169,6 @@ export function ProfileForm() {
         setValue("lastname", row?.u_lastname ?? "");
         setValue("phone", row?.u_phone ?? "");
 
-    
         if (row?.u_address) {
           const p = parseAddress(row.u_address);
           setValue("addr_line", p.addr_line);
