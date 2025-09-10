@@ -1,8 +1,9 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
+import { LogOutButton } from "@/components/ui/logout-button";
 import { useRouter } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -10,8 +11,11 @@ export function LogoutButton() {
   const logout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/auth/login");
+    router.push("/");
   };
 
-  return <Button onClick={logout} variant="outline" size="sm">ออกจากระบบ</Button>;
+  return <LogOutButton onClick={logout} variant="ghost" size="lg">
+    ออกจากระบบ
+  <ArrowRight className="w-4 h-4" />
+  </LogOutButton>;
 }
