@@ -22,7 +22,7 @@ export const RegisterSchema = z
 export const ProfileSchema = z.object({
   firstname: z.string().min(1, "กรุณากรอกชื่อ"),
   lastname: z.string().min(1, "กรุณากรอกนามสกุล"),
-  email: z.string().email("อีเมลไม่ถูกต้อง"), // read-only ใน UI แต่ต้อง valid
+  email: z.email(), // read-only ใน UI แต่ต้อง valid
   phone: z
     .string()
     .trim()
