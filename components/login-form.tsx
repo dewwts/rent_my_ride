@@ -17,6 +17,7 @@ import { z } from "zod";
 import { LoginSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AuthApiError } from "@supabase/supabase-js";
 
 type LoginFormValues = z.infer<typeof LoginSchema>;
 
@@ -31,6 +32,7 @@ export function LoginForm({
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
@@ -48,10 +50,28 @@ export function LoginForm({
       });
       if (error) throw error;
 
-      // later: replace with toast success
       router.push("/dashboard");
     } catch (err) {
-      // later: replace with toast error
+      // Handle wrong password / invalid credentials nicely
+      if (err instanceof AuthApiError) {
+        // Supabase typically returns status 400 for invalid credentials
+        const msg =
+          err.status === 400 ||
+          /invalid login credentials/i.test(err.message) ||
+          /invalid_credentials/i.test((err as any)?.code ?? "")
+            ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+            : /email not confirmed/i.test(err.message)
+            ? "ยังไม่ได้ยืนยันอีเมล กรุณาตรวจสอบกล่องจดหมายของคุณ"
+            : "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้ง";
+
+        // Show error under the password field
+        setError("password", { type: "server", message: msg });
+      } else {
+        setError("password", {
+          type: "server",
+          message: "เกิดข้อผิดพลาดที่ไม่คาดคิด โปรดลองอีกครั้ง",
+        });
+      }
       console.error("Login error:", err);
     } finally {
       setIsLoading(false);
