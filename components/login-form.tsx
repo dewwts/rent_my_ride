@@ -2,11 +2,7 @@
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,49 +39,42 @@ export function LoginForm({
     const supabase = createClient();
     setIsLoading(true);
 
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: data.email.trim().toLowerCase(),
-        password: data.password,
-      });
-      if (error) throw error;
+    // no throw — we’ll *handle* the error and return early
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email.trim().toLowerCase(),
+      password: data.password,
+    });
 
-      router.push("/dashboard");
-    } catch (err) {
-      // Handle wrong password / invalid credentials nicely
-      if (err instanceof AuthApiError) {
-        // Supabase typically returns status 400 for invalid credentials
-        const msg =
-          err.status === 400 ||
-          /invalid login credentials/i.test(err.message) ||
-          /invalid_credentials/i.test((err as any)?.code ?? "")
-            ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
-            : /email not confirmed/i.test(err.message)
-            ? "ยังไม่ได้ยืนยันอีเมล กรุณาตรวจสอบกล่องจดหมายของคุณ"
-            : "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้ง";
-
-        // Show error under the password field
-        setError("password", { type: "server", message: msg });
-      } else {
-        setError("password", {
-          type: "server",
-          message: "เกิดข้อผิดพลาดที่ไม่คาดคิด โปรดลองอีกครั้ง",
-        });
+    if (error) {
+      let message = "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้ง";
+      if (error instanceof AuthApiError) {
+        if (
+          error.status === 400 ||
+          /invalid login credentials/i.test(error.message) ||
+          /invalid_credentials/i.test((error as any)?.code ?? "")
+        ) {
+          message = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+        } else if (/email not confirmed/i.test(error.message)) {
+          message = "ยังไม่ได้ยืนยันอีเมล กรุณาตรวจสอบกล่องจดหมายของคุณ";
+        } else if (error.status === 429) {
+          message = "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่ภายหลัง";
+        }
       }
-      console.error("Login error:", err);
-    } finally {
+      setError("password", { type: "server", message });
       setIsLoading(false);
+      return;
     }
+
+    // success
+    router.push("/dashboard");
+    setIsLoading(false);
   };
 
   const disabled = isLoading || isSubmitting;
 
   return (
     <div
-      className={cn(
-        "flex items-center justify-center bg-white px-4",
-        className
-      )}
+      className={cn("flex items-center justify-center bg-white px-4", className)}
       style={{ minHeight: "calc(100svh - 88px)" }}
       {...props}
     >
