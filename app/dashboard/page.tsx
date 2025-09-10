@@ -1,17 +1,34 @@
+"use client"
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+// import axios from "axios";
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
+export default function DashboardPage() {
+  // const [transactionData, setTransactionData] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const supabase = createClient();
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError || !authData?.user) {
+          console.log("No user session, redirecting to login.");
+          redirect("/auth/login");
+          return;
+        }
+        // const response = await axios.get("/api/transaction");
+        // setTransactionData(response.data);
+        // console.log(response.data);
+      } catch (error) {
+        console.error("An error occurred during data fetching:", error);
+      }
+    };
 
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims) {
-    redirect("/auth/login");
-  }
-
+    fetchData();
+  }, []);
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1">

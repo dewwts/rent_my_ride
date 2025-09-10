@@ -49,6 +49,11 @@ export function SignUpForm({
         password:data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
+          data:{
+            firstname: data.firstname,
+            lastname: data.lastname,
+            role: 'user'
+          }
         },
       });
       if (error) throw error;
