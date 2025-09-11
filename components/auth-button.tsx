@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { Button } from "./ui/button";
+import { LogInButton } from "./ui/login-button";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
 
 export async function AuthButton() {
   const supabase = await createClient();
-
-  // You can also use getUser() which will be slower.
+  
   const { data } = await supabase.auth.getClaims();
 
   const user = data?.claims;
@@ -18,12 +17,12 @@ export async function AuthButton() {
     </div>
   ) : (
     <div className="flex gap-2">
-      <Button asChild size="sm" variant="ghost">
+      <LogInButton asChild size="default" variant="ghost">
         <Link href="/auth/login">เข้าสู่ระบบ</Link>
-      </Button>
-      <Button asChild size="sm" variant="default">
-        <Link href="/auth/sign-up">สมัครสมาชิก</Link>
-      </Button>
+      </LogInButton>
+      <LogInButton asChild size="default" variant="ghost">
+        <Link href="/auth/sign-up">ลงทะเบียน</Link>
+      </LogInButton>
     </div>
   );
 }
