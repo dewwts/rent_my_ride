@@ -1,15 +1,42 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
+export default function DashboardPage() {
+  const router = useRouter();
+  const supabase = createClient();
 
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims) {
-    redirect("/auth/login");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase.auth.getUser();
+      if (!mounted) return;
+
+      if (error || !data?.user) {
+        router.push("/auth/login");
+        return;
+      }
+
+      setLoading(false);
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [router, supabase]);
+
+  if (loading) {
+    return (
+      <main className="min-h-screen grid place-items-center">
+        <p className="text-gray-600">กำลังตรวจสอบสิทธิ์เข้าใช้งาน…</p>
+      </main>
+    );
   }
 
   return (
@@ -17,54 +44,44 @@ export default async function DashboardPage() {
       <Header />
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-black mb-2">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-black mb-2">
               แดชบอร์ดของฉัน
-          </h1>
-          <p className="text-gray-600">
-            จัดการการจองรถของคุณทั้งการปล่อยเช่าและจอง
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-black mb-2">
-              การจองรถของฉัน
-            </h3>
-            <p className="text-gray-600 mb-4">
-              ดูและจัดการการจองรถของคุณทั้งหมด
+            </h1>
+            <p className="text-gray-600">
+              จัดการการจองรถของคุณทั้งการปล่อยเช่าและจอง
             </p>
-            <Button variant="default" size="sm">
-              ดูการจองรถ
-            </Button>
           </div>
 
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-black mb-2">
-              ค้นหารถ
-            </h3>
-            <p className="text-gray-600 mb-4">
-              ค้นหารถที่ต้องการจอง
-            </p>
-            <Button variant="default" size="sm">
-              ค้นหารถ
-            </Button>
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-black mb-2">
+                การจองรถของฉัน
+              </h3>
+              <p className="text-gray-600 mb-4">
+                ดูและจัดการการจองรถของคุณทั้งหมด
+              </p>
+              <Button size="sm">ดูการจองรถ</Button>
+            </div>
 
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-black mb-2">
-              ข้อมูลส่วนตัวของฉัน
-            </h3>
-            <p className="text-gray-600 mb-4">
-              อัพเดตข้อมูลส่วนตัวของคุณ
-            </p>
-            <Button variant="default" size="sm">
-              แก้ไขข้อมูลส่วนตัว
-            </Button>
-          </div>
-        </div>
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-black mb-2">
+                ค้นหารถ
+              </h3>
+              <p className="text-gray-600 mb-4">ค้นหารถที่ต้องการจอง</p>
+              <Button size="sm">ค้นหารถ</Button>
+            </div>
 
-        
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-black mb-2">
+                ข้อมูลส่วนตัวของฉัน
+              </h3>
+              <p className="text-gray-600 mb-4">อัพเดตข้อมูลส่วนตัวของคุณ</p>
+              <Button size="sm" onClick={() => router.push("/dashboard/profile")}>
+                แก้ไขข้อมูลส่วนตัว
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
       <Footer />
