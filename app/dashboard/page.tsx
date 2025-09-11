@@ -40,8 +40,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <Header />
+    <div className="min-h-screen flex flex-col">
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="mb-8">
@@ -84,7 +83,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
