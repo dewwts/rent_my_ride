@@ -49,7 +49,7 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
-const LogOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const LogInButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
@@ -61,6 +61,6 @@ const LogOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
   },
 );
-LogOutButton.displayName = "LogOutButton";
+LogInButton.displayName = "LogInButton";
 
-export { LogOutButton, buttonVariants };
+export { LogInButton, buttonVariants };
