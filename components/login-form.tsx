@@ -39,6 +39,7 @@ export function LoginForm({
     const supabase = createClient();
     setIsLoading(true);
 
+
     // no throw — we’ll *handle* the error and return early
     const { error } = await supabase.auth.signInWithPassword({
       email: data.email.trim().toLowerCase(),
@@ -73,6 +74,7 @@ export function LoginForm({
   const disabled = isLoading || isSubmitting;
 
   return (
+
     <div
       className={cn("flex items-center justify-center bg-white px-4", className)}
       style={{ minHeight: "calc(100svh - 88px)" }}
@@ -82,8 +84,7 @@ export function LoginForm({
         <CardHeader className="pb-3">
           <CardTitle className="text-xl font-bold text-center">เข้าสู่ระบบ</CardTitle>
           <CardDescription className="text-center">
-            ใส่อีเมลและรหัสผ่านเพื่อเข้าสู่ระบบ
-          </CardDescription>
+            ใส่อีเมลและรหัสผ่านเพื่อเข้าสู่ระบบ          </CardDescription>
         </CardHeader>
 
         <CardContent>
