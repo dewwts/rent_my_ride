@@ -1,13 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, User, Key, CarFront } from "lucide-react";
+import { LayoutDashboard, User, Key, CarFront,History } from "lucide-react";
 
 const menuItems = [
   { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} /> },
   { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} /> },
   { href: "/dashboard/bookings", label: "การจองรถ", icon: <CarFront size={18} /> },
   { href: "/dashboard/cars", label: "ปล่อยเช่ารถ", icon: <Key size={18} /> },
+  { href: "/dashboard/history", label: "ประวัติธุรกรรม", icon: <History size={18} /> },
 ];
 
 export default function DashboardSidebar() {

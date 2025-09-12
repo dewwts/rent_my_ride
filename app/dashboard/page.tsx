@@ -80,6 +80,17 @@ export default function DashboardPage() {
                 แก้ไขข้อมูลส่วนตัว
               </Button>
             </div>
+
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-black mb-2">
+                ประวัติธุรกรรม
+              </h3>
+              <p className="text-gray-600 mb-4">เข้าถึงประวัติธุรกรรม</p>
+              <Button size="sm" onClick={() => router.push("/dashboard/history")}>
+              ประวัติธุรกรรม
+              </Button>
+            </div>
+
           </div>
         </div>
       </main>
