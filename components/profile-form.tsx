@@ -112,7 +112,6 @@ export function ProfileForm() {
           .maybeSingle();
 
         if (!active) return;
-
         if (qErr?.message) {
           console.error("select user_info error:", {
             message: qErr.message,
@@ -124,7 +123,7 @@ export function ProfileForm() {
           setLoading(false);
           return;
         }
-
+        
         setValue("email", row?.u_email ?? user.email ?? "");
         setValue("firstname", row?.u_firstname ?? "");
         setValue("lastname", row?.u_lastname ?? "");
