@@ -15,48 +15,53 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {z} from 'zod'
+import { RegisterSchema } from "@/lib/schemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AuthResponse } from "@supabase/supabase-js";
+
+type RegisterFormValues = z.infer<typeof RegisterSchema>
 
 export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const[surname, setSurname] = useState("");
-  const[firstname, setFirstname] = useState("");
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {register, handleSubmit, formState:{errors}} = useForm<RegisterFormValues>({
+    resolver: zodResolver(RegisterSchema)
+  })
+  const handleSignUp = async (data: RegisterFormValues) => {
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
-
-    if (password !== repeatPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
     try {
+      const { data: user, error: err} = await supabase.from('user_info').select('u_email').eq('u_email', data.email).single();
+      if (err) throw err
+      if (user) throw new Error('Email already exists');
       const { error } = await supabase.auth.signUp({
-        //username,
-        email,
-        password,
+        email:data.email,
+        password:data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            firstname: data.firstname,
+            lastname: data.lastname,
+            role: 'user'
+          },
         },
       });
       if (error) throw error;
-      setIsLoading(false);
-      
       router.push("/auth/sign-up-success");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+    } catch (error: any) {
+      console.log(error);
+      if (error instanceof Error){
+        setError(error.message);
+      }else{
+        setError("An error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -70,40 +75,27 @@ export function SignUpForm({
           <CardDescription>สร้างบัญชีผู้ใช้งานใหม่</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignUp}>
+          <form onSubmit={handleSubmit(handleSignUp)}>
+             <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="firstname">ชื่อจริง</Label>
+                <Input id="firstname" {...register('firstname')} />
+                {errors.firstname && <p className="text-red-500">{errors.firstname.message}</p>}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="lastname">นามสกุล</Label>
+                <Input id="lastname" {...register('lastname')} />
+                {errors.lastname && <p className="text-red-500">{errors.lastname.message}</p>}
+              </div>
+            </div>
             <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="Firstname">ชื่อ</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="ชื่อ"
-                  required
-                  value={firstname}
-                  onChange={(e) => setFirstname(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="Surname">นามสกุล</Label>
-                <Input
-                  id="surname"
-                  type="text"
-                  placeholder="นามสกุล"
-                  required
-                  value={surname}
-                  onChange={(e) => setSurname(e.target.value)}
-                />
-              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">อีเมล์</Label>
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register('email')}
                 />
+                {errors.email && <p className="text-red-500">{errors.email.message}</p>}
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
@@ -112,22 +104,20 @@ export function SignUpForm({
                 <Input
                   id="password"
                   type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register('password')}
                 />
+                {(errors.password) && <p className="text-red-500">{errors.password?.message}</p>}
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="repeat-password">รหัสผ่านอีกครั้ง</Label>
+                  <Label htmlFor="repeat-password">ยืนยันรหัสผ่าน</Label>
                 </div>
                 <Input
                   id="repeat-password"
                   type="password"
-                  required
-                  value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
+                  {...register('confirmPassword')}
                 />
+                {errors.confirmPassword && <p className="text-red-500">{errors.confirmPassword.message}</p>}
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
