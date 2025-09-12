@@ -295,7 +295,7 @@ export function ProfileForm() {
             type="button"
             onClick={handleRemoveAvatar}
             disabled={busy || uploading}
-            className="px-6 py-2 bg-white text-black rounded-3xl border-2 border-black hover:bg-[#023047] hover:text-white transition-colors disabled:opacity-50"
+            className="px-6 py-2 bg-white text-black rounded-3xl border-2 border-black hover:bg-[#f01a1a] hover:text-white transition-colors disabled:opacity-50"
           >
             ลบรูปโปรไฟล์
           </button>

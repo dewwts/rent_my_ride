@@ -2,18 +2,52 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, User, Key, CarFront,History } from "lucide-react";
-
-const menuItems = [
-  { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} /> },
-  { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} /> },
-  { href: "/dashboard/bookings", label: "การจองรถ", icon: <CarFront size={18} /> },
-  { href: "/dashboard/cars", label: "ปล่อยเช่ารถ", icon: <Key size={18} /> },
-  { href: "/dashboard/history", label: "ประวัติธุรกรรม", icon: <History size={18} /> },
-];
+import { useEffect,useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
+  const supabase = createClient();
+  const [role,setRole] = useState<"user" | "admin" | null>(null)
 
+  useEffect(() => {
+    const fetchRole = async() => {
+      try{
+        const { data: sessionData } = await supabase.auth.getUser();
+        const user = sessionData?.user;
+        if(!user) return;
+
+        const {data : row,error} =await supabase
+          .from("user_info")
+          .select("role")
+          .eq("user_id",user.id)
+          .maybeSingle();
+
+        if(!error && row){
+          setRole(row.role as "user" | "admin")
+        }
+      }catch(error){
+        console.log(error);
+        console.log("โหลดroleไม่สำเร็จ");
+      }
+    };
+    fetchRole();
+  }, [supabase]);
+
+  const userMenu = [
+    { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} /> },
+    { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} /> },
+    { href: "/dashboard/bookings", label: "การจองรถ", icon: <CarFront size={18} /> },
+    { href: "/dashboard/cars", label: "ปล่อยเช่ารถ", icon: <Key size={18} /> }
+  ];
+
+  const adminMenu = [
+    { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} /> },
+    { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} /> },
+    { href: "/dashboard/history", label: "ประวัติธุรกรรม", icon: <History size={18} /> }
+  ];
+
+  const menuItems = role === "admin" ? adminMenu : userMenu;
   return (
     <aside className="w-max bg-white border-r p-4 md:w-[300px]">
       <h2 className="font-mitr font-light text-[16px] text-[#8C8C8C] ml-3 mt-3 mb-3 hidden md:block">เกี่ยวกับรถ</h2>
