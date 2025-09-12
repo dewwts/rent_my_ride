@@ -38,9 +38,8 @@ export function SignUpForm({
     setIsLoading(true);
     setError(null);
     try {
-      const { data: user, error: err} = await supabase.from('user_info').select('u_email').eq('u_email', data.email).single();
-      if (err) throw err
-      if (user) throw new Error('Email already exists');
+      const { data: user} = await supabase.from('user_info').select('u_email').eq('u_email', data.email).single();
+      if (user){throw new Error('Email already exists');}
       const { error } = await supabase.auth.signUp({
         email:data.email,
         password:data.password,
