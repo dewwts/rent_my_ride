@@ -9,13 +9,16 @@ export default function DashboardSidebar() {
   const pathname = usePathname();
   const supabase = createClient();
   const [role,setRole] = useState<"user" | "admin" | null>(null)
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRole = async() => {
       try{
-        const { data: sessionData } = await supabase.auth.getUser();
-        const user = sessionData?.user;
-        if(!user) return;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setLoading(false);
+          return;
+        }
 
         const {data : row,error} =await supabase
           .from("user_info")
@@ -29,10 +32,19 @@ export default function DashboardSidebar() {
       }catch(error){
         console.log(error);
         console.log("โหลดroleไม่สำเร็จ");
+      } finally {
+        setLoading(false);
       }
     };
     fetchRole();
   }, [supabase]);
+  if (loading || role === null) {
+  return (
+    <aside className="w-max bg-white border-r p-4 md:w-[300px]">
+      {/* เว้นว่างไว้ให้ skeleton หรือเปล่า ๆ */}
+    </aside>
+  );
+}
 
   const userMenu = [
     { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} /> },
