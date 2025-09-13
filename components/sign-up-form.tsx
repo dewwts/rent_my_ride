@@ -19,7 +19,6 @@ import {z} from 'zod'
 import { RegisterSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AuthResponse } from "@supabase/supabase-js";
 
 type RegisterFormValues = z.infer<typeof RegisterSchema>
 
@@ -37,30 +36,25 @@ export function SignUpForm({
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
+    console.log("Test");
+    // if (data.password !== data.confirmPassword) {
+    //   setError("Passwords do not match");
+    //   setIsLoading(false);
+    //   return;
+    // }
+
     try {
-      const { data: user} = await supabase.from('user_info').select('u_email').eq('u_email', data.email).single();
-      if (user){throw new Error('Email already exists');}
       const { error } = await supabase.auth.signUp({
         email:data.email,
         password:data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            firstname: data.firstname,
-            lastname: data.lastname,
-            role: 'user'
-          },
         },
       });
       if (error) throw error;
       router.push("/auth/sign-up-success");
-    } catch (error: any) {
-      console.log(error);
-      if (error instanceof Error){
-        setError(error.message);
-      }else{
-        setError("An error occurred");
-      }
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
