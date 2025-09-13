@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Check, X, Loader2, ArrowLeft, Calendar, DollarSign } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 interface Transaction {
@@ -39,11 +40,46 @@ export default function TransactionHistoryPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
-    fetchAllTransactions();
-  }, []);
+    checkRoleAndFetchTransactions();
+  }, [router, supabase]);
+
+  const checkRoleAndFetchTransactions = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Check admin role first
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        router.push("/auth/login");
+        return;
+      }
+
+      // Fetch user_info to check role
+      const { data: userInfo, error: roleError } = await supabase
+        .from("user_info")
+        .select("role")
+        .eq("user_id", user.id)
+        .single();
+
+      if (roleError || !userInfo || userInfo.role !== "admin") {
+        router.push("/auth/login");
+        return;
+      }
+
+      // If admin role confirmed, fetch all transactions
+      await fetchAllTransactions();
+    } catch (err) {
+      console.error('Error checking role:', err);
+      setError('เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์การเข้าใช้งาน');
+      setLoading(false);
+    }
+  };
 
   const fetchAllTransactions = async () => {
     try {
@@ -166,7 +202,7 @@ export default function TransactionHistoryPage() {
       <main className="min-h-screen grid place-items-center" style={{ backgroundColor: '#c9d1d9' }}>
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">กำลังโหลดข้อมูลธุรกรรมทั้งหมด...</p>
+          <p className="text-gray-600">กำลังตรวจสอบสิทธิ์และโหลดข้อมูลธุรกรรม...</p>
         </div>
       </main>
     );
@@ -183,7 +219,7 @@ export default function TransactionHistoryPage() {
             <h3 className="text-lg font-medium text-red-900 mb-2">เกิดข้อผิดพลาด</h3>
             <p className="text-red-700 mb-4">{error}</p>
             <button
-              onClick={() => fetchAllTransactions()}
+              onClick={() => checkRoleAndFetchTransactions()}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               ลองใหม่
