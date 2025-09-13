@@ -1,18 +1,7 @@
 "use client";
 
-import * as React from "react";
-import type { HTMLAttributes } from "react";
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { RegisterSchema } from "@/lib/schemas";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,92 +12,59 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {z} from 'zod'
+import { RegisterSchema } from "@/lib/schemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AuthResponse } from "@supabase/supabase-js";
 
-// ✅ ใช้ toast ของ shadcn/ui
-import { useToast } from "@/components/ui/use-toast";
-
-type RegisterFormValues = z.infer<typeof RegisterSchema>;
+type RegisterFormValues = z.infer<typeof RegisterSchema>
 
 export function SignUpForm({
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement>) {
+}: React.ComponentPropsWithoutRef<"div">) {
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<RegisterFormValues>({
-    resolver: zodResolver(RegisterSchema),
-    mode: "onTouched",
-  });
-
-  const onSubmit = async (data: RegisterFormValues) => {
-    setIsLoading(true);
+  const {register, handleSubmit, formState:{errors}} = useForm<RegisterFormValues>({
+    resolver: zodResolver(RegisterSchema)
+  })
+  const handleSignUp = async (data: RegisterFormValues) => {
     const supabase = createClient();
-
+    setIsLoading(true);
+    setError(null);
     try {
-      const email = data.email.trim().toLowerCase();
-
-      const { data: signUpData, error } = await supabase.auth.signUp({
-        email,
-        password: data.password,
+      const { data: user} = await supabase.from('user_info').select('u_email').eq('u_email', data.email).single();
+      if (user){throw new Error('Email already exists');}
+      const { error } = await supabase.auth.signUp({
+        email:data.email,
+        password:data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             firstname: data.firstname,
             lastname: data.lastname,
-            role: "user",
+            role: 'user'
           },
         },
       });
-
-      if (error) {
-        const msg = (error.message || "").toLowerCase();
-        if (
-          msg.includes("already") ||
-          msg.includes("exists") ||
-          msg.includes("registered") ||
-          msg.includes("duplicate")
-        ) {
-          toast({
-            title: "อีเมลนี้ถูกใช้แล้ว",
-            description: "กรุณาเข้าสู่ระบบแทน",
-            variant: "destructive", // สีแดง
-          });
-          return;
-        }
-        throw error;
-      }
-
-      const identitiesLen =
-        (signUpData?.user as any)?.identities?.length ?? null;
-
-      if (identitiesLen === 0) {
-        toast({
-          title: "อีเมลนี้ถูกใช้แล้ว",
-          description: "กรุณาเข้าสู่ระบบแทน",
-          variant: "destructive",
-        });
-        return;
-      }
-
+      if (error) throw error;
       router.push("/auth/sign-up-success");
-    } catch (err) {
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: err instanceof Error ? err.message : "ไม่สามารถสมัครได้",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      console.log(error);
+      if (error instanceof Error){
+        setError(error.message);
+      }else{
+        setError("An error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
-  const disabled = isLoading || isSubmitting;
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -118,92 +74,58 @@ export function SignUpForm({
           <CardDescription>สร้างบัญชีผู้ใช้งานใหม่</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit(handleSignUp)}>
+             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="firstname">ชื่อจริง</Label>
-                <Input
-                  id="firstname"
-                  {...register("firstname")}
-                  autoComplete="given-name"
-                  disabled={disabled}
-                />
-                {errors.firstname && (
-                  <p className="text-red-500 text-sm">
-                    {errors.firstname.message}
-                  </p>
-                )}
+                <Input id="firstname" {...register('firstname')} />
+                {errors.firstname && <p className="text-red-500">{errors.firstname.message}</p>}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="lastname">นามสกุล</Label>
-                <Input
-                  id="lastname"
-                  {...register("lastname")}
-                  autoComplete="family-name"
-                  disabled={disabled}
-                />
-                {errors.lastname && (
-                  <p className="text-red-500 text-sm">
-                    {errors.lastname.message}
-                  </p>
-                )}
+                <Input id="lastname" {...register('lastname')} />
+                {errors.lastname && <p className="text-red-500">{errors.lastname.message}</p>}
               </div>
             </div>
-
-            <div className="flex flex-col gap-6 mt-4">
+            <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">อีเมล</Label>
+                <Label htmlFor="email">อีเมล์</Label>
                 <Input
                   id="email"
-                  type="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  {...register("email")}
-                  disabled={disabled}
+                  {...register('email')}
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-sm">{errors.email.message}</p>
-                )}
+                {errors.email && <p className="text-red-500">{errors.email.message}</p>}
               </div>
-
               <div className="grid gap-2">
-                <Label htmlFor="password">รหัสผ่าน</Label>
+                <div className="flex items-center">
+                  <Label htmlFor="password">รหัสผ่าน</Label>
+                </div>
                 <Input
                   id="password"
                   type="password"
-                  autoComplete="new-password"
-                  {...register("password")}
-                  disabled={disabled}
+                  {...register('password')}
                 />
-                {errors.password && (
-                  <p className="text-red-500 text-sm">{errors.password.message}</p>
-                )}
+                {(errors.password) && <p className="text-red-500">{errors.password?.message}</p>}
               </div>
-
               <div className="grid gap-2">
-                <Label htmlFor="confirmPassword">ยืนยันรหัสผ่าน</Label>
+                <div className="flex items-center">
+                  <Label htmlFor="repeat-password">ยืนยันรหัสผ่าน</Label>
+                </div>
                 <Input
-                  id="confirmPassword"
+                  id="repeat-password"
                   type="password"
-                  autoComplete="new-password"
-                  {...register("confirmPassword")}
-                  disabled={disabled}
+                  {...register('confirmPassword')}
                 />
-                {errors.confirmPassword && (
-                  <p className="text-red-500 text-sm">
-                    {errors.confirmPassword.message}
-                  </p>
-                )}
+                {errors.confirmPassword && <p className="text-red-500">{errors.confirmPassword.message}</p>}
               </div>
-
-              <Button type="submit" className="w-full" disabled={disabled}>
-                {disabled ? "กำลังสร้างบัญชี..." : "ลงทะเบียน"}
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "กำลังสร้างบัญชี..." : "ลงทะเบียน"}
               </Button>
             </div>
-
             <div className="mt-4 text-center text-sm">
-              มีบัญชีอยู่แล้ว?{" "}
-              <Link href="/sign-in" className="underline underline-offset-4">
+              Already have an account?{" "}
+              <Link href="/auth/login" className="underline underline-offset-4">
                 เข้าสู่ระบบ
               </Link>
             </div>
