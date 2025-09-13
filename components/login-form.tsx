@@ -15,39 +15,40 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {z} from 'zod'
-import { LoginSchema } from "@/lib/schemas";
-import {useForm} from 'react-hook-form'
-import {zodResolver} from '@hookform/resolvers/zod'
-
-
-type LoginFormValues = z.infer<typeof LoginSchema>
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(LoginSchema),
-  });
-  const handleLogin = async (data: LoginFormValues) => {
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email:data.email,
-        password:data.password,
+        email,
+        password,
       });
-      if (error) throw error;
+      if (error){
+    // ตรวจสอบข้อความ error จาก Supabase
+        if (
+          error.message === "Invalid login credentials" ||
+          error.message.includes("Invalid login credentials")
+        ) {
+          setError("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+        } else {
+          setError(error.message);
+        }
+        return;
+      }
       // Redirect to dashboard after successful login
       router.push("/dashboard");
     } catch (error: unknown) {
@@ -63,19 +64,22 @@ export function LoginForm({
         <CardHeader>
           <CardTitle className="text-2xl">เข้าสู่ระบบ</CardTitle>
           <CardDescription>
-            ใส่อีเมลล์ด้านล่างเพื่อเข้าสู่ระบบนะฮัฟฟ
+            ใส่อีเมลล์ด้านล่างเพื่อเข้าสู่ระบบ
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(handleLogin)}>
+          <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">อีเมล์</Label>
                 <Input
                   id="email"
-                  {...register('email')}
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
-                {errors.email && <p className=" text-red-500">{errors.email.message}</p>}
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
@@ -90,9 +94,10 @@ export function LoginForm({
                 <Input
                   id="password"
                   type="password"
-                  {...register('password')}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
-                {errors.password && <p className=" text-red-500">{errors.password.message}</p>}
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>

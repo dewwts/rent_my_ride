@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 export function ForgotPasswordForm({
   className,
@@ -23,6 +24,7 @@ export function ForgotPasswordForm({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,8 +39,19 @@ export function ForgotPasswordForm({
       });
       if (error) throw error;
       setSuccess(true);
+      toast({
+        title: "Premise",
+        description: "ส่งอีเมลรีเซ็ตรหัสผ่านแล้ว",
+        variant: "warning",
+      });
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
+      toast({
+        title: "ผิดพลาด",
+        description:
+          error instanceof Error ? error.message : "ส่งอีเมลไม่สำเร็จ",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 export function UpdatePasswordForm({
   className,
@@ -23,6 +24,7 @@ export function UpdatePasswordForm({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,9 +36,20 @@ export function UpdatePasswordForm({
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       // Update this route to redirect to an authenticated route. The user already has an active session.
+      toast({
+        title: "สำเร็จ",
+        description: "เปลี่ยนรหัสผ่านเรียบร้อย",
+        variant: "success",
+      });
       router.push("/protected");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
+      toast({
+        title: "ผิดพลาด",
+        description:
+          error instanceof Error ? error.message : "ไม่สามารถเปลี่ยนรหัสผ่านได้",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
