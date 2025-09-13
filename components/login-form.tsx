@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast"
 
 export function LoginForm({
   className,
@@ -25,6 +26,7 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,18 +41,14 @@ export function LoginForm({
       });
       if (error){
     // ตรวจสอบข้อความ error จาก Supabase
-        if (
-          error.message === "Invalid login credentials" ||
-          error.message.includes("Invalid login credentials")
-        ) {
-          setError("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
-        } else {
-          setError(error.message);
-        }
-        return;
-      }
-      // Redirect to dashboard after successful login
-      router.push("/dashboard");
+        toast({
+    variant: "destructive",
+    title: "Login failed",
+    description: "รหัสผ่านหรืออีเมลล์ไม่ถูกต้อง",
+  })
+} else {
+  router.push("/dashboard")
+}
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
