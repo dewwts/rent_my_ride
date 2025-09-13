@@ -1,11 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client"; // Adjust path as needed
 import { Check, X, Loader2, ArrowLeft, Calendar, DollarSign } from "lucide-react";
 
 export default function TransactionHistoryPage() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all"); // all, pending, done, failed
+  const router = useRouter();
+  const supabase = createClient();
+
+   useEffect(() => {
+    const checkRole = async () => {
+      // Get current user
+      const { data: { user }, error } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        router.push("/auth/login");
+        return;
+      }
+
+      // Fetch user_info
+      const { data, error: roleError } = await supabase
+        .from("user_info")
+        .select("role")
+        .eq("user_id", user.id)
+        .single();
+
+      if (roleError || !data || data.role !== "admin") {
+        router.push("/auth/login");
+        return;
+      }
+
+      setLoading(false);
+    };
+
+    checkRole();
+  }, [router, supabase]);
+
+  if (loading) {
+    return (
+      <main className="min-h-screen grid place-items-center">
+        <p className="text-gray-600">กำลังตรวจสอบสิทธิ์เข้าใช้งาน…</p>
+      </main>
+    );
+  }
 
   // Mock transaction data - In real implementation, this would come from backend
   const mockTransactions = [
@@ -98,16 +138,6 @@ export default function TransactionHistoryPage() {
     return transaction.status.toLowerCase() === filter;
   });
 
-  if (loading) {
-    return (
-      <main className="min-h-screen grid place-items-center" style={{ backgroundColor: '#c9d1d9' }}>
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">กำลังโหลดข้อมูล...</p>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#c9d1d9' }}>
