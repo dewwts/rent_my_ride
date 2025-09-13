@@ -41,7 +41,7 @@ export default function Page() {
           </Card>
         </div>
       </div>
-      <Footer />
+      <Footer noMargin/>
     </div>
   );
 }
