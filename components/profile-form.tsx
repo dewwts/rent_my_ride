@@ -8,6 +8,7 @@ import type { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import { ProfileSchema } from "@/lib/schemas";
 import InputField from "@/components/ui/inputfield";
+import { toast } from "./ui/use-toast";
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
 
@@ -164,8 +165,18 @@ export function ProfileForm() {
       if (error) throw error;
 
       setFormSuccess("บันทึกโปรไฟล์สำเร็จ");
+      toast({
+        variant:"success",
+        title:"สำเร็จ",
+        description:"บันทึกโปรไฟล์สำเร็จ"
+      })
     } catch (e: any) {
       setFormError(e.message ?? "บันทึกไม่สำเร็จ");
+      toast({
+        variant:"destructive",
+        title:"ไม่สำเร็จ",
+        description:"บันทึกไม่สำเร็จ"
+      })
     } finally {
       setSaving(false);
     }
@@ -227,8 +238,18 @@ export function ProfileForm() {
       // อัปเดต state ให้ UI
       setAvatarUrl(publicUrl);
       setFormSuccess("อัปโหลดรูปโปรไฟล์สำเร็จ");
+      toast({
+        variant:"success",
+        title:"สำเร็จ",
+        description:"อัปโหลดรูปโปรไฟล์สำเร็จ"
+      })
     } catch (e: any) {
       console.error(e);
+      toast({
+        variant:"destructive",
+        title:"ไม่สำเร็จ",
+        description:"บันทึกรูปภาพไม่สำเร็จไม่สำเร็จ"
+      })
       setFormError(e?.message ?? "อัปโหลดรูปไม่สำเร็จ");
     } finally {
       setUploading(false);
@@ -248,8 +269,19 @@ export function ProfileForm() {
       setAvatarUrl(null);
       setAvatarPreview(null);
       setFormSuccess("ลบรูปโปรไฟล์สำเร็จ");
+      toast({
+        variant:"success",
+        title:"สำเร็จ",
+        description:"ลบรูปโปรไฟล์สำเร็จ"
+      })
+      
     } catch (e: any) {
       setFormError(e?.message ?? "ลบรูปไม่สำเร็จ");
+      toast({
+        variant:"destructive",
+        title:"ไม่สำเร็จ",
+        description:"ลบรูปภาพไม่สำเร็จ"
+      })
     }
   }
 
@@ -314,10 +346,10 @@ export function ProfileForm() {
       <InputField label="รหัสไปรษณีย์" placeholder="10500" disabled={busy} {...register("postcode")} error={errors.postcode?.message} />
       <InputField label="ประเทศ" placeholder="ไทย" disabled={busy} {...register("country")} error={errors.country?.message} />
 
-      <div className="sm:col-span-2 mt-1">
+      {/* <div className="sm:col-span-2 mt-1">
         {formError && <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">{formError}</div>}
         {formSuccess && <div className="p-3 bg-green-50 border border-green-200 rounded-md text-sm text-green-600">{formSuccess}</div>}
-      </div>
+      </div> */}
 
       <div className="sm:col-span-2 flex justify-center mt-2 mb-2">
         <button
