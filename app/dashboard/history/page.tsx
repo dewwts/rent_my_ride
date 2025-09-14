@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Check, X, Loader2, ArrowLeft, Calendar, DollarSign } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Pagination from "@/components/ui/Pagination";
 
 interface Transaction {
   transaction_id: string;
@@ -39,13 +40,24 @@ export default function TransactionHistoryPage() {
   const [filter, setFilter] = useState("all"); // all, pending, done, failed
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [error, setError] = useState<string | null>(null);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [statusCounts, setStatusCounts] = useState({
+    all: 0,
+    pending: 0,
+    done: 0,
+    failed: 0
+  });
 
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
     checkRoleAndFetchTransactions();
-  }, [router, supabase]);
+  }, [router, supabase, currentPage, filter, itemsPerPage]);
 
   const checkRoleAndFetchTransactions = async () => {
     try {
@@ -86,9 +98,45 @@ export default function TransactionHistoryPage() {
       setLoading(true);
       setError(null);
 
-      // Fetch ALL transactions for admin view - no user filtering
-      const { data, error: fetchError } = await supabase
-        .from('transactions')
+      // First, get all status counts
+      const [allCountResult, pendingCountResult, doneCountResult, failedCountResult] = await Promise.all([
+        supabase.from('transactions').select('*', { count: 'exact', head: true }),
+        supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('status', 'Pending'),
+        supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('status', 'Done'),
+        supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('status', 'Failed')
+      ]);
+
+      // Update status counts
+      setStatusCounts({
+        all: allCountResult.count || 0,
+        pending: pendingCountResult.count || 0,
+        done: doneCountResult.count || 0,
+        failed: failedCountResult.count || 0
+      });
+
+      // Get filtered count for pagination
+      let countQuery = supabase.from('transactions').select('*', { count: 'exact', head: true });
+      
+      // Apply status filter if not 'all'
+      if (filter !== 'all') {
+        countQuery = countQuery.eq('status', filter.charAt(0).toUpperCase() + filter.slice(1));
+      }
+
+      const { count, error: countError } = await countQuery;
+
+      if (countError) {
+        console.error('Error counting transactions:', countError);
+        setError('เกิดข้อผิดพลาดในการนับจำนวนธุรกรรม');
+        return;
+      }
+
+      setTotalCount(count || 0);
+
+      // Fetch paginated transactions
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage - 1;
+
+      let dataQuery = supabase.from('transactions')
         .select(`
           transaction_id,
           renting_id,
@@ -116,8 +164,15 @@ export default function TransactionHistoryPage() {
             u_firstname,
             u_lastname
           )
-        `)
-        .order('date', { ascending: false });
+        `);
+
+      if (filter !== 'all') {
+        dataQuery = dataQuery.eq('status', filter.charAt(0).toUpperCase() + filter.slice(1));
+      }
+
+      const { data, error: fetchError } = await dataQuery
+        .order('date', { ascending: false })
+        .range(startIndex, endIndex);
 
       if (fetchError) {
         console.error('Error fetching transactions:', fetchError);
@@ -192,10 +247,21 @@ export default function TransactionHistoryPage() {
     }
   };
 
-  const filteredTransactions = transactions.filter(transaction => {
-    if (filter === "all") return true;
-    return transaction.status.toLowerCase() === filter.toLowerCase();
-  });
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleFilterChange = (newFilter: string) => {
+    setFilter(newFilter);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when items per page changes
+  };
+
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   if (loading) {
     return (
@@ -240,25 +306,42 @@ export default function TransactionHistoryPage() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex gap-2 mb-6">
-            {[
-              { key: "all", label: "ทั้งหมด", count: transactions.length },
-              { key: "pending", label: "รอดำเนินการ", count: transactions.filter(t => t.status === "Pending").length },
-              { key: "done", label: "เสร็จสิ้น", count: transactions.filter(t => t.status === "Done").length },
-              { key: "failed", label: "ล้มเหลว", count: transactions.filter(t => t.status === "Failed").length }
-            ].map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setFilter(tab.key)}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                  filter === tab.key 
-                    ? "bg-blue-600 text-white" 
-                    : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                }`}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex gap-2">
+              {[
+                { key: "all", label: "ทั้งหมด", count: statusCounts.all },
+                { key: "pending", label: "รอดำเนินการ", count: statusCounts.pending },
+                { key: "done", label: "เสร็จสิ้น", count: statusCounts.done },
+                { key: "failed", label: "ล้มเหลว", count: statusCounts.failed }
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => handleFilterChange(tab.key)}
+                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    filter === tab.key 
+                      ? "bg-blue-600 text-white" 
+                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                  }`}
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              ))}
+            </div>
+
+            {/* Items per page selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">แสดงต่อหน้า:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                {tab.label} ({tab.count})
-              </button>
-            ))}
+                <option value={5}>5 รายการ</option>
+                <option value={10}>10 รายการ</option>
+                <option value={20}>20 รายการ</option>
+                <option value={50}>50 รายการ</option>
+              </select>
+            </div>
           </div>
 
           {/* Note about admin data */}
@@ -273,7 +356,7 @@ export default function TransactionHistoryPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Transaction Cards */}
         <div className="space-y-6">
-          {filteredTransactions.map((transaction) => (
+          {transactions.map((transaction) => (
             <div key={transaction.transaction_id} className={`bg-white rounded-xl shadow-sm border-2 ${getStatusBorderColor(transaction.status)} overflow-hidden hover:shadow-md transition-shadow`}>
               {/* Card Header */}
               <div className="p-6 border-b border-gray-100">
@@ -365,8 +448,22 @@ export default function TransactionHistoryPage() {
           ))}
         </div>
 
+        {/* Pagination */}
+        {totalCount > 0 && (
+          <div className="mt-8">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalCount}
+              itemsPerPage={itemsPerPage}
+              showInfo={true}
+            />
+          </div>
+        )}
+
         {/* Empty State */}
-        {filteredTransactions.length === 0 && (
+        {totalCount === 0 && !loading && (
           <div className="bg-white rounded-xl p-12 text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Calendar className="w-8 h-8 text-gray-400" />
