@@ -175,7 +175,7 @@ export function ProfileForm() {
       toast({
         variant:"destructive",
         title:"ไม่สำเร็จ",
-        description:"บันทึกไม่สำเร็จ"
+        description:"บันทึกข้อมูลไม่สำเร็จ"
       })
     } finally {
       setSaving(false);

@@ -14,6 +14,7 @@ import { LoginSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthApiError } from "@supabase/supabase-js";
+import { toast } from "./ui/use-toast";
 
 type LoginFormValues = z.infer<typeof LoginSchema>;
 
@@ -60,12 +61,20 @@ export function LoginForm({
           message = "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่ภายหลัง";
         }
       }
+      toast({
+        variant:'destructive',
+        title:"Sign-in ไม่สำเร็จ",
+        description:message
+      })
       setError("password", { type: "server", message });
       setIsLoading(false);
       return;
     }
-
-    // success
+    toast({
+      variant:'success',
+      title:"สำเร็จ",
+      description:"Sign-in สำเร็จ"
+    })
     router.push("/dashboard");
     setIsLoading(false);
   };
