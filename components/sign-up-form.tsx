@@ -96,9 +96,9 @@ export function SignUpForm({
                 {errors.lastname && <p className="text-red-500">{errors.lastname.message}</p>}
               </div>
             </div>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 mt-5">
               <div className="grid gap-2">
-                <Label htmlFor="email">อีเมล์</Label>
+                <Label htmlFor="email">อีเมล</Label>
                 <Input
                   id="email"
                   {...register('email')}
