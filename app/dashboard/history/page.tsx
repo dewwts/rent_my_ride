@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client"; // Adjust path as needed
 import { Check, X, Loader2, ArrowLeft, Calendar, DollarSign } from "lucide-react";
+import axios from 'axios'
 
 export default function TransactionHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all"); // all, pending, done, failed
   const router = useRouter();
   const supabase = createClient();
-
+  const [page,setPage] = useState<Number>(1);
    useEffect(() => {
     const checkRole = async () => {
       // Get current user
@@ -34,6 +35,9 @@ export default function TransactionHistoryPage() {
       }
 
       setLoading(false);
+      const response = await axios.get(`/api/transaction/${page}`);
+      console.log(response.data);
+      
     };
 
     checkRole();
@@ -96,7 +100,7 @@ export default function TransactionHistoryPage() {
     }
   ];
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status:string) => {
     switch (status) {
       case "Pending":
         return (
@@ -124,7 +128,7 @@ export default function TransactionHistoryPage() {
     }
   };
 
-  const getStatusBorderColor = (status) => {
+  const getStatusBorderColor = (status:string) => {
     switch (status) {
       case "Pending": return "border-yellow-400";
       case "Done": return "border-green-500";

@@ -7,10 +7,6 @@ export async function AuthButton() {
   const supabase = await createClient();
   await supabase.auth.refreshSession();
 
-  // You can also use getUser() which will be slower.
-  //const { data } = await supabase.auth.getUser();
-  //const { data } = await supabase.auth.getClaims();
-  //const user = data?.user_metadata;
   const {
     data: { user },
   } = await supabase.auth.getUser();
