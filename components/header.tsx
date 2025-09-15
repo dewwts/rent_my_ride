@@ -10,8 +10,8 @@ export function Header() {
   return (
     <header className="w-full bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          <div className="flex items-center">
+        <div className="flex items-center justify-between py-4">
+          <div className="flex items-center flex-1">
             <Link href="/" className="flex items-center">
               <Image
                 src="/logo/logo.png"
@@ -23,7 +23,7 @@ export function Header() {
             </Link>
           </div>
 
-          <nav className="hidden lg:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-1 flex-1 justify-center">
             <Button variant="nav" size="nav" asChild>
               <Link href="/">หน้าหลัก</Link>
             </Button>
@@ -36,9 +36,12 @@ export function Header() {
             <Button variant="nav" size="nav" asChild>
               <Link href="/contact">ติดต่อ</Link>
             </Button>
+            <Button variant="nav" size="nav" asChild>
+              <Link href="/dashboard">แดชบอร์ด</Link>
+            </Button>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-1 justify-end">
             <div className="lg:hidden">
               <Button variant="menu" size="icon">
                 <Menu className="h-5 w-5" />
