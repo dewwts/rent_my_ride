@@ -9,7 +9,6 @@ import {
   ToastClose,
 } from "@/components/ui/toast"
 import { useToast } from "@/components/ui/use-toast"
-import { cn } from "@/lib/utils"
 
 // Helper function to get icon based on variant
 function getToastIcon(variant?: string | null) {

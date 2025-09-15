@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Check, X, Loader2, ArrowLeft, Calendar, DollarSign } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Check, X, Loader2, Calendar, DollarSign } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Pagination from "@/components/ui/Pagination";
@@ -55,45 +55,7 @@ export default function TransactionHistoryPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  useEffect(() => {
-    checkRoleAndFetchTransactions();
-  }, [router, supabase, currentPage, filter, itemsPerPage]);
-
-  const checkRoleAndFetchTransactions = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Check admin role first
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-      if (authError || !user) {
-        router.push("/auth/login");
-        return;
-      }
-
-      // Fetch user_info to check role
-      const { data: userInfo, error: roleError } = await supabase
-        .from("user_info")
-        .select("role")
-        .eq("user_id", user.id)
-        .single();
-
-      if (roleError || !userInfo || userInfo.role !== "admin") {
-        router.push("/auth/login");
-        return;
-      }
-
-      // If admin role confirmed, fetch all transactions
-      await fetchAllTransactions();
-    } catch (err) {
-      console.error('Error checking role:', err);
-      setError('เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์การเข้าใช้งาน');
-      setLoading(false);
-    }
-  };
-
-  const fetchAllTransactions = async () => {
+  const fetchAllTransactions = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -180,14 +142,52 @@ export default function TransactionHistoryPage() {
         return;
       }
 
-      setTransactions(data || []);
+      setTransactions((data as unknown as Transaction[]) || []);
     } catch (err) {
       console.error('Error:', err);
       setError('เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล');
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase, filter, currentPage, itemsPerPage]);
+
+  const checkRoleAndFetchTransactions = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Check admin role first
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        router.push("/auth/login");
+        return;
+      }
+
+      // Fetch user_info to check role
+      const { data: userInfo, error: roleError } = await supabase
+        .from("user_info")
+        .select("role")
+        .eq("user_id", user.id)
+        .single();
+
+      if (roleError || !userInfo || userInfo.role !== "admin") {
+        router.push("/auth/login");
+        return;
+      }
+
+      // If admin role confirmed, fetch all transactions
+      await fetchAllTransactions();
+    } catch (err) {
+      console.error('Error checking role:', err);
+      setError('เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์การเข้าใช้งาน');
+      setLoading(false);
+    }
+  }, [router, supabase, fetchAllTransactions]);
+
+  useEffect(() => {
+    checkRoleAndFetchTransactions();
+  }, [currentPage, filter, itemsPerPage, checkRoleAndFetchTransactions]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

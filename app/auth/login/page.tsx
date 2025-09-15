@@ -1,7 +1,6 @@
 import { LoginForm } from "@/components/login-form";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { LoginSchema } from "@/lib/schemas";
 export default function Page() {
   
 

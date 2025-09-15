@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Prompt, Mitr } from "next/font/google";
+import { Mitr } from "next/font/google";
 import "./globals.css";
 
 // ✅ เพิ่ม Toaster เข้ามา

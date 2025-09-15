@@ -73,8 +73,8 @@ export async function uploadAvatar(formData: FormData) {
     }
 
     return { ok: true, url: publicUrl, path };
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("uploadAvatar fatal:", e);
-    return { ok: false, error: e?.message ?? "Unexpected server error" };
+    return { ok: false, error: e instanceof Error ? e.message : "Unexpected server error" };
   }
 }

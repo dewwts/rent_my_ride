@@ -62,8 +62,6 @@ export function ProfileForm() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -127,8 +125,8 @@ export function ProfileForm() {
         }
 
         setAvatarUrl(row?.url ?? null);
-      } catch (e: any) {
-        setFormError(e?.message ?? "โหลดข้อมูลไม่สำเร็จ");
+      } catch (e: unknown) {
+        console.error(e instanceof Error ? e.message : "โหลดข้อมูลไม่สำเร็จ");
       } finally {
         setLoading(false);
       }
@@ -138,8 +136,6 @@ export function ProfileForm() {
 
   const onSubmit = async (values: ProfileValues) => {
     setSaving(true);
-    setFormError(null);
-    setFormSuccess(null);
     try {
       const { data: sessionData } = await supabase.auth.getUser();
       const user = sessionData?.user;
@@ -164,14 +160,14 @@ export function ProfileForm() {
         );
       if (error) throw error;
 
-      setFormSuccess("บันทึกโปรไฟล์สำเร็จ");
       toast({
         variant:"success",
         title:"สำเร็จ",
         description:"บันทึกโปรไฟล์สำเร็จ"
       })
-    } catch (e: any) {
-      setFormError(e.message ?? "บันทึกไม่สำเร็จ");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "บันทึกไม่สำเร็จ";
+      console.error(errorMessage);
       toast({
         variant:"destructive",
         title:"ไม่สำเร็จ",
@@ -185,18 +181,16 @@ export function ProfileForm() {
   async function handleFileSelected(file: File) {
     // validate ก่อน อัปโหลด
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setFormError("รองรับเฉพาะ JPG, PNG, WEBP, GIF");
+      console.error("รองรับเฉพาะ JPG, PNG, WEBP, GIF");
       return;
     }
     if (file.size > MAX_BYTES) {
-      setFormError("ไฟล์ต้องไม่เกิน 5MB");
+      console.error("ไฟล์ต้องไม่เกิน 5MB");
       return;
     }
 
     setAvatarPreview(URL.createObjectURL(file)); // โชว์ทันที
     setUploading(true);
-    setFormError(null);
-    setFormSuccess(null);
 
     try {
       const { data: sessionData } = await supabase.auth.getUser();
@@ -237,20 +231,19 @@ export function ProfileForm() {
 
       // อัปเดต state ให้ UI
       setAvatarUrl(publicUrl);
-      setFormSuccess("อัปโหลดรูปโปรไฟล์สำเร็จ");
       toast({
         variant:"success",
         title:"สำเร็จ",
         description:"อัปโหลดรูปโปรไฟล์สำเร็จ"
       })
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       toast({
         variant:"destructive",
         title:"ไม่สำเร็จ",
-        description:"บันทึกรูปภาพไม่สำเร็จไม่สำเร็จ"
+        description:"บันทึกรูปภาพไม่สำเร็จ"
       })
-      setFormError(e?.message ?? "อัปโหลดรูปไม่สำเร็จ");
+      console.error(e instanceof Error ? e.message : "อัปโหลดรูปไม่สำเร็จ");
     } finally {
       setUploading(false);
       setAvatarPreview(null); // ให้ใช้ URL จริง
@@ -268,15 +261,14 @@ export function ProfileForm() {
 
       setAvatarUrl(null);
       setAvatarPreview(null);
-      setFormSuccess("ลบรูปโปรไฟล์สำเร็จ");
       toast({
         variant:"success",
         title:"สำเร็จ",
         description:"ลบรูปโปรไฟล์สำเร็จ"
       })
       
-    } catch (e: any) {
-      setFormError(e?.message ?? "ลบรูปไม่สำเร็จ");
+    } catch (e: unknown) {
+      console.error(e instanceof Error ? e.message : "ลบรูปไม่สำเร็จ");
       toast({
         variant:"destructive",
         title:"ไม่สำเร็จ",

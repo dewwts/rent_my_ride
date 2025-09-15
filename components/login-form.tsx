@@ -52,7 +52,7 @@ export function LoginForm({
         if (
           error.status === 400 ||
           /invalid login credentials/i.test(error.message) ||
-          /invalid_credentials/i.test((error as any)?.code ?? "")
+          /invalid_credentials/i.test((error as AuthApiError)?.code ?? "")
         ) {
           message = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
         } else if (/email not confirmed/i.test(error.message)) {

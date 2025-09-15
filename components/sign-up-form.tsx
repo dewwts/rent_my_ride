@@ -19,7 +19,6 @@ import {z} from 'zod'
 import { RegisterSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AuthResponse } from "@supabase/supabase-js";
 import { toast } from "./ui/use-toast";
 
 type RegisterFormValues = z.infer<typeof RegisterSchema>
@@ -57,7 +56,7 @@ export function SignUpForm({
       setIsLoading(false);
       
       router.push("/auth/sign-up-success");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(error);
       let err;
       if (error instanceof Error){
