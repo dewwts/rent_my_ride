@@ -54,6 +54,8 @@ export function SignUpForm({
         },
       });
       if (error) throw error;
+      setIsLoading(false);
+      
       router.push("/auth/sign-up-success");
     } catch (error: any) {
       console.log(error);
