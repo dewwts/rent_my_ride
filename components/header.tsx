@@ -39,9 +39,7 @@ export function Header() {
             <Button variant="nav" size="nav" asChild>
               <Link href="/dashboard">แดชบอร์ด</Link>
             </Button>
-
           </nav>
-
           <div className="flex items-center gap-4">
             <div className="lg:hidden">
               <Button variant="menu" size="icon">
