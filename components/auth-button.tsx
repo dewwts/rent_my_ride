@@ -2,11 +2,12 @@ import Link from "next/link";
 import { LogInButton } from "./ui/login-button";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
+import { userInfo } from "os";
 
 export async function AuthButton() {
   const supabase = await createClient();
   await supabase.auth.refreshSession();
-
+  let displayName = null
   // You can also use getUser() which will be slower.
   //const { data } = await supabase.auth.getUser();
   //const { data } = await supabase.auth.getClaims();
@@ -14,12 +15,16 @@ export async function AuthButton() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-
-  return user ? (
+  if (user){
+    const {data: userInfo, error: err} = await supabase.from('user_info').select('u_firstname').eq('user_id',user.id).single()
+    if (userInfo){
+      displayName = userInfo.u_firstname
+    }
+  }
+  return displayName ? (
     <div className="flex items-center gap-3">
 
-      <Link href="/dashboard"><span className="text-sm text-gray-600 font-medium">สวัสดี, {user?.user_metadata?.firstname}!</span></Link>
+      <Link href="/dashboard"><span className="text-sm text-gray-600 font-medium">สวัสดี, {displayName}!</span></Link>
       <LogoutButton />
     </div>
   ) : (
@@ -33,3 +38,4 @@ export async function AuthButton() {
     </div>
   );
 }
+

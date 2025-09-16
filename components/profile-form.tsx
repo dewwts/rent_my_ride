@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ProfileSchema } from "@/lib/schemas";
 import InputField from "@/components/ui/inputfield";
 import { toast } from "./ui/use-toast";
+import { useRouter } from "next/navigation";
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
 
@@ -66,7 +67,7 @@ export function ProfileForm() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-
+  const router = useRouter()
   const fileRef = useRef<HTMLInputElement | null>(null);
   const disabled = loading || saving;
 
@@ -165,6 +166,7 @@ export function ProfileForm() {
         title:"สำเร็จ",
         description:"บันทึกโปรไฟล์สำเร็จ"
       })
+      router.refresh()
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "บันทึกไม่สำเร็จ";
       console.error(errorMessage);
