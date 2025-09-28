@@ -10,6 +10,7 @@ import { ProfileSchema } from "@/lib/schemas";
 import InputField from "@/components/ui/inputfield";
 import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
+import { getProfile } from "@/lib/authServices";
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
 
@@ -97,20 +98,10 @@ export function ProfileForm() {
     let active = true;
     (async () => {
       try {
-        const { data: sessionData } = await supabase.auth.getUser();
-        const user = sessionData?.user;
-        if (!user) { setLoading(false); return; }
-
-        const { data: row, error } = await supabase
-          .from("user_info")
-          .select("u_firstname, u_lastname, u_email, u_phone, u_address, url")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (error) throw error;
+        const row = await getProfile(supabase)
         if (!active) return;
 
-        setValue("email", row?.u_email ?? user.email ?? "");
+        setValue("email", row?.u_email ??  "");
         setValue("firstname", row?.u_firstname ?? "");
         setValue("lastname", row?.u_lastname ?? "");
         setValue("phone", row?.u_phone ?? "");
@@ -127,7 +118,16 @@ export function ProfileForm() {
 
         setAvatarUrl(row?.url ?? null);
       } catch (e: unknown) {
-        console.error(e instanceof Error ? e.message : "โหลดข้อมูลไม่สำเร็จ");
+        let error = "โหลดข้อมูลไม่สำเร็จ"
+        if (e instanceof Error){
+          error = e.message
+        }
+        console.error(error);
+        toast({
+            variant:"destructive",
+            title:"ไม่สำเร็จ",
+            description:error
+        })
       } finally {
         setLoading(false);
       }

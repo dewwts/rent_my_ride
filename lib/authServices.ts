@@ -1,4 +1,4 @@
-import { loginInfo, userInfo } from "@/types/authInterface";
+import { loginInfo, profileInfo, userInfo } from "@/types/authInterface";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export const SignUp = async(data: userInfo, supabase: SupabaseClient)=>{
@@ -65,4 +65,25 @@ export const getFirstname = async(supabase: SupabaseClient)=>{
       throw new Error("ไม่เจอผู้ใช้งานนี้ในฐานข้อมูล")
     }
     // throw new Error("โปรดเข้าสู่ระบบก่อนใช้งาน")
+}
+
+export const getProfile = async(supabase: SupabaseClient)=>{
+    const { data: sessionData } = await supabase.auth.getUser();
+    const user = sessionData?.user;
+    if (!user)throw new Error("โปรดเข้าสู่ระบบก่อนใช้งาน")  
+    const { data: row, error } = await supabase
+      .from("user_info")
+      .select("u_firstname, u_lastname, u_email, u_phone, u_address, url")
+      .eq("user_id", user.id)
+      .maybeSingle()    
+    if (error) throw error;
+    const object: profileInfo = {
+        u_firstname: row?.u_firstname,
+        u_lastname: row?.u_lastname,
+        u_email:row?.u_email,
+        u_address:row?.u_address,
+        u_phone:row?.u_phone,
+        url:row?.url
+    }
+    return object
 }
