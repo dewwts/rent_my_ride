@@ -10,7 +10,7 @@ import { ProfileSchema } from "@/lib/schemas";
 import InputField from "@/components/ui/inputfield";
 import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
-import { getProfile } from "@/lib/authServices";
+import { getProfile, updateAvatar, updateProfile } from "@/lib/authServices";
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
 
@@ -138,29 +138,7 @@ export function ProfileForm() {
   const onSubmit = async (values: ProfileValues) => {
     setSaving(true);
     try {
-      const { data: sessionData } = await supabase.auth.getUser();
-      const user = sessionData?.user;
-      if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
-
-      const email = values.email?.trim() || user.email?.trim();
-      if (!email) throw new Error("ไม่พบอีเมลใน session");
-
-      const u_address = buildAddress(values);
-      const { error } = await supabase
-        .from("user_info")
-        .upsert(
-          {
-            user_id: user.id,
-            u_email: email, // กัน NOT NULL
-            u_firstname: values.firstname,
-            u_lastname: values.lastname,
-            u_phone: values.phone || null,
-            u_address,
-          },
-          { onConflict: "user_id" }
-        );
-      if (error) throw error;
-
+      await updateProfile(supabase, values)
       toast({
         variant:"success",
         title:"สำเร็จ",
@@ -173,7 +151,7 @@ export function ProfileForm() {
       toast({
         variant:"destructive",
         title:"ไม่สำเร็จ",
-        description:"บันทึกข้อมูลไม่สำเร็จ"
+        description:errorMessage
       })
     } finally {
       setSaving(false);
@@ -195,43 +173,42 @@ export function ProfileForm() {
     setUploading(true);
 
     try {
-      const { data: sessionData } = await supabase.auth.getUser();
-      const user = sessionData?.user;
-      if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
+      // const { data: sessionData } = await supabase.auth.getUser();
+      // const user = sessionData?.user;
+      // if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
 
-      // path: userId/uuid.ext
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const uid = (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
-      const path = `${user.id}/${uid}.${ext}`;
+      // // path: userId/uuid.ext
+      // const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      // const uid = (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
+      // const path = `${user.id}/${uid}.${ext}`;
 
-      // อัปโหลดตรงไป Storage (เลี่ยง Server Actions limit)
-      const { error: upErr } = await supabase.storage
-        .from(BUCKET)
-        .upload(path, file, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: file.type,
-        });
-      if (upErr) throw upErr;
+      // // อัปโหลดตรงไป Storage (เลี่ยง Server Actions limit)
+      // const { error: upErr } = await supabase.storage
+      //   .from(BUCKET)
+      //   .upload(path, file, {
+      //     cacheControl: "3600",
+      //     upsert: false,
+      //     contentType: file.type,
+      //   });
+      // if (upErr) throw upErr;
 
-      // สร้าง public URL (ต้องเปิด select policy/public bucket)
-      const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      const publicUrl = pub?.publicUrl;
-      if (!publicUrl) throw new Error("ไม่สามารถสร้าง URL ของรูปได้");
+      // // สร้าง public URL (ต้องเปิด select policy/public bucket)
+      // const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
+      // const publicUrl = pub?.publicUrl;
+      // if (!publicUrl) throw new Error("ไม่สามารถสร้าง URL ของรูปได้");
 
-      // อัปเดต DB: url + u_email (กัน NOT NULL)
-      const email = (await supabase.auth.getUser()).data.user?.email ?? null;
-      if (!email) throw new Error("ไม่พบอีเมลใน session");
+      // // อัปเดต DB: url + u_email (กัน NOT NULL)
+      // const email = (await supabase.auth.getUser()).data.user?.email ?? null;
+      // if (!email) throw new Error("ไม่พบอีเมลใน session");
 
-      const { error: dbErr } = await supabase
-        .from("user_info")
-        .upsert(
-          { user_id: user.id, u_email: email, url: publicUrl },
-          { onConflict: "user_id" }
-        );
-      if (dbErr) throw dbErr;
-
-      // อัปเดต state ให้ UI
+      // const { error: dbErr } = await supabase
+      //   .from("user_info")
+      //   .upsert(
+      //     { user_id: user.id, u_email: email, url: publicUrl },
+      //     { onConflict: "user_id" }
+      //   );
+      // if (dbErr) throw dbErr;
+      const publicUrl = await updateAvatar(supabase, file) 
       setAvatarUrl(publicUrl);
       toast({
         variant:"success",
