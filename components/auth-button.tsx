@@ -2,24 +2,21 @@ import Link from "next/link";
 import { LogInButton } from "./ui/login-button";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
+import { getFirstname } from "@/lib/authServices";
 
 export async function AuthButton() {
   const supabase = await createClient();
   await supabase.auth.refreshSession();
   let displayName = null
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user){
-    const {data: userInfo, error: err} = await supabase.from('user_info').select('u_firstname').eq('user_id',user.id).single()
-    if (userInfo){
-      displayName = userInfo.u_firstname
-    }
+  try{
+    const name = await getFirstname(supabase)
+    displayName = name;
+  }catch(err: unknown){
+    console.error(err)
   }
+  
   return displayName ? (
     <div className="flex items-center gap-3">
-
       <Link href="/dashboard"><span className="text-sm text-gray-600 font-medium">สวัสดี, {displayName}!</span></Link>
       <LogoutButton />
     </div>
