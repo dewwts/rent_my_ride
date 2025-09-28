@@ -2,16 +2,12 @@ import Link from "next/link";
 import { LogInButton } from "./ui/login-button";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
-import { userInfo } from "os";
 
 export async function AuthButton() {
   const supabase = await createClient();
   await supabase.auth.refreshSession();
   let displayName = null
-  // You can also use getUser() which will be slower.
-  //const { data } = await supabase.auth.getUser();
-  //const { data } = await supabase.auth.getClaims();
-  //const user = data?.user_metadata;
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
