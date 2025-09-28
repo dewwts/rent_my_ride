@@ -171,3 +171,16 @@ export const updateAvatar = async (supabase: SupabaseClient, file: File) => {
   if (dbErr) throw new Error("ฐานข้อมูลมีปัญหา");
   return publicUrl;
 };
+
+export const removeAvatar = async (supabase: SupabaseClient) => {
+  const { data: sessionData } = await supabase.auth.getUser();
+  const user = sessionData?.user;
+  if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
+
+  const { error } = await supabase
+    .from("user_info")
+    .update({ url: null })
+    .eq("user_id", user.id);
+  if (error) throw error;
+  return true
+};

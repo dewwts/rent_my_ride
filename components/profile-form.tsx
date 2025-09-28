@@ -10,7 +10,7 @@ import { ProfileSchema } from "@/lib/schemas";
 import InputField from "@/components/ui/inputfield";
 import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
-import { getProfile, updateAvatar, updateProfile } from "@/lib/authServices";
+import { getProfile, removeAvatar, updateAvatar, updateProfile } from "@/lib/authServices";
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
 
@@ -231,13 +231,13 @@ export function ProfileForm() {
 
   async function handleRemoveAvatar() {
     try {
-      const { data: sessionData } = await supabase.auth.getUser();
-      const user = sessionData?.user;
-      if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
+      // const { data: sessionData } = await supabase.auth.getUser();
+      // const user = sessionData?.user;
+      // if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
 
-      const { error } = await supabase.from("user_info").update({ url: null }).eq("user_id", user.id);
-      if (error) throw error;
-
+      // const { error } = await supabase.from("user_info").update({ url: null }).eq("user_id", user.id);
+      // if (error) throw error;
+      await removeAvatar(supabase)
       setAvatarUrl(null);
       setAvatarPreview(null);
       toast({
