@@ -59,20 +59,20 @@ export function UpdatePasswordForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
+          <CardTitle className="text-2xl">เปลี่ยนรหัสผ่าน</CardTitle>
           <CardDescription>
-            Please enter your new password below.
+            ใส่รหัสผ่านใหม่ด้านล่าง
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleForgotPassword}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="password">New password</Label>
+                <Label htmlFor="password">รหัสผ่านใหม่</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="New password"
+                  placeholder="รหัสผ่านใหม่"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -80,7 +80,7 @@ export function UpdatePasswordForm({
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save new password"}
+                {isLoading ? "กำลังบันทึก..." : "บันทึกรหัสผ่านใหม่เรียบร้อย"}
               </Button>
             </div>
           </form>

@@ -15,6 +15,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthApiError } from "@supabase/supabase-js";
 import { toast } from "./ui/use-toast";
+import { loginInfo } from "@/types/authInterface";
+import { SignIn } from "@/lib/authServices";
 
 type LoginFormValues = z.infer<typeof LoginSchema>;
 
@@ -38,15 +40,17 @@ export function LoginForm({
 
   const onSubmit = async (data: LoginFormValues) => {
     const supabase = createClient();
+    const object: loginInfo = data
     setIsLoading(true);
-
-    // no throw — we’ll *handle* the error and return early
-    const { error } = await supabase.auth.signInWithPassword({
-      email: data.email.trim().toLowerCase(),
-      password: data.password,
-    });
-
-    if (error) {
+    try{
+      await SignIn(object, supabase)
+      toast({
+        variant:'success',
+        title:"สำเร็จ",
+        description:"เข้าสู่ระบบสำเร็จ"
+      })
+      router.push("/dashboard");
+    }catch(error: unknown){
       let message = "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้ง";
       if (error instanceof AuthApiError) {
         if (
@@ -67,16 +71,9 @@ export function LoginForm({
         description:message
       })
       setError("password", { type: "server", message });
-      setIsLoading(false);
-      return;
+    }finally{
+      setIsLoading(false)
     }
-    toast({
-      variant:'success',
-      title:"สำเร็จ",
-      description:"Sign-in สำเร็จ"
-    })
-    router.push("/dashboard");
-    setIsLoading(false);
   };
 
   const disabled = isLoading || isSubmitting;

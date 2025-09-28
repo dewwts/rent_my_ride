@@ -4,13 +4,14 @@ import { createClient } from "@/lib/supabase/client";
 import { LogOutButton } from "@/components/ui/logout-button";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import { SignOut } from "@/lib/authServices";
 
 export function LogoutButton() {
   const router = useRouter();
 
   const logout = async () => {
     const supabase = createClient();
-    await supabase.auth.signOut();
+    await SignOut(supabase)
     router.push("/");
   };
 
