@@ -53,3 +53,21 @@ export function parseAddress(s: string | null | undefined) {
   if (freeTexts.length) addr_line = freeTexts.join(" ");
   return { addr_line, subdistrict, district, province, postcode, country };
 }
+export const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('th-TH', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+};
+export const calculateDuration = (startDate: string, endDate: string) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffTime = Math.abs(end.getTime() - start.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return `${diffDays} วัน`;
+};
+export const formatCurrency = (amount: number) => {
+  return `฿${amount.toLocaleString('th-TH')}`;
+};

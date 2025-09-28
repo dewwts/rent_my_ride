@@ -5,35 +5,10 @@ import { Check, X, Loader2, Calendar, DollarSign } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Pagination from "@/components/ui/Pagination";
-
-interface Transaction {
-  transaction_id: string;
-  renting_id: string;
-  lessee_id: string;
-  lessor_id: string;
-  amount: number;
-  status: 'Pending' | 'Done' | 'Failed';
-  date: string;
-  renting: {
-    sdate: string;
-    edate: string;
-    status: string;
-    car_information: {
-      car_brand: string;
-      model: string;
-      year_created: number;
-      car_image: string;
-    };
-  };
-  lessee_info: {
-    u_firstname: string;
-    u_lastname: string;
-  };
-  lessor_info: {
-    u_firstname: string;
-    u_lastname: string;
-  };
-}
+import { Transaction } from "@/types/transactionInterface";
+import axios, { AxiosError } from 'axios'
+import { toast } from "@/components/ui/use-toast";
+import {formatDate, calculateDuration, formatCurrency} from '@/lib/utils'
 
 export default function TransactionHistoryPage() {
   const [loading, setLoading] = useState(true);
@@ -59,93 +34,32 @@ export default function TransactionHistoryPage() {
     try {
       setLoading(true);
       setError(null);
-
-      // First, get all status counts
-      const [allCountResult, pendingCountResult, doneCountResult, failedCountResult] = await Promise.all([
-        supabase.from('transactions').select('*', { count: 'exact', head: true }),
-        supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('status', 'Pending'),
-        supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('status', 'Done'),
-        supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('status', 'Failed')
-      ]);
-
-      // Update status counts
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_SERVER_URL}api/transactions/summary`)
+      console.log(response.data);
       setStatusCounts({
-        all: allCountResult.count || 0,
-        pending: pendingCountResult.count || 0,
-        done: doneCountResult.count || 0,
-        failed: failedCountResult.count || 0
-      });
-
-      // Get filtered count for pagination
-      let countQuery = supabase.from('transactions').select('*', { count: 'exact', head: true });
-      
-      // Apply status filter if not 'all'
-      if (filter !== 'all') {
-        countQuery = countQuery.eq('status', filter.charAt(0).toUpperCase() + filter.slice(1));
-      }
-
-      const { count, error: countError } = await countQuery;
-
-      if (countError) {
-        console.error('Error counting transactions:', countError);
-        setError('เกิดข้อผิดพลาดในการนับจำนวนธุรกรรม');
-        return;
-      }
-
-      setTotalCount(count || 0);
-
-      // Fetch paginated transactions
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage - 1;
-
-      let dataQuery = supabase.from('transactions')
-        .select(`
-          transaction_id,
-          renting_id,
-          lessee_id,
-          lessor_id,
-          amount,
-          status,
-          date,
-          renting:renting_id (
-            sdate,
-            edate,
-            status,
-            car_information:car_id (
-              car_brand,
-              model,
-              year_created,
-              car_image
-            )
-          ),
-          lessee_info:lessee_id (
-            u_firstname,
-            u_lastname
-          ),
-          lessor_info:lessor_id (
-            u_firstname,
-            u_lastname
-          )
-        `);
-
-      if (filter !== 'all') {
-        dataQuery = dataQuery.eq('status', filter.charAt(0).toUpperCase() + filter.slice(1));
-      }
-
-      const { data, error: fetchError } = await dataQuery
-        .order('date', { ascending: false })
-        .range(startIndex, endIndex);
-
-      if (fetchError) {
-        console.error('Error fetching transactions:', fetchError);
-        setError('เกิดข้อผิดพลาดในการโหลดข้อมูลธุรกรรม');
-        return;
-      }
-
-      setTransactions((data as unknown as Transaction[]) || []);
+        all:response.data.all,
+        pending: response.data.pending,
+        done: response.data.done,
+        failed: response.data.failed
+      })
+      const transactionResponse = await axios.get(`${process.env.NEXT_PUBLIC_SERVER_URL}api/transactions?page=${currentPage}&
+        limit=${itemsPerPage}&filter=${filter}`)
+      setTotalCount(transactionResponse.data.pagination.totalItems)
+      setTransactions((transactionResponse.data.data as unknown as Transaction[]) || []);
     } catch (err) {
       console.error('Error:', err);
       setError('เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล');
+      if (err instanceof AxiosError) {
+        if (err.response?.status === 401) {
+          toast({
+            variant: "destructive",
+            title: "ไม่สำเร็จ",
+            description: "โปรดเข้าสู่ระบบอีกครั้ง.",
+          });
+          router.push("/auth/login");
+          return;
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -154,29 +68,6 @@ export default function TransactionHistoryPage() {
   const checkRoleAndFetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
-      setError(null);
-
-      // Check admin role first
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-      if (authError || !user) {
-        router.push("/auth/login");
-        return;
-      }
-
-      // Fetch user_info to check role
-      const { data: userInfo, error: roleError } = await supabase
-        .from("user_info")
-        .select("role")
-        .eq("user_id", user.id)
-        .single();
-
-      if (roleError || !userInfo || userInfo.role !== "admin") {
-        router.push("/auth/login");
-        return;
-      }
-
-      // If admin role confirmed, fetch all transactions
       await fetchAllTransactions();
     } catch (err) {
       console.error('Error checking role:', err);
@@ -188,28 +79,6 @@ export default function TransactionHistoryPage() {
   useEffect(() => {
     checkRoleAndFetchTransactions();
   }, [currentPage, filter, itemsPerPage, checkRoleAndFetchTransactions]);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('th-TH', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
-
-  const calculateDuration = (startDate: string, endDate: string) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return `${diffDays} วัน`;
-  };
-
-  const formatCurrency = (amount: number) => {
-    return `฿${amount.toLocaleString('th-TH')}`;
-  };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Pending":

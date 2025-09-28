@@ -3,7 +3,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import z from "zod";
 import { ProfileSchema } from "./schemas";
 import { buildAddress } from "./utils";
-import {MAX_BYTES, BUCKET, ALLOWED_TYPES} from "@/types/avatarConstraint"
+import { MAX_BYTES, BUCKET, ALLOWED_TYPES } from "@/types/avatarConstraint";
+import { createClient } from "./supabase/server";
 export const SignUp = async (data: userInfo, supabase: SupabaseClient) => {
   const { data: user } = await supabase
     .from("user_info")
@@ -182,5 +183,27 @@ export const removeAvatar = async (supabase: SupabaseClient) => {
     .update({ url: null })
     .eq("user_id", user.id);
   if (error) throw error;
-  return true
+  return true;
 };
+
+export async function isAdmin(supabase: SupabaseClient):Promise<boolean> {
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return false;
+  }
+
+  const { data: userInfo, error: roleError } = await supabase
+    .from("user_info")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+
+  if (roleError || !userInfo || userInfo.role !== "admin") {
+    return false;
+  }
+  return true;
+}
