@@ -3,7 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import z from "zod";
 import { ProfileSchema } from "./schemas";
 import { buildAddress } from "./utils";
-
+import {MAX_BYTES, BUCKET, ALLOWED_TYPES} from "@/types/avatarConstraint"
 export const SignUp = async (data: userInfo, supabase: SupabaseClient) => {
   const { data: user } = await supabase
     .from("user_info")
@@ -129,7 +129,7 @@ export const updateProfile = async (
   if (error) throw error;
   return true;
 };
-const BUCKET = "mbucket";
+// const BUCKET = "mbucket";
 // const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 // const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 

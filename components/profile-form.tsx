@@ -1,4 +1,3 @@
-// components/profile-form.tsx
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -11,54 +10,10 @@ import InputField from "@/components/ui/inputfield";
 import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
 import { getProfile, removeAvatar, updateAvatar, updateProfile } from "@/lib/authServices";
+import { parseAddress } from "@/lib/utils";
+import {MAX_BYTES, BUCKET, ALLOWED_TYPES} from "@/types/avatarConstraint"
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
-
-const ADDRESS_SEP = " | ";
-const PFX = {
-  sub: "แขวง/ตำบล ",
-  dist: "เขต/อำเภอ ",
-  prov: "จังหวัด ",
-  post: "รหัสไปรษณีย์ ",
-  country: "ประเทศ ",
-};
-
-// ---- Helpers ----
-function buildAddress(v: ProfileValues): string | null {
-  const parts: string[] = [];
-  if (v.addr_line?.trim()) parts.push(v.addr_line.trim());
-  if (v.subdistrict?.trim()) parts.push(PFX.sub + v.subdistrict.trim());
-  if (v.district?.trim()) parts.push(PFX.dist + v.district.trim());
-  if (v.province?.trim()) parts.push(PFX.prov + v.province.trim());
-  if (v.postcode?.trim()) parts.push(PFX.post + v.postcode.trim());
-  if (v.country?.trim()) parts.push(PFX.country + v.country.trim());
-  return parts.length ? parts.join(ADDRESS_SEP) : null;
-}
-function stripPrefix(s: string, prefix: string) {
-  return s.startsWith(prefix) ? s.slice(prefix.length) : s;
-}
-function parseAddress(s: string | null | undefined) {
-  let addr_line = "", subdistrict = "", district = "", province = "", postcode = "", country = "";
-  if (!s) return { addr_line, subdistrict, district, province, postcode, country };
-  const tokens = s.split(ADDRESS_SEP).map(t => t.trim()).filter(Boolean);
-  const freeTexts: string[] = [];
-  for (const t of tokens) {
-    if (t.startsWith(PFX.sub)) subdistrict = stripPrefix(t, PFX.sub);
-    else if (t.startsWith(PFX.dist)) district = stripPrefix(t, PFX.dist);
-    else if (t.startsWith(PFX.prov)) province = stripPrefix(t, PFX.prov);
-    else if (t.startsWith(PFX.post)) postcode = stripPrefix(t, PFX.post);
-    else if (t.startsWith(PFX.country)) country = stripPrefix(t, PFX.country);
-    else if (/^\d{5}$/.test(t) && !postcode) postcode = t;
-    else freeTexts.push(t);
-  }
-  if (freeTexts.length) addr_line = freeTexts.join(" ");
-  return { addr_line, subdistrict, district, province, postcode, country };
-}
-
-// ---- Configs for upload ----
-const BUCKET = "mbucket";
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 
 export function ProfileForm() {
   const supabase = createClient();
@@ -159,7 +114,6 @@ export function ProfileForm() {
   };
 
   async function handleFileSelected(file: File) {
-    // validate ก่อน อัปโหลด
     if (!ALLOWED_TYPES.includes(file.type)) {
       console.error("รองรับเฉพาะ JPG, PNG, WEBP, GIF");
       return;
@@ -168,46 +122,9 @@ export function ProfileForm() {
       console.error("ไฟล์ต้องไม่เกิน 5MB");
       return;
     }
-
     setAvatarPreview(URL.createObjectURL(file)); // โชว์ทันที
     setUploading(true);
-
     try {
-      // const { data: sessionData } = await supabase.auth.getUser();
-      // const user = sessionData?.user;
-      // if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
-
-      // // path: userId/uuid.ext
-      // const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      // const uid = (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
-      // const path = `${user.id}/${uid}.${ext}`;
-
-      // // อัปโหลดตรงไป Storage (เลี่ยง Server Actions limit)
-      // const { error: upErr } = await supabase.storage
-      //   .from(BUCKET)
-      //   .upload(path, file, {
-      //     cacheControl: "3600",
-      //     upsert: false,
-      //     contentType: file.type,
-      //   });
-      // if (upErr) throw upErr;
-
-      // // สร้าง public URL (ต้องเปิด select policy/public bucket)
-      // const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      // const publicUrl = pub?.publicUrl;
-      // if (!publicUrl) throw new Error("ไม่สามารถสร้าง URL ของรูปได้");
-
-      // // อัปเดต DB: url + u_email (กัน NOT NULL)
-      // const email = (await supabase.auth.getUser()).data.user?.email ?? null;
-      // if (!email) throw new Error("ไม่พบอีเมลใน session");
-
-      // const { error: dbErr } = await supabase
-      //   .from("user_info")
-      //   .upsert(
-      //     { user_id: user.id, u_email: email, url: publicUrl },
-      //     { onConflict: "user_id" }
-      //   );
-      // if (dbErr) throw dbErr;
       const publicUrl = await updateAvatar(supabase, file) 
       setAvatarUrl(publicUrl);
       toast({
@@ -231,12 +148,6 @@ export function ProfileForm() {
 
   async function handleRemoveAvatar() {
     try {
-      // const { data: sessionData } = await supabase.auth.getUser();
-      // const user = sessionData?.user;
-      // if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
-
-      // const { error } = await supabase.from("user_info").update({ url: null }).eq("user_id", user.id);
-      // if (error) throw error;
       await removeAvatar(supabase)
       setAvatarUrl(null);
       setAvatarPreview(null);
