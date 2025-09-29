@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, User, Key, CarFront,History } from "lucide-react";
 import { useEffect,useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getRole } from "@/lib/authServices";
+import { toast } from "./ui/use-toast";
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
@@ -14,23 +16,24 @@ export default function DashboardSidebar() {
   useEffect(() => {
     const fetchRole = async() => {
       try{
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setLoading(false);
-          return;
-        }
-
-        const {data : row,error} =await supabase
-          .from("user_info")
-          .select("role")
-          .eq("user_id",user.id)
-          .maybeSingle();
-
-        if(!error && row){
-          setRole(row.role as "user" | "admin")
+        const role = await getRole(supabase)
+        if(role){
+          setRole(role as "user" | "admin")
         }
       }catch(error){
         console.log(error);
+        let err = "Something went wrong"
+        if (error instanceof Error){
+          err = error.message
+          
+        }else{
+          err = "An error occurred"
+        }
+        toast({
+          variant:"destructive",
+          title:"ไม่สำเร็จ",
+          description:err
+        })
         console.log("โหลดroleไม่สำเร็จ");
       } finally {
         setLoading(false);

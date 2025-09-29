@@ -20,6 +20,8 @@ import { RegisterSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
+import { SignUp } from "@/lib/authServices";
+import { userInfo } from "@/types/authInterface";
 
 type RegisterFormValues = z.infer<typeof RegisterSchema>
 
@@ -37,24 +39,9 @@ export function SignUpForm({
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
+    const object: userInfo = data
     try {
-      const { data: user} = await supabase.from('user_info').select('u_email').eq('u_email', data.email).single();
-      if (user){throw new Error('Email already exists');}
-      const { error } = await supabase.auth.signUp({
-        email:data.email,
-        password:data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            firstname: data.firstname,
-            lastname: data.lastname,
-            role: 'user'
-          },
-        },
-      });
-      if (error) throw error;
-      setIsLoading(false);
-      
+      await SignUp(object, supabase)
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       console.log(error);
