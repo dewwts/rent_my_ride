@@ -2,7 +2,7 @@ import { loginInfo, profileInfo, userInfo } from "@/types/authInterface";
 import { SupabaseClient } from "@supabase/supabase-js";
 import z from "zod";
 import { ProfileSchema } from "./schemas";
-import { buildAddress } from "./utils";
+import { buildAddress, uploadImage } from "./utils";
 import { MAX_BYTES, BUCKET, ALLOWED_TYPES } from "@/types/avatarConstraint";
 import { createClient } from "./supabase/server";
 export const SignUp = async (data: userInfo, supabase: SupabaseClient) => {
@@ -138,39 +138,27 @@ export const updateAvatar = async (supabase: SupabaseClient, file: File) => {
   const { data: sessionData } = await supabase.auth.getUser();
   const user = sessionData?.user;
   if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
-
-  // path: userId/uuid.ext
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-  const uid =
-    typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : String(Date.now());
-  const path = `${user.id}/${uid}.${ext}`;
-
-  const { error: upErr } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: file.type,
-    });
-  if (upErr) throw new Error("เกิดปัญหากับพื้นที่เก็บข้อมูล");
-
-  const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  const publicUrl = pub?.publicUrl;
-  if (!publicUrl) throw new Error("ไม่สามารถสร้าง URL ของรูปได้");
-
-  const email = (await supabase.auth.getUser()).data.user?.email ?? null;
-  if (!email) throw new Error("ไม่พบอีเมลใน session");
-
-  const { error: dbErr } = await supabase
-    .from("user_info")
-    .upsert(
-      { user_id: user.id, u_email: email, url: publicUrl },
-      { onConflict: "user_id" }
-    );
-  if (dbErr) throw new Error("ฐานข้อมูลมีปัญหา");
-  return publicUrl;
+  try{
+    const publicUrl = await uploadImage(BUCKET, user.id, file, supabase)
+    const email = (await supabase.auth.getUser()).data.user?.email ?? null;
+    if (!email) throw new Error("ไม่พบอีเมลใน session");
+    
+    const { error: dbErr } = await supabase
+      .from("user_info")
+      .upsert(
+        { user_id: user.id, u_email: email, url: publicUrl },
+        { onConflict: "user_id" }
+      );
+    if (dbErr) throw new Error("ฐานข้อมูลมีปัญหา");
+    return publicUrl;
+  }catch(err: unknown){
+    let message = "something went wrong"
+    if (err instanceof Error){
+      message = err.message
+    }  
+    throw new Error(message)
+  }
+  
 };
 
 export const removeAvatar = async (supabase: SupabaseClient) => {
