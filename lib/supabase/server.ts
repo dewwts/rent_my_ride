@@ -2,6 +2,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { middleware } from "@/middleware";
 
 function getUrl() {
   return (
@@ -61,3 +62,5 @@ export function createAdminClient() {
     }
   });
 }
+
+
