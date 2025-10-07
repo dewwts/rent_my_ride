@@ -50,7 +50,7 @@ describe('Upload Image function testing', ()=>{
             auth:{
                 getUser:jest.fn().mockResolvedValue({
                     data:{user:null},
-                    error:null
+                    error:mockError
                 })
             },
             from:jest.fn(),
