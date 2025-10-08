@@ -28,7 +28,7 @@ export const getRentingById = async (supabase: SupabaseClient, id: string) => {
 //create renting
 export const createRenting = async (
   supabase : SupabaseClient,
-  payload : Omit<rentingInfo, 'renting_id' | 'created_at' | 'lessee_id'>
+  payload : Omit<rentingInfo, 'renting_id' | 'created_at' | 'lessee_id' | 'status'>
 ) => {
   const {data: { user }} = await supabase.auth.getUser();
   if (!user) throw new Error("ไม่พบผู้ใช้งานนี้ในฐานข้อมูล");
@@ -36,6 +36,7 @@ export const createRenting = async (
   const insertPayload = {
     ...payload,
     lessee_id: user.id, // uid ของผู้ใช้งาน
+    status : "Pending"
   };
 
   const {data , error} = await supabase
