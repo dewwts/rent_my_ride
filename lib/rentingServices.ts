@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { rentingInfo } from "@/types/rentingInterface";
-import { getRole } from "./authServices";
+import { isAdmin } from "./authServices";
 
 // Get all renting
 export const getRentings = async (supabase: SupabaseClient) => {
@@ -55,9 +55,7 @@ export const updateRenting = async (
   renting_id: string, 
   payload: Partial<Omit<rentingInfo, 'renting_id' | 'created_at' | 'lessee_id'>>
 ) => {
-  const role = await getRole(supabase);
-  if(role !== "admin") throw new Error("Not allowed to access");
-
+  if(!isAdmin(supabase)) throw new Error("Not allowed to access");
   const {data,error} = await supabase
     .from("renting")
     .update(payload)
@@ -74,9 +72,7 @@ export const deleteRenting = async (
   supabase : SupabaseClient,
   renting_id : string
 ) => {
-  const role = await getRole(supabase);
-  if(role !== "admin") throw new Error("Not allowed to access");
-
+  if(!isAdmin(supabase)) throw new Error("Not allowed to access");
   const {error} = await supabase
     .from("renting")
     .delete()
