@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ProfileSchema } from "./schemas";
 import z from "zod";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -71,3 +72,26 @@ export const calculateDuration = (startDate: string, endDate: string) => {
 export const formatCurrency = (amount: number) => {
   return `฿${amount.toLocaleString('th-TH')}`;
 };
+
+export const uploadImage = async(mbucket: string, userid: string, file: File, supabase: SupabaseClient)=>{
+const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const uid =
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : String(Date.now());
+  const path = `${userid}/${uid}.${ext}`;
+
+  const { error: upErr } = await supabase.storage
+    .from(mbucket)
+    .upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type,
+    });
+  if (upErr) throw new Error("เกิดปัญหากับพื้นที่เก็บข้อมูล");
+
+  const { data: pub } = supabase.storage.from(mbucket).getPublicUrl(path);
+  const publicUrl = pub?.publicUrl;
+  if (!publicUrl) throw new Error("ไม่สามารถสร้าง URL ของรูปได้");
+  return publicUrl
+}
