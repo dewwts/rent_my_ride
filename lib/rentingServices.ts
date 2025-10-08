@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { rentingInfo } from "@/types/rentingInterface";
+import { getRole } from "./authServices";
 
 // Get all renting
 export const getRentings = async (supabase: SupabaseClient) => {
@@ -29,9 +30,7 @@ export const createRenting = async (
   supabase : SupabaseClient,
   payload : Omit<rentingInfo, 'renting_id' | 'created_at' | 'lessee_id'>
 ) => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const {data: { user }} = await supabase.auth.getUser();
   if (!user) throw new Error("ไม่พบผู้ใช้งานนี้ในฐานข้อมูล");
 
   const insertPayload = {
@@ -49,18 +48,41 @@ export const createRenting = async (
   return data;
 }
 
-//update renting
+//update renting (for admin)
 export const updateRenting = async (
   supabase : SupabaseClient, 
   renting_id: string, 
   payload: Partial<Omit<rentingInfo, 'renting_id' | 'created_at' | 'lessee_id'>>
 ) => {
+  const role = await getRole(supabase);
+  if(role !== "admin") throw new Error("Not allowed to access");
+
   const {data,error} = await supabase
     .from("renting")
     .update(payload)
     .eq("renting_id",renting_id)
     .select()
     .single()
+
+  if(error) throw error
+  return data;
+}
+
+//delete Renting (for admin)
+export const deleteRenting = async (
+  supabase : SupabaseClient,
+  renting_id : string
+) => {
+  const role = await getRole(supabase);
+  if(role !== "admin") throw new Error("Not allowed to access");
+
+  const {error} = await supabase
+    .from("renting")
+    .delete()
+    .eq("renting_id",renting_id)
+
+  if(error) throw error;
+  return true;
 }
 
 //set renting status

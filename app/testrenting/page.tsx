@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { getRentings,createRenting,updateRenting,setRentingStatus,getRentingById} from "@/lib/rentingServices";
+import { getRentings,createRenting,updateRenting,setRentingStatus,getRentingById,deleteRenting} from "@/lib/rentingServices";
 export default function TestRentingPage() {
   const [result, setResult] = useState<any>(null);
 
@@ -19,7 +19,10 @@ export default function TestRentingPage() {
     //     edate: "2025-10-31"
     // });
     // console.log(updaterenting);
+
+    // const deleterenting  = await deleteRenting(supabase,"33803ff0-89ed-4ab4-a45d-f93ba7bb2b41");
     // // console.log(newRenting);
+    // console.log(deleterenting)
     // const data = await getRentings(supabase);
     // setResult(data);
     // console.log(data)
