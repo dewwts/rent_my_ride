@@ -13,7 +13,7 @@ export const getRentings = async (supabase: SupabaseClient) => {
 };
 
 //Get renting with id
-export const getRentingById = async (supabase: SupabaseClient, id: number) => {
+export const getRentingById = async (supabase: SupabaseClient, id: string) => {
   const {data , error} = await supabase
     .from("renting")
     .select()
@@ -51,8 +51,9 @@ export const createRenting = async (
 
 //update renting
 export const updateRenting = async (
-  supabase : SupabaseClient, renting_id: string, 
-  payload: Partial<Omit<rentingInfo, 'renting_id' | 'created_at'>>
+  supabase : SupabaseClient, 
+  renting_id: string, 
+  payload: Partial<Omit<rentingInfo, 'renting_id' | 'created_at' | 'lessee_id'>>
 ) => {
   const {data,error} = await supabase
     .from("renting")
