@@ -4,6 +4,12 @@ import { isAdmin } from "./authServices";
 
 // Get all renting
 export const getRentings = async (supabase: SupabaseClient) => {
+  //Check login
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    throw new Error("You are not logged in.");
+  }
+
   const { data, error } = await supabase
     .from("renting")
     .select()
@@ -15,6 +21,12 @@ export const getRentings = async (supabase: SupabaseClient) => {
 
 //Get renting with id
 export const getRentingById = async (supabase: SupabaseClient, id: string) => {
+  //Check login
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    throw new Error("You are not logged in.");
+  }
+  
   const {data , error} = await supabase
     .from("renting")
     .select()
