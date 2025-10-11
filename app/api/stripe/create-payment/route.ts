@@ -1,0 +1,31 @@
+import { NextResponse } from "next/server"
+import Stripe from "stripe"
+import { success } from "zod"
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string || "")
+
+export async function POST(req:Request){
+    try{
+        const body = await req.json()
+        const {aid, amount} = body
+        if (!amount || !aid || amount <= 0) {
+            return NextResponse.json({success: false, error:"ข้อมูลไม่ถูกต้อง"},{status:400})
+        }
+        const totalAmount = Math.round(amount * 100)
+        const fee = Math.round(totalAmount * 0.05)
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: totalAmount,
+            currency: 'thb',
+            payment_method_types:['promptpay'],
+            application_fee_amount: fee,
+            transfer_data:{
+                destination: aid
+            }
+        })
+        NextResponse.json({
+            success: true,
+        })
+    }catch(err: unknown){
+        
+    }
+}
