@@ -22,9 +22,8 @@ export async function POST(){
             return NextResponse.json({success: false, error: "โปรดเข้าสู่ระบบก่อน"},{status:401})
         }
         const {error: update_error} = await supabase.from('user_info').update({
-            user_id: user.data.user.id,
             stripe_account_id: account.id
-        })
+        }).eq('user_id', user.data.user.id)
         if (update_error){
             console.error(update_error)
             return NextResponse.json({
