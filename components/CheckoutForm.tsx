@@ -1,4 +1,4 @@
-import { useElements, useStripe, Elements, PaymentElement } from "@stripe/react-stripe-js"
+import { useElements, useStripe, PaymentElement } from "@stripe/react-stripe-js"
 import { useState } from "react"
 import { Button } from "./ui/button"
 import { toast } from "./ui/use-toast"
