@@ -6,39 +6,18 @@ import { useEffect,useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getRole } from "@/lib/authServices";
 import { toast } from "./ui/use-toast";
+import { StandardMenuItem, DropdownMenuItemType, MenuItem } from "@/types/dashboard"; 
 
-// 1. Interface สำหรับ Menu Item ธรรมดา
-interface StandardMenuItem {
-    href: string; 
-    label: string;
-    icon: React.ReactElement<LucideIcon>;
-    isDropdown?: false; 
-}
-
-// 2. Interface สำหรับ Menu Item ที่เป็น Dropdown
-interface DropdownMenuItemType {
-    href?: never; 
-    label: string;
-    icon: React.ReactElement<LucideIcon>;
-    isDropdown: true;
-    subItems: StandardMenuItem[];
-}
-
-// Type รวมสำหรับเมนูทั้งหมด
-type MenuItem = StandardMenuItem | DropdownMenuItemType;
-
-
-// **ฟังก์ชันใหม่สำหรับจัดการเมนูย่อย (Submenu/Dropdown) - มีการแก้ไขเล็กน้อยเพื่อใช้ Type ใหม่**
 const DropdownMenuItemComponent = ({ 
   item, 
   pathname, 
   defaultSubPath 
 }: { 
-  item: DropdownMenuItemType; // ใช้ Type DropdownMenuItemType ที่กำหนดใหม่
+  item: DropdownMenuItemType; 
   pathname: string; 
   defaultSubPath: string 
 }) => {
-  const isActive = item.subItems.some((sub: any) => pathname.startsWith(sub.href)) || pathname.startsWith(defaultSubPath);
+  const isActive = item.subItems.some((sub) => pathname.startsWith(sub.href)) || pathname.startsWith(defaultSubPath);
 
   const [isOpen, setIsOpen] = useState(isActive);
 
@@ -50,7 +29,7 @@ const DropdownMenuItemComponent = ({
     <div className="flex flex-col">
       {/* ส่วนหัวของ Dropdown: ปล่อยเช่ารถ */}
       <Link
-        href={defaultSubPath} // เมื่อกดที่ "ปล่อยเช่ารถ" ให้ไปที่ /dashboard/cars
+        href={defaultSubPath} 
         onClick={(e) => {
           e.preventDefault(); 
           setIsOpen(!isOpen);
@@ -68,13 +47,13 @@ const DropdownMenuItemComponent = ({
       {/* รายการเมนูย่อย */}
       {isOpen && (
         <div className="flex flex-col gap-1 mt-1 pl-8">
-          {item.subItems.map((sub: StandardMenuItem) => ( // ใช้ Type StandardMenuItem สำหรับ sub item
+          {item.subItems.map((sub: StandardMenuItem) => ( 
             <Link
               key={sub.href}
               href={sub.href}
               className={`flex items-center px-3 py-2 rounded-lg hover:text-[#2B09F7] transition text-[14px] ${
                 pathname.startsWith(sub.href) 
-                  ? " text-[#2B09F7] font-medium bg-[#D9D9D9]" 
+                  ? " text-[#2B09F7] bg-[#D9D9D9]" 
                   : "text-[#8C8C8C]"
               }`}
             >
@@ -119,12 +98,11 @@ export default function DashboardSidebar() {
 }
 
   // **กำหนด Type ให้กับ userMenu**
-  const userMenu: MenuItem[] = [
+  const userMenu: MenuItem[] = [ 
     { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} />, isDropdown: false },
     { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} />, isDropdown: false },
     { href: "/dashboard/bookings", label: "การจองรถ", icon: <CarFront size={18} />, isDropdown: false },
     { 
-      // ไม่มี href ใน Dropdown
       label: "ปล่อยเช่ารถ", 
       icon: <Key size={18} />,
       isDropdown: true, 
@@ -136,7 +114,7 @@ export default function DashboardSidebar() {
   ];
 
   // **กำหนด Type ให้กับ adminMenu**
-  const adminMenu: StandardMenuItem[] = [
+  const adminMenu: StandardMenuItem[] = [ // Type StandardMenuItem ถูก Import มาใช้
     { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} /> },
     { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} /> },
     { href: "/dashboard/history", label: "ดูคำสั่งซื้อทั้งหมด", icon: <History size={18} /> }
@@ -150,9 +128,8 @@ export default function DashboardSidebar() {
       <h2 className="font-mitr font-light text-[16px] text-[#8C8C8C] ml-3 mt-3 mb-3 hidden md:block">เกี่ยวกับรถ</h2>
       <nav className="flex flex-col gap-3 font-mitr font-light text-[15px] md:ml-3 mt-5">
         {menuItems.map((item) => {
-          // **ใช้ Type Narrowing เพื่อให้ TypeScript รู้ว่า item มี href หรือไม่**
           if (item.isDropdown) {
-            const defaultSubPath = item.subItems[0].href; // /dashboard/cars
+            const defaultSubPath = item.subItems[0].href; 
             return (
               <DropdownMenuItemComponent 
                 key={item.label} 
@@ -163,8 +140,7 @@ export default function DashboardSidebar() {
             );
           }
           
-          // **โค้ดนี้จะทำงานเมื่อ item.isDropdown เป็น false เท่านั้น (หรือไม่มี isDropdown เลย)**
-          // TypeScript จะทราบว่า item ที่มาถึงตรงนี้คือ StandardMenuItem และมี item.href เป็น string
+          // **โค้ดนี้จะทำงานเมื่อ item.isDropdown เป็น false เท่านั้น**
           return (
             <Link
               key={item.href} 
