@@ -21,7 +21,7 @@ export async function POST(req:Request){
                 destination: aid
             },
             metadata:{
-                amount:amount,
+                amount:amount as string,
                 renting_id:renting_id
             }
         })
