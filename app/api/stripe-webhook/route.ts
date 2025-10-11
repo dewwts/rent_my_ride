@@ -54,11 +54,11 @@ export async function POST(req: Request){
                 success: false,
                 message: "อัปเดตข้อมูลการชำระเงินที่ล้มเหลวแล้ว"
             },{status:200})
-            }else{
-                console.log(`Unhandled event type ${event.type}`);
-                return NextResponse.json({success: false, message: "Unhandled event type"},{status:200})
-            }     
-            return NextResponse.json({success:true, messsage: "การจ่ายเงินสำเร็จ"},{status:200})
+        }else{
+            console.log(`Unhandled event type ${event.type}`);
+            return NextResponse.json({success: false, message: "Unhandled event type"},{status:200})
+        }     
+        return NextResponse.json({success:true, messsage: "การจ่ายเงินสำเร็จ"},{status:200})
     }catch(err: unknown){
         console.error(err);
         return NextResponse.json({
