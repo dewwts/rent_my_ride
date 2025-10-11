@@ -5,25 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { formatDate, formatCurrency } from '@/lib/utils' 
-
-// Interface สำหรับ Booking
-export interface Booking {
-  booking_id: string; 
-  car_id: string; 
-  renter_id: string; 
-  start_date: string; 
-  end_date: string; 
-  status: 'Ready' | 'Ongoing' | 'Completed'; 
-  total_price: number; 
-  car_info: {
-    car_plate: string;
-    car_brand: string;
-  };
-  renter_info: {
-    u_firstname: string;
-    u_lastname: string;
-  };
-}
+import { Booking } from "@/types/dashboard";
 
 // **ฟังก์ชันสำหรับสร้างข้อมูล Mock**
 const createMockBookings = (page: number, limit: number, total: number): Booking[] => {
