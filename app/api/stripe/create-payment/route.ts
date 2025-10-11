@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
-import { success } from "zod"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string || "")
 
 export async function POST(req:Request){
     try{
         const body = await req.json()
-        const {aid, amount} = body
+        const {aid, amount, renting_id} = body
         if (!amount || !aid || amount <= 0) {
             return NextResponse.json({success: false, error:"ข้อมูลไม่ถูกต้อง"},{status:400})
         }
@@ -20,6 +19,10 @@ export async function POST(req:Request){
             application_fee_amount: fee,
             transfer_data:{
                 destination: aid
+            },
+            metadata:{
+                amount:amount,
+                renting_id:renting_id
             }
         })
         return NextResponse.json({
