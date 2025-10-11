@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { rentingInfo } from "@/types/rentingInterface";
+import { rentingInfo, RentingStatus } from "@/types/rentingInterface";
 import { isAdmin } from "./authServices";
 
 // Get all renting
@@ -95,6 +95,6 @@ export const deleteRenting = async (
 }
 
 //set renting status
-export const setRentingStatus = async (supabase : SupabaseClient , renting_id:string, status:string) => {
+export const setRentingStatus = async (supabase : SupabaseClient , renting_id:string, status:RentingStatus) => {
   return updateRenting(supabase,renting_id,{ status });
 }
