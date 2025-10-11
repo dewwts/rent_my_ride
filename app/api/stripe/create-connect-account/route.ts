@@ -52,7 +52,7 @@ export async function POST(){
         console.error(err);
         return NextResponse.json({
             success: false,
-            error: "Something went wrong"
+            error: "ไม่สามารถสร้างบัญชีเชื่อมต่อได้"
         }, {status:500})
     }
     

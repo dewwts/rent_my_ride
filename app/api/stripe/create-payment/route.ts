@@ -22,10 +22,15 @@ export async function POST(req:Request){
                 destination: aid
             }
         })
-        NextResponse.json({
+        return NextResponse.json({
             success: true,
+            data:{
+                client_secret:paymentIntent.client_secret,
+                message: "สร้างคำขอชำระเงินสำเร็จ"
+            } 
         })
     }catch(err: unknown){
-        
+        console.error(err);
+        return NextResponse.json({success:false, error: "ไม่สามารถสร้างคำขอชำระเงินได้"}, {status:500})
     }
 }
