@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, useCallback } from "react";
 import { Loader2, History, ChevronLeft, ChevronRight } from "lucide-react"; // เพิ่ม ChevronLeft, ChevronRight
 import { useRouter } from "next/navigation";
@@ -64,11 +63,22 @@ const CustomPagination = ({ currentPage, totalPages, onPageChange }: {
     totalPages: number; 
     onPageChange: (page: number) => void;
 }) => {
-    const pagesToShow = 5; // แสดง 1, 2, 3, ... , TotalPages
-    const startPage = Math.max(1, currentPage - Math.floor(pagesToShow / 2));
-    const endPage = Math.min(totalPages, startPage + pagesToShow - 1);
-    const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+    const pagesToShow = 5; 
+    
+    let startPage = 1;
+    let endPage = totalPages;
 
+    if (totalPages > pagesToShow) {
+        startPage = Math.max(1, currentPage - Math.floor(pagesToShow / 2));
+        endPage = Math.min(totalPages, startPage + pagesToShow - 1);
+
+        if (endPage === totalPages) {
+            startPage = Math.max(1, totalPages - pagesToShow + 1);
+        }
+    }
+
+    const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+    
     const isPrevDisabled = currentPage === 1;
     const isNextDisabled = currentPage === totalPages;
 
@@ -102,10 +112,7 @@ const CustomPagination = ({ currentPage, totalPages, onPageChange }: {
                     {page}
                 </button>
             ))}
-
-            {/* ... ตัวแทนหน้า */}
-            {endPage < totalPages && <span className="text-gray-500">...</span>}
-
+            
             {/* ปุ่ม ถัดไป */}
             <button
                 onClick={() => onPageChange(currentPage + 1)}
