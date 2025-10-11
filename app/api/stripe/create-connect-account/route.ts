@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string || "")
+
 export async function POST(){
     try{
         const account = await stripe.accounts.create({
@@ -10,7 +11,6 @@ export async function POST(){
             country: 'TH',
             capabilities:{
                 card_payments: {requested: true},
-                transfers: {requested: true},
                 promptpay_payments: {requested: true}
             },
             business_type: 'individual'

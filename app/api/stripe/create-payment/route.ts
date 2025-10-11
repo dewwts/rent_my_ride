@@ -17,13 +17,15 @@ export async function POST(req:Request){
             currency: 'thb',
             payment_method_types:['promptpay'],
             application_fee_amount: fee,
-            transfer_data:{
-                destination: aid
-            },
+            // transfer_data:{
+            //     destination: aid
+            // },
             metadata:{
                 amount:amount as string,
                 renting_id:renting_id
             }
+        },{
+            stripeAccount:aid
         })
         return NextResponse.json({
             success: true,
