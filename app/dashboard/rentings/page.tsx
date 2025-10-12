@@ -3,41 +3,33 @@ import { useState, useEffect, useCallback } from "react";
 import { Loader2, History, ChevronLeft, ChevronRight } from "lucide-react"; // เพิ่ม ChevronLeft, ChevronRight
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { toast } from "@/components/ui/use-toast";
 import { formatDate, formatCurrency } from '@/lib/utils' 
-import { Booking } from "@/types/dashboard";
+import { rentingInfo,RentingStatus } from "@/types/rentingInterface";
+import { getRentings,getRentingPrice } from "@/lib/rentingServices";
 
-// **ฟังก์ชันสำหรับสร้างข้อมูล Mock**
-const createMockBookings = (page: number, limit: number, total: number): Booking[] => {
-  const mockData: Booking[] = [];
-  const start = (page - 1) * limit;
-  const end = Math.min(start + limit, total);
-  const statuses = ['Ready', 'Ongoing', 'Completed'] as const; 
+export const createMockBookings = (count: number): rentingInfo[] => {
+  const mockData: rentingInfo[] = [];
+  const statuses = [RentingStatus.CONFIRMED, RentingStatus.PENDING] as const;
 
-  for (let i = start; i < end; i++) {
-    const statusIndex = i % statuses.length;
+  for (let i = 0; i < count; i++) {
+    const status = statuses[i % statuses.length];
+    const startDay = (i % 28) + 1;
+    const endDay = startDay + 3;
+
     mockData.push({
-      booking_id: `ORDER-D${1000 + i}`,
-      car_id: `CAR-D${200 + i}`,
-      renter_id: `USER-D${3000 + i}`,
-      start_date: `2025-09-${(i % 28) + 1}`,
-      end_date: `2025-09-${(i % 28) + 5}`,
-      status: statuses[statusIndex],
-      total_price: (i % 5) * 1500 + 3500, 
-      car_info: {
-        car_plate: `กข${(i % 10) + 1} ${8000 + i}`,
-        car_brand: i % 2 === 0 ? 'Toyota Yaris' : 'Honda City',
-      },
-      renter_info: {
-        u_firstname: `ผู้เช่า`,
-        u_lastname: `${(i % 10) + 1}`,
-      },
-    } as Booking);
+      renting_id: `RENT-${1000 + i}`,
+      car_id: `CAR-${200 + i}`,
+      lessee_id: `USER-${3000 + i}`,
+      sdate: `2025-09-${startDay.toString().padStart(2, "0")}`,
+      edate: `2025-09-${endDay.toString().padStart(2, "0")}`,
+      status,
+      total_price: 3500 + (i % 5) * 1000,
+    });
   }
+
   return mockData;
 };
 
-const MOCK_TOTAL_COUNT = 68; 
 
 // **คอมโพเนนต์สำหรับ Pagination ที่กำหนดเอง**
 const CustomPagination = ({ currentPage, totalPages, onPageChange }: { 
@@ -115,28 +107,43 @@ const CustomPagination = ({ currentPage, totalPages, onPageChange }: {
 
 export default function RentingHistoryPage() { 
   const [loading, setLoading] = useState(true);
-  const [bookings, setBookings] = useState<Booking[]>([]); 
+  const [bookings, setBookings] = useState<any[]>([]); 
   const [error, setError] = useState<string | null>(null);
-  
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount] = useState(MOCK_TOTAL_COUNT); 
-  const [itemsPerPage] = useState(10); 
-
-  const router = useRouter();
+  const [totalCount, setTotalCount] = useState(0);
+  const itemsPerPage = 10; 
   const supabase = createClient();
 
   const fetchOwnerBookings = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      await new Promise(resolve => setTimeout(resolve, 500)); 
       
-      const mockBookings = createMockBookings(currentPage, itemsPerPage, MOCK_TOTAL_COUNT);
-      setBookings(mockBookings);
+      const data = await getRentings(supabase);
+      // const data = createMockBookings(68)
+      setTotalCount(data.length);
+
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageData = data.slice(start, end);
+
+      const bookingsWithPrice = await Promise.all(
+        pageData.map(async (booking) => {
+          try {
+            const price = await getRentingPrice(supabase, booking.renting_id);
+            return { ...booking, total_price: price ?? 0 }; //add total price field
+          } catch (err) {
+            console.error("Error fetching price for", booking.renting_id, err);
+            return { ...booking, total_price: 0 }; // fallback
+          }
+        })
+      );
+
+    setBookings(bookingsWithPrice);
       
     } catch (err) {
       console.error('Error fetching mock bookings:', err);
-      setError('เกิดข้อผิดพลาดในการโหลดประวัติการเช่า (Mock Error)');
+      setError('เกิดข้อผิดพลาดในการโหลดประวัติการเช่า');
     } finally {
       setLoading(false);
     }
@@ -147,29 +154,21 @@ export default function RentingHistoryPage() {
   }, [currentPage, fetchOwnerBookings]);
   
   // UI Logic สำหรับ Status (คงเดิม)
-  const getStatusDisplay = (status: Booking['status']) => {
-    switch (status) {
-      case "Ready": 
-        return "รอเริ่มต้น";
-      case "Ongoing":
-        return "ใช้งานอยู่";
-      case "Completed": 
-        return "สิ้นสุดแล้ว";
-      default:
-        return status;
+  const getStatusDisplay = (status: rentingInfo['status']) => {
+    if(status === RentingStatus.CONFIRMED){
+      return "ยืนยัน"
+    }
+    else{
+      return "รอดำเนินการ"
     }
   };
 
-  const getStatusColor = (status: Booking['status']) => {
-    switch (status) {
-      case "Ready": 
-        return "text-amber-700 bg-amber-100";
-      case "Ongoing":
-        return "text-blue-700 bg-blue-100";
-      case "Completed": 
-        return "text-green-700 bg-green-100";
-      default:
-        return "text-gray-700 bg-gray-100";
+  const getStatusColor = (status: rentingInfo['status']) => {
+    if(status === RentingStatus.CONFIRMED){
+      return "text-green-700 bg-green-100"
+    }
+    else{
+      return "text-amber-700 bg-amber-100"
     }
   };
   
@@ -226,24 +225,24 @@ export default function RentingHistoryPage() {
                     {bookings.map((booking) => (
                         // **สไตล์แถวข้อมูล: ใช้สีฟ้าอ่อน/น้ำเงิน (#E5E7F9) และขอบมนตาม UI**
                         <div 
-                            key={booking.booking_id} 
+                            key={booking.renting_id} 
                             className="grid grid-cols-7 gap-4 px-3 py-3 rounded-lg bg-[#F0F0F0] text-gray-800 transition hover:bg-[#E5E7F9] border border-gray-300"
                         >
                             {/* หมายเลขการเช่า */}
                             <div className="col-span-1 text-sm font-medium">
-                                {booking.booking_id.slice(0, 10)}
+                                {booking.renting_id.slice(0, 10)}
                             </div>
                             {/* ID รถ */}
                             <div className="col-span-1 text-sm">
-                                {booking.car_info?.car_plate || booking.car_id.slice(0, 10)}
+                                {booking.car_id.slice(0, 10)}
                             </div>
                             {/* ID ผู้เช่า */}
                             <div className="col-span-1 text-sm">
-                                {booking.renter_info ? `${booking.renter_info.u_firstname} ${booking.renter_info.u_lastname.slice(0, 1)}.` : booking.renter_id.slice(0, 10)}
+                                {booking.lessee_id.slice(0, 10)}
                             </div>
                             {/* วันที่เช่า */}
                             <div className="col-span-2 text-sm">
-                                {formatDate(booking.start_date)} - {formatDate(booking.end_date)}
+                                {formatDate(booking.sdate)} - {formatDate(booking.edate)}
                             </div>
                             {/* สถานะ */}
                             <div className="col-span-1 text-sm font-medium">
@@ -253,7 +252,7 @@ export default function RentingHistoryPage() {
                             </div>
                             {/* รายได้ */}
                             <div className="col-span-1 text-sm font-bold text-right">
-                                {formatCurrency(booking.total_price)}
+                                {formatCurrency(booking.total_price ?? 0)}
                             </div>
                         </div>
                     ))}
@@ -282,3 +281,39 @@ export default function RentingHistoryPage() {
     </main>
   );
 }
+
+
+
+
+
+// **ฟังก์ชันสำหรับสร้างข้อมูล Mock**
+// const createMockBookings = (page: number, limit: number, total: number): rentingInfo[] => {
+//   const mockData: rentingInfo[] = [];
+//   const start = (page - 1) * limit;
+//   const end = Math.min(start + limit, total);
+//   const statuses = ['Ready', 'Ongoing', 'Completed'] as const; 
+
+//   for (let i = start; i < end; i++) {
+//     const statusIndex = i % statuses.length;
+//     mockData.push({
+//       booking_id: `ORDER-D${1000 + i}`,
+//       car_id: `CAR-D${200 + i}`,
+//       renter_id: `USER-D${3000 + i}`,
+//       start_date: `2025-09-${(i % 28) + 1}`,
+//       end_date: `2025-09-${(i % 28) + 5}`,
+//       status: statuses[statusIndex],
+//       total_price: (i % 5) * 1500 + 3500, 
+//       car_info: {
+//         car_plate: `กข${(i % 10) + 1} ${8000 + i}`,
+//         car_brand: i % 2 === 0 ? 'Toyota Yaris' : 'Honda City',
+//       },
+//       renter_info: {
+//         u_firstname: `ผู้เช่า`,
+//         u_lastname: `${(i % 10) + 1}`,
+//       },
+//     } as Booking);
+//   }
+//   return mockData;
+// };
+
+// const MOCK_TOTAL_COUNT = 68; 

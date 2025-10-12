@@ -98,3 +98,14 @@ export const deleteRenting = async (
 export const setRentingStatus = async (supabase : SupabaseClient , renting_id:string, status:RentingStatus) => {
   return updateRenting(supabase,renting_id,{ status });
 }
+
+export const getRentingPrice = async (supabase : SupabaseClient, renting_id:string) => {
+  const {data,error} = await supabase
+    .from("transactions")
+    .select("amount")
+    .eq("renting_id",renting_id)
+    .single();
+    if(error) throw error;
+    return data.amount;
+}
+
