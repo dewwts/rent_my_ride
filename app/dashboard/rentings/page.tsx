@@ -7,28 +7,28 @@ import { formatDate, formatCurrency } from '@/lib/utils'
 import { rentingInfo,RentingStatus } from "@/types/rentingInterface";
 import { getRentings,getRentingPrice } from "@/lib/rentingServices";
 
-export const createMockBookings = (count: number): rentingInfo[] => {
-  const mockData: rentingInfo[] = [];
-  const statuses = [RentingStatus.CONFIRMED, RentingStatus.PENDING] as const;
+// export const createMockBookings = (count: number): rentingInfo[] => {
+//   const mockData: rentingInfo[] = [];
+//   const statuses = [RentingStatus.CONFIRMED, RentingStatus.PENDING] as const;
 
-  for (let i = 0; i < count; i++) {
-    const status = statuses[i % statuses.length];
-    const startDay = (i % 28) + 1;
-    const endDay = startDay + 3;
+//   for (let i = 0; i < count; i++) {
+//     const status = statuses[i % statuses.length];
+//     const startDay = (i % 28) + 1;
+//     const endDay = startDay + 3;
 
-    mockData.push({
-      renting_id: `RENT-${1000 + i}`,
-      car_id: `CAR-${200 + i}`,
-      lessee_id: `USER-${3000 + i}`,
-      sdate: `2025-09-${startDay.toString().padStart(2, "0")}`,
-      edate: `2025-09-${endDay.toString().padStart(2, "0")}`,
-      status,
-      total_price: 3500 + (i % 5) * 1000,
-    });
-  }
+//     mockData.push({
+//       renting_id: `RENT-${1000 + i}`,
+//       car_id: `CAR-${200 + i}`,
+//       lessee_id: `USER-${3000 + i}`,
+//       sdate: `2025-09-${startDay.toString().padStart(2, "0")}`,
+//       edate: `2025-09-${endDay.toString().padStart(2, "0")}`,
+//       status,
+//       total_price: 3500 + (i % 5) * 1000,
+//     });
+//   }
 
-  return mockData;
-};
+//   return mockData;
+// };
 
 
 // **คอมโพเนนต์สำหรับ Pagination ที่กำหนดเอง**
@@ -285,35 +285,3 @@ export default function RentingHistoryPage() {
 
 
 
-
-// **ฟังก์ชันสำหรับสร้างข้อมูล Mock**
-// const createMockBookings = (page: number, limit: number, total: number): rentingInfo[] => {
-//   const mockData: rentingInfo[] = [];
-//   const start = (page - 1) * limit;
-//   const end = Math.min(start + limit, total);
-//   const statuses = ['Ready', 'Ongoing', 'Completed'] as const; 
-
-//   for (let i = start; i < end; i++) {
-//     const statusIndex = i % statuses.length;
-//     mockData.push({
-//       booking_id: `ORDER-D${1000 + i}`,
-//       car_id: `CAR-D${200 + i}`,
-//       renter_id: `USER-D${3000 + i}`,
-//       start_date: `2025-09-${(i % 28) + 1}`,
-//       end_date: `2025-09-${(i % 28) + 5}`,
-//       status: statuses[statusIndex],
-//       total_price: (i % 5) * 1500 + 3500, 
-//       car_info: {
-//         car_plate: `กข${(i % 10) + 1} ${8000 + i}`,
-//         car_brand: i % 2 === 0 ? 'Toyota Yaris' : 'Honda City',
-//       },
-//       renter_info: {
-//         u_firstname: `ผู้เช่า`,
-//         u_lastname: `${(i % 10) + 1}`,
-//       },
-//     } as Booking);
-//   }
-//   return mockData;
-// };
-
-// const MOCK_TOTAL_COUNT = 68; 
