@@ -91,6 +91,16 @@ export default function DashboardPage() {
               </Button>
             </div>
 
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-black mb-2">
+                รถของฉัน
+              </h3>
+              <p className="text-gray-600 mb-4">เข้าถึงรถที่ฉันปล่อยเช่าทั้งหมด</p>
+              <Button size="sm" onClick={() => router.push("/dashboard/cars")}>
+              รถของฉัน
+              </Button>
+            </div>
+
           </div>
         </div>
       </main>
