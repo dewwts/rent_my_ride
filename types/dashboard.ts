@@ -20,21 +20,3 @@ export interface DropdownMenuItemType {
 
 // Type รวมสำหรับเมนูทั้งหมด
 export type MenuItem = StandardMenuItem | DropdownMenuItemType;
-
-// export interface Booking {
-//   booking_id: string; 
-//   car_id: string; 
-//   renter_id: string; 
-//   start_date: string; 
-//   end_date: string; 
-//   status: 'Ready' | 'Ongoing' | 'Completed'; 
-//   total_price: number; 
-//   car_info: {
-//     car_plate: string;
-//     car_brand: string;
-//   };
-//   renter_info: {
-//     u_firstname: string;
-//     u_lastname: string;
-//   };
-// }

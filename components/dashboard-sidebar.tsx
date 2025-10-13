@@ -5,7 +5,6 @@ import { LayoutDashboard, User, Key, CarFront, History, ChevronDown, ChevronUp, 
 import { useEffect,useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getRole } from "@/lib/authServices";
-import { toast } from "./ui/use-toast";
 import { StandardMenuItem, DropdownMenuItemType, MenuItem } from "@/types/dashboard"; 
 
 const DropdownMenuItemComponent = ({ 
@@ -25,28 +24,48 @@ const DropdownMenuItemComponent = ({
     setIsOpen(isActive);
   }, [isActive]);
 
+  const [showMobileDropdown, setShowMobileDropdown] = useState(false);
+
   return (
-    <div className="flex flex-col">
-      {/* ส่วนหัวของ Dropdown: ปล่อยเช่ารถ */}
+    <div className="flex flex-col relative">
+      {/* desktop version */}
       <Link
         href={defaultSubPath} 
         onClick={(e) => {
-          e.preventDefault(); 
-          setIsOpen(!isOpen);
+          // desktop toggle
+          if (window.innerWidth >= 768) {
+            e.preventDefault(); 
+            setIsOpen(!isOpen);
+          }
         }}
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:text-[#2B09F7] transition ${
+        className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-lg hover:text-[#2B09F7] transition ${
           isActive ? " text-[#2B09F7] bg-[#D9D9D9]" : "text-[#8C8C8C]"
-        }`}
+        } md:flex`}
       >
         {item.icon}
         <span className="ml-2 hidden md:block">{item.label}</span>
         {/* ไอคอนแสดงสถานะเปิด/ปิด */}
-        {isOpen ? <ChevronUp size={16} className="ml-auto hidden md:block" /> : <ChevronDown size={16} className="ml-auto hidden md:block" />}
+        <span className="ml-auto hidden md:block">
+          {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </span>
       </Link>
 
-      {/* รายการเมนูย่อย */}
+      {/* mobile version*/}
+      <button
+        type="button"
+        className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:text-[#2B09F7] transition md:hidden ${
+          isActive ? " text-[#2B09F7] bg-[#D9D9D9]" : "text-[#8C8C8C]"
+        }`}
+        onClick={() => setShowMobileDropdown((prev) => !prev)}
+      >
+        {item.icon}
+        <span className="ml-auto">
+          {showMobileDropdown ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </span>
+      </button>
+
       {isOpen && (
-        <div className="flex flex-col gap-1 mt-1 pl-8">
+        <div className="flex flex-col gap-1 mt-1 pl-8 hidden md:flex">
           {item.subItems.map((sub: StandardMenuItem) => ( 
             <Link
               key={sub.href}
@@ -58,6 +77,26 @@ const DropdownMenuItemComponent = ({
               }`}
             >
               <span className="ml-2 hidden md:block">{sub.label}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* รายการเมนูย่อย (mobile popup) */}
+      {showMobileDropdown && (
+        <div className="absolute left-16 top-0 z-50 bg-white shadow-lg rounded-lg p-2 flex flex-col gap-1 md:hidden">
+          {item.subItems.map((sub: StandardMenuItem) => (
+            <Link
+              key={sub.href}
+              href={sub.href}
+              className={`flex items-center px-3 py-2 rounded-lg hover:text-[#2B09F7] transition text-[15px] ${
+                pathname.startsWith(sub.href)
+                  ? " text-[#2B09F7] bg-[#D9D9D9]"
+                  : "text-[#8C8C8C]"
+              }`}
+              onClick={() => setShowMobileDropdown(false)}
+            >
+              <span>{sub.label}</span>
             </Link>
           ))}
         </div>
@@ -97,7 +136,7 @@ export default function DashboardSidebar() {
   );
 }
 
-  // **กำหนด Type ให้กับ userMenu**
+  // for user
   const userMenu: MenuItem[] = [ 
     { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} />, isDropdown: false },
     { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} />, isDropdown: false },
@@ -113,14 +152,13 @@ export default function DashboardSidebar() {
     }
   ];
 
-  // **กำหนด Type ให้กับ adminMenu**
-  const adminMenu: StandardMenuItem[] = [ // Type StandardMenuItem ถูก Import มาใช้
+  // for admin
+  const adminMenu: StandardMenuItem[] = [ 
     { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} /> },
     { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} /> },
     { href: "/dashboard/history", label: "ดูคำสั่งซื้อทั้งหมด", icon: <History size={18} /> }
   ];
-
-  // **กำหนด Type ให้กับ menuItems**
+  
   const menuItems: MenuItem[] = role === "admin" ? adminMenu : userMenu;
   
   return (

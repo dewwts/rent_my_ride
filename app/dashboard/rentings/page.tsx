@@ -1,35 +1,10 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { Loader2, History, ChevronLeft, ChevronRight } from "lucide-react"; // เพิ่ม ChevronLeft, ChevronRight
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { formatDate, formatCurrency } from '@/lib/utils' 
 import { rentingInfo,RentingStatus } from "@/types/rentingInterface";
 import { getRentings,getRentingPrice } from "@/lib/rentingServices";
-
-// export const createMockBookings = (count: number): rentingInfo[] => {
-//   const mockData: rentingInfo[] = [];
-//   const statuses = [RentingStatus.CONFIRMED, RentingStatus.PENDING] as const;
-
-//   for (let i = 0; i < count; i++) {
-//     const status = statuses[i % statuses.length];
-//     const startDay = (i % 28) + 1;
-//     const endDay = startDay + 3;
-
-//     mockData.push({
-//       renting_id: `RENT-${1000 + i}`,
-//       car_id: `CAR-${200 + i}`,
-//       lessee_id: `USER-${3000 + i}`,
-//       sdate: `2025-09-${startDay.toString().padStart(2, "0")}`,
-//       edate: `2025-09-${endDay.toString().padStart(2, "0")}`,
-//       status,
-//       total_price: 3500 + (i % 5) * 1000,
-//     });
-//   }
-
-//   return mockData;
-// };
-
 
 // **คอมโพเนนต์สำหรับ Pagination ที่กำหนดเอง**
 const CustomPagination = ({ currentPage, totalPages, onPageChange }: { 
@@ -202,84 +177,92 @@ export default function RentingHistoryPage() {
     );
   }
 
-  return (
-    <main className="min-h-screen" style={{ backgroundColor: '#D4E0E6' }}>
-        <div className="p-2 sm:p-5 m-0 sm:m-5">
-            <h2 className="text-3xl font-bold mb-6 text-gray-900">ประวัติการเช่าทั้งหมด</h2>
-            
-            {/* Content Area: ใช้พื้นหลังสีขาวเพื่อให้เน้น */}
-            <div className="bg-white p-4 rounded-lg shadow-md"> 
+return (
+  <main className="min-h-screen" style={{ backgroundColor: '#D4E0E6' }}>
+    <div className="p-2 sm:p-5 m-0 sm:m-5">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-900 text-center sm:text-left">
+        ประวัติการเช่าทั้งหมด
+      </h2>
 
-                {/* Table Header */}
-                <div className="grid grid-cols-7 gap-4 px-3 py-2 text-sm font-semibold text-gray-700">
-                    <div className="col-span-1">หมายเลขการเช่า</div>
-                    <div className="col-span-1">ID รถ</div>
-                    <div className="col-span-1">ID ผู้เช่า</div>
-                    <div className="col-span-2">วันที่เช่า</div>
-                    <div className="col-span-1">สถานะ</div>
-                    <div className="col-span-1 text-right">รายได้</div>
-                </div>
-                
-                {/* Table Body */}
-                <div className="space-y-3 mt-2">
-                    {bookings.map((booking) => (
-                        // **สไตล์แถวข้อมูล: ใช้สีฟ้าอ่อน/น้ำเงิน (#E5E7F9) และขอบมนตาม UI**
-                        <div 
-                            key={booking.renting_id} 
-                            className="grid grid-cols-7 gap-4 px-3 py-3 rounded-lg bg-[#F0F0F0] text-gray-800 transition hover:bg-[#E5E7F9] border border-gray-300"
-                        >
-                            {/* หมายเลขการเช่า */}
-                            <div className="col-span-1 text-sm font-medium">
-                                {booking.renting_id.slice(0, 10)}
-                            </div>
-                            {/* ID รถ */}
-                            <div className="col-span-1 text-sm">
-                                {booking.car_id.slice(0, 10)}
-                            </div>
-                            {/* ID ผู้เช่า */}
-                            <div className="col-span-1 text-sm">
-                                {booking.lessee_id.slice(0, 10)}
-                            </div>
-                            {/* วันที่เช่า */}
-                            <div className="col-span-2 text-sm">
-                                {formatDate(booking.sdate)} - {formatDate(booking.edate)}
-                            </div>
-                            {/* สถานะ */}
-                            <div className="col-span-1 text-sm font-medium">
-                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
-                                    {getStatusDisplay(booking.status)}
-                                </span>
-                            </div>
-                            {/* รายได้ */}
-                            <div className="col-span-1 text-sm font-bold text-right">
-                                {formatCurrency(booking.total_price ?? 0)}
-                            </div>
-                        </div>
-                    ))}
-
-                    {/* Empty State */}
-                    {totalCount === 0 && (
-                        <div className="p-12 text-center text-gray-500">
-                            <History className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                            <p>ยังไม่มีประวัติการเช่าสำหรับรถของคุณ</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Pagination */}
-            {totalCount > 0 && (
-                <div className="mt-8 flex justify-center">
-                    <CustomPagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
-                    />
-                </div>
-            )}
+      {/* พื้นหลังขาว */}
+      <div className="bg-white p-3 sm:p-4 rounded-lg shadow-md">
+        
+        {/* Header: แสดงเฉพาะในหน้าจอขนาด sm ขึ้นไป */}
+        <div className="hidden sm:grid grid-cols-7 gap-4 px-3 py-2 text-sm font-semibold text-gray-700 border-b border-gray-200">
+          <div>หมายเลขการเช่า</div>
+          <div>ID รถ</div>
+          <div>ID ผู้เช่า</div>
+          <div className="col-span-2">วันที่เช่า</div>
+          <div>สถานะ</div>
+          <div className="text-right">รายได้</div>
         </div>
-    </main>
-  );
+
+        {/* Table Body / Card List */}
+        <div className="space-y-3 mt-2">
+          {bookings.map((booking) => (
+            <div
+              key={booking.renting_id}
+              className="rounded-lg bg-[#F0F0F0] text-gray-800 transition hover:bg-[#E5E7F9] border border-gray-300 p-4 sm:p-3 sm:grid sm:grid-cols-7 sm:gap-4"
+            >
+              {/* Mobile Layout */}
+              <div className="flex flex-col gap-1 sm:hidden text-sm">
+                <div><span className="font-semibold">หมายเลขการเช่า:</span> {booking.renting_id.slice(0, 8)+"..."}</div>
+                <div><span className="font-semibold">ID รถ:</span> {booking.car_id.slice(0, 8)+"..."}</div>
+                <div><span className="font-semibold">ID ผู้เช่า:</span> {booking.lessee_id.slice(0, 8)+"..."}</div>
+                <div><span className="font-semibold">วันที่เช่า:</span> {formatDate(booking.sdate)} - {formatDate(booking.edate)}</div>
+                <div>
+                  <span className="font-semibold">สถานะ:</span>{" "}
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
+                    {getStatusDisplay(booking.status)}
+                  </span>
+                </div>
+                <div className="font-bold text-right mt-1">
+                  {formatCurrency(booking.total_price ?? 0)}
+                </div>
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden sm:block text-sm font-medium">{booking.renting_id.slice(0, 8)+"..."}</div>
+              <div className="hidden sm:block text-sm">{booking.car_id.slice(0, 8)+"..."}</div>
+              <div className="hidden sm:block text-sm">{booking.lessee_id.slice(0, 8)+"..."}</div>
+              <div className="hidden sm:block text-sm col-span-2">
+                {formatDate(booking.sdate)} - {formatDate(booking.edate)}
+              </div>
+              <div className="hidden sm:flex items-center">
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
+                  {getStatusDisplay(booking.status)}
+                </span>
+              </div>
+              <div className="hidden sm:block text-sm font-bold text-right">
+                {formatCurrency(booking.total_price ?? 0)}
+              </div>
+            </div>
+          ))}
+
+          {/* Empty State */}
+          {totalCount === 0 && (
+            <div className="p-12 text-center text-gray-500">
+              <History className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+              <p>ยังไม่มีประวัติการเช่าสำหรับรถของคุณ</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Pagination */}
+      {totalCount > 0 && (
+        <div className="mt-8 flex justify-center">
+          <CustomPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      )}
+    </div>
+  </main>
+);
+
 }
 
 
