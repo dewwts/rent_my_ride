@@ -4,18 +4,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-interface Car {
-  id: string;
-  brand: string;
-  model: string;
-  car_id: string;
-  seats: number;
-  oil_type: string;
-  gear_type: string;
-  price_per_day: number;
-  status: "available" | "unavailable";
-  image_url: string;
-}
+import { Car } from "@/types/carInterface";
 
 // Mock data
 const mockCars: Car[] = [
@@ -144,7 +133,7 @@ export default function MyCarsPage() {
                   <div className="flex flex-col gap-2 flex-shrink-0">
                     <Button
                       size="sm"
-                      className="text-white px-6"
+                      variant="default"
                     >
                       แก้ไข
                     </Button>
