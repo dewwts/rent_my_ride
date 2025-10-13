@@ -158,7 +158,7 @@ export default function DashboardSidebar() {
     { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} /> },
     { href: "/dashboard/history", label: "ดูคำสั่งซื้อทั้งหมด", icon: <History size={18} /> }
   ];
-  
+
   const menuItems: MenuItem[] = role === "admin" ? adminMenu : userMenu;
   
   return (
