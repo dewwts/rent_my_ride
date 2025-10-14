@@ -10,8 +10,7 @@ export async function POST(){
             type: 'express',
             country: 'TH',
             capabilities:{
-                card_payments: {requested: true},
-                promptpay_payments: {requested: true}
+                transfers: {requested: true}
             },
             business_type: 'individual'
         })
