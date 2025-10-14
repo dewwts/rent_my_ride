@@ -4,10 +4,13 @@ import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useState } from "react";
+import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
 import { carAvailable } from "@/lib/carAvailable";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { dateRangeAvailable } from "@/lib/dateRangeAvailable";
+
 
 export function CarDetailsPage({cid}:{cid:string}) {
     const [startDate, setStartDate] = useState<Dayjs | null>(null);
@@ -74,38 +77,40 @@ export function CarDetailsPage({cid}:{cid:string}) {
             <div className="flex cursor-pointer items-center rounded-full bg-slate-900 p-1 shadow-md transition-colors hover:bg-slate-800">
 
               <button className="py-2 pl-2 pr-2 text-white" onClick={async()=>{
-                  if(!startDate || !endDate){
+                 if(!startDate || !endDate){
                       toast({
                       variant:'destructive',
                       title:"วันที่ไม่ครบ",
                       description:"กรุณาเลือกวันที่ให้ครบ"
-                  })
-                      return;
-                  }
-                  if(endDate.isBefore(startDate)){
-                     toast({
-                    variant:'destructive',
-                    title:"วันที่ไม่ถูกต้อง",
-                    description:"วันที่สิ้นสุดต้องไม่อยู่ก่อนวันที่เริ่มต้น"
-                  })
+                      })
                       return;
                   }
                   const supabase = createClient();
-
-                  const isAvailable = await carAvailable(supabase,cid, startDate.startOf('day').toDate(), endDate.startOf('day').toDate());
-                  if (isAvailable) {
-                      toast({
-                    variant:'default',
-                    title:"ยืนยันข้อมูล",
-                    description:`คุณได้เลือกจองรถยนต์คันนี้ตั้งแต่ ${startDate.format('DD/MM/YYYY')} ถึง ${endDate.format('DD/MM/YYYY')}`
-                  })
-                  } else {
-                      toast({
-                    variant:'destructive',
-                    title:"การจองไม่สำเร็จ",
-                    description:"รถยนต์นี้ไม่ว่างในช่วงเวลาที่เลือก"
-                  })
-                  }
+                  try{
+                    const parsed = await dateRangeAvailable.parseAsync({ startDate,endDate});
+                    const start = dayjs(parsed.startDate).startOf("day").toDate();
+                    const end = dayjs(parsed.endDate).startOf("day").add(1, "day").toDate();
+                    const isAvailable = await carAvailable(supabase,cid, start, end);
+                    if (isAvailable) {
+                      toast({variant:'default',title:"ยืนยันข้อมูล",
+                      description:`คุณได้เลือกจองรถยนต์คันนี้ตั้งแต่ ${startDate.format('DD/MM/YYYY')} ถึง ${endDate.format('DD/MM/YYYY')}`
+                      });
+                    } else {
+                      toast({variant:'destructive',title:"การจองไม่สำเร็จ",
+                      description:"รถยนต์นี้ไม่ว่างในช่วงเวลาที่เลือก"});
+                    }
+                  } catch (error: any) {
+                      if (error?.issues.length > 0) {
+                        toast({variant: 'destructive', title: 'เกิดข้อผิดพลาด',
+                          description: error.issues[0].message,});
+                        return;
+                      }
+                      else {
+                        toast({variant: 'destructive',title: 'เกิดข้อผิดพลาด',
+                          description: error.message,});
+                        return;
+                      }
+                    } 
               }}>
                 เช่ารถคันนี้
               </button>
