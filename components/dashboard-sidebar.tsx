@@ -140,7 +140,7 @@ export default function DashboardSidebar() {
   const userMenu: MenuItem[] = [ 
     { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} />, isDropdown: false },
     { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} />, isDropdown: false },
-    { href: "/dashboard/bookings", label: "การจองรถ", icon: <CarFront size={18} />, isDropdown: false },
+    { href: "/dashboard/bookings", label: "การเช่ารถ", icon: <CarFront size={18} />, isDropdown: false },
     { 
       label: "ปล่อยเช่ารถ", 
       icon: <Key size={18} />,

@@ -31,20 +31,20 @@ export default function RentingHistoryPage() {
       const end = start + itemsPerPage;
       const pageData = data.slice(start, end);
 
-      const bookingsWithPrice = await Promise.all(
-        // const lessor_name = await getFirstname(supabase,bookings.lessee_id);
+      const bookingsWithPriceandLessorName = await Promise.all(
         pageData.map(async (booking) => {
+            const lessor_name = await getFirstname(supabase,booking.car_information.owner_id);
           try {
             const price = await getRentingPrice(supabase, booking.renting_id);
-            return { ...booking, total_price: price ?? 0 }; //add total price field
+            return { ...booking, total_price: price ?? 0 ,lessor_name}; //add total price field
           } catch (err) {
             console.error("Error fetching price for", booking.renting_id, err);
-            return { ...booking, total_price: 0 }; // fallback
+            return { ...booking, total_price: 0, lessor_name }; // fallback
           }
         })
       );
 
-    setBookings(bookingsWithPrice);
+    setBookings(bookingsWithPriceandLessorName);
       
     } catch (err) {
       console.error('Error fetching mock bookings:', err);
@@ -121,7 +121,7 @@ return (
         <div className="hidden sm:grid grid-cols-7 gap-4 px-3 py-2 text-sm font-semibold text-gray-700 border-b border-gray-200">
           <div>หมายเลขการเช่า</div>
           <div>ID รถ</div>
-          <div>ID ผู้เช่า</div>
+          <div>ผู้ให้เช่า</div>
           <div className="col-span-2">วันที่เช่า</div>
           <div>สถานะ</div>
           <div className="text-right">รายได้</div>
@@ -136,9 +136,9 @@ return (
             >
               {/* Mobile Layout */}
               <div className="flex flex-col gap-1 sm:hidden text-sm">
-                <div><span className="font-semibold">หมายเลขการเช่า:</span> {booking.renting_id.slice(0, 8)+"..."}</div>
-                <div><span className="font-semibold">ID รถ:</span> {booking.car_id.slice(0, 8)+"..."}</div>
-                <div><span className="font-semibold">ID ผู้เช่า:</span> {booking.lessee_id.slice(0, 8)+"..."}</div>
+                <div><span className="font-semibold">หมายเลขการเช่า:</span> {booking.renting_id.slice(0, 15)+"..."}</div>
+                <div><span className="font-semibold">ID รถ:</span> {booking.car_id.slice(0, 15)+"..."}</div>
+                <div><span className="font-semibold">ผู้ให้เช่า:</span> {booking.lessor_name}</div>
                 <div><span className="font-semibold">วันที่เช่า:</span> {formatDate(booking.sdate)} - {formatDate(booking.edate)}</div>
                 <div>
                   <span className="font-semibold">สถานะ:</span>{" "}
@@ -154,7 +154,7 @@ return (
               {/* Desktop Layout */}
               <div className="hidden sm:block text-sm font-medium">{booking.renting_id.slice(0, 8)+"..."}</div>
               <div className="hidden sm:block text-sm">{booking.car_id.slice(0, 8)+"..."}</div>
-              <div className="hidden sm:block text-sm">{booking.lessee_id.slice(0, 8)+"..."}</div>
+              <div className="hidden sm:block text-sm">{booking.lessor_name}</div>
               <div className="hidden sm:block text-sm col-span-2">
                 {formatDate(booking.sdate)} - {formatDate(booking.edate)}
               </div>
