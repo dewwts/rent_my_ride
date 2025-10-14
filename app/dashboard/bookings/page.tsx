@@ -23,8 +23,6 @@ export default function RentingHistoryPage() {
       setError(null);
       
       const data = await getMyRentingHistory(supabase);
-      // const data = createMockBookings(68)
-      console.log(data)
       setTotalCount(data.length);
 
       const start = (currentPage - 1) * itemsPerPage;
@@ -124,7 +122,7 @@ return (
           <div>ผู้ให้เช่า</div>
           <div className="col-span-2">วันที่เช่า</div>
           <div>สถานะ</div>
-          <div className="text-right">รายได้</div>
+          <div className="text-right">ราคา</div>
         </div>
 
         {/* Table Body / Card List */}
