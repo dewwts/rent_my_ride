@@ -15,12 +15,13 @@ const { exec } = require('child_process');
 // Configuration
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000';
 const AMOUNT = parseInt(process.argv[2]) || 1000;
-const RENTING_ID = process.argv[3] || `quick_test_${Date.now()}`;
+const RENTING_ID = process.argv[3] || `test_rent_${Date.now()}`;
 
-console.log('🚀 Opening Stripe Payment Page...');
+console.log('🚀 Stripe Payment Test Script');
 console.log('================================');
-console.log(`Amount: ${AMOUNT} THB`);
-console.log(`Renting ID: ${RENTING_ID}`);
+console.log(`💰 Amount: ${AMOUNT} THB`);
+console.log(`📦 Renting ID: ${RENTING_ID}`);
+console.log(`🌐 Server: ${SERVER_URL}`);
 console.log('');
 
 /**
@@ -31,15 +32,21 @@ function makeRequest(url, method, data) {
         const urlObj = new URL(url);
         const protocol = urlObj.protocol === 'https:' ? https : http;
 
+        const postData = data ? JSON.stringify(data) : null;
+
         const options = {
             hostname: urlObj.hostname,
-            port: urlObj.port,
+            port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
             path: urlObj.pathname,
             method: method,
             headers: {
                 'Content-Type': 'application/json',
             }
         };
+
+        if (postData) {
+            options.headers['Content-Length'] = Buffer.byteLength(postData);
+        }
 
         const req = protocol.request(options, (res) => {
             let body = '';
@@ -56,10 +63,12 @@ function makeRequest(url, method, data) {
             });
         });
 
-        req.on('error', reject);
+        req.on('error', (err) => {
+            reject(new Error(`Network error: ${err.message}`));
+        });
 
-        if (data) {
-            req.write(JSON.stringify(data));
+        if (postData) {
+            req.write(postData);
         }
 
         req.end();
@@ -109,6 +118,8 @@ async function main() {
             }
         );
 
+        console.log(`📬 Response Status: ${response.statusCode}`);
+
         if (response.statusCode !== 200) {
             throw new Error(`HTTP ${response.statusCode}: ${JSON.stringify(response.data)}`);
         }
@@ -120,24 +131,37 @@ async function main() {
         const checkoutUrl = response.data.data.url;
         const sessionId = response.data.data.session_id;
 
-        console.log('✅ Checkout Session created!');
-        console.log(`   Session ID: ${sessionId}`);
+        console.log('✅ Checkout Session created successfully!');
+        console.log(`   📋 Session ID: ${sessionId}`);
         console.log('');
         console.log('🔗 Payment URL:');
         console.log(checkoutUrl);
         console.log('');
         console.log('🌐 Opening in browser...');
 
-        // Open browser
+        // Open browser after short delay
         setTimeout(() => openBrowser(checkoutUrl), 500);
 
+        console.log('');
+        console.log('📝 Test Instructions:');
+        console.log('   1. Use test card: 4242 4242 4242 4242');
+        console.log('   2. Any future expiry date (e.g., 12/34)');
+        console.log('   3. Any 3-digit CVC (e.g., 123)');
+        console.log('');
+        console.log('💡 Tip: Check your webhook logs for payment events');
+
     } catch (error) {
+        console.error('');
         console.error('❌ Error:', error.message);
         console.log('');
-        console.log('💡 Make sure:');
-        console.log('  1. Your server is running on', SERVER_URL);
-        console.log('  2. Stripe API keys are configured');
-        console.log('  3. NEXT_PUBLIC_SERVER_URL is set correctly');
+        console.log('💡 Troubleshooting:');
+        console.log('  1. Ensure your server is running:', SERVER_URL);
+        console.log('  2. Check STRIPE_SECRET_KEY in .env.local');
+        console.log('  3. Check NEXT_PUBLIC_SERVER_URL in .env.local');
+        console.log('  4. Verify API route exists: /api/stripe/create-checkout-session');
+        console.log('');
+        console.log('🔧 Quick check:');
+        console.log(`   curl ${SERVER_URL}/api/stripe/create-checkout-session -X POST -H "Content-Type: application/json" -d '{"amount":${AMOUNT},"renting_id":"${RENTING_ID}"}'`);
         process.exit(1);
     }
 }
