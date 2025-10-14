@@ -13,16 +13,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
 import { uploadImageCar } from "@/lib/carServices";
 import { Car } from "@/types/carInterface";
+import { EditCarFormProps } from "@/types/componentProps";
 
 type CarFormValues = z.infer<typeof CarSchema>;
-
-interface EditCarFormProps {
-  car: Car;
-  onCarUpdated?: (car: Car) => void;
-  onCancel?: () => void;
-  isLoading?: boolean;
-  className?: string;
-}
 
 export function EditCarForm({
   car,

@@ -2,15 +2,10 @@
 
 import { useState } from "react";
 import { AddCarForm } from "./add-car-form";
-import { Car } from "@/types/carInterface";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
-
-interface AddCarModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onCarAdded?: (car: Car) => void;
-}
+import { Car } from "@/types/carInterface";
+import { AddCarModalProps } from "@/types/componentProps";
 
 export function AddCarModal({ isOpen, onClose, onCarAdded }: AddCarModalProps) {
   if (!isOpen) return null;

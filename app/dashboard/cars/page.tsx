@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { AddCarModal } from "@/components/add-car-modal";
 import { DeleteCarDialog } from "@/components/delete-car-dialog";
 import { createClient } from "@/lib/supabase/client";
 import { getMyCars, deleteCar } from "@/lib/carServices";
@@ -71,7 +70,6 @@ const mockCars: Car[] = [
 export default function MyCarsPage() {
   const router = useRouter();
   const [cars, setCars] = useState<Car[]>(mockCars);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; car: Car | null }>({
     isOpen: false,
     car: null,
@@ -139,9 +137,6 @@ export default function MyCarsPage() {
     router.push(`/dashboard/cars/${car.id}/edit`);
   };
 
-  const handleCarAdded = (newCar: Car) => {
-    setCars(prevCars => [newCar, ...prevCars]);
-  };
 
   const getStatusColor = (status: string) => {
     return status === "available" ? "border-green-400" : "border-red-400";
@@ -306,13 +301,6 @@ export default function MyCarsPage() {
         </div>
       </main>
       
-      {/* Add Car Modal */}
-      <AddCarModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onCarAdded={handleCarAdded}
-      />
-
       {/* Delete Confirmation Dialog */}
       <DeleteCarDialog
         isOpen={deleteDialog.isOpen}

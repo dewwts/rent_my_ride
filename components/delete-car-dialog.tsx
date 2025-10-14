@@ -3,14 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Car } from "@/types/carInterface";
-
-interface DeleteCarDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  car: Car | null;
-  isLoading?: boolean;
-}
+import { DeleteCarDialogProps } from "@/types/componentProps";
 
 export function DeleteCarDialog({
   isOpen,
