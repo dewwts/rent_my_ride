@@ -147,7 +147,7 @@ export default function DashboardSidebar() {
       isDropdown: true, 
       subItems: [
         { href: "/dashboard/cars", label: "รถของฉัน", icon: <CarFront size={18} /> },
-        { href: "/dashboard/rentings", label: "ประวัติการเช่า", icon: <History size={18} /> }
+        { href: "/dashboard/rentings", label: "ประวัติการให้เช่า", icon: <History size={18} /> }
       ]
     }
   ];

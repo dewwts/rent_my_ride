@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
         const supabase = await createClient()
         const IsAdmin = await isAdmin(supabase)
         if (!IsAdmin){
-            return NextResponse.json({success: false, error: "ผู้ใช้ไม่ได้รับอณุญาติให้เข้าถึง"},{status:401})
+            return NextResponse.json({success: false, error: "ผู้ใช้ไม่ได้รับอนุญาตให้เข้าถึง"},{status:401})
         }
         const Adminsupabase = createAdminClient()
         const [allCountResult, pendingCountResult, doneCountResult, failedCountResult] = await Promise.all([
