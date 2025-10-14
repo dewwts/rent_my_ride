@@ -11,7 +11,9 @@ export async function GET(req: NextRequest){
     }
     const searchParams = req.nextUrl.searchParams
     const page = parseInt(searchParams.get('page') || '1', 10)
-    const limit = parseInt(searchParams.get('limit')|| '10', 10)
+    console.log(page);
+    const limit = parseInt(searchParams.get('limit')|| '5', 10)
+    console.log(limit);
     const filter = searchParams.get('filter')
     const Adminsupabase = createAdminClient()
     let countQuery = Adminsupabase.from('transactions').select('*', { count: 'exact', head: true });
@@ -37,7 +39,7 @@ export async function GET(req: NextRequest){
         lessor_id,
         amount,
         status,
-        date,
+        transaction_date,
         renting:renting_id (
           sdate,
           edate,
@@ -62,7 +64,7 @@ export async function GET(req: NextRequest){
       dataQuery = dataQuery.eq('status', filter.charAt(0).toUpperCase() + filter.slice(1));
     }
     const { data, error: fetchError } = await dataQuery
-      .order('date', { ascending: false })
+      .order('transaction_date', { ascending: false })
       .range(startIndex, endIndex);
     if (fetchError) {
       console.error('Error fetching transactions:', fetchError);
