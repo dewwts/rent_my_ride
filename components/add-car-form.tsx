@@ -46,11 +46,11 @@ export function AddCarForm({
     resolver: zodResolver(CarSchema) as any,
     mode: "onTouched",
     defaultValues: {
-      brand: "",
+      car_brand: "",
       model: "",
       car_id: "",
       year: new Date().getFullYear(),
-      seats: 4,
+      number_of_seats: 4,
       car_type: "",
       color: "",
       mileage: 0,
@@ -124,10 +124,10 @@ export function AddCarForm({
       // Here you would typically save to your database
       // For now, we'll just simulate success
       const newCar: Car = {
-        id: `car_${Date.now()}`,
+        id: "temp-id",
         ...data,
         rating: data.rating || 0,
-        image_url: data.image_url || "",
+        car_image: data.image_url || "",
       };
 
       // Simulate API call
@@ -135,7 +135,7 @@ export function AddCarForm({
 
       toast({
         title: "เพิ่มรถสำเร็จ",
-        description: `รถ ${data.brand} ${data.model} ถูกเพิ่มเรียบร้อยแล้ว`,
+        description: `รถ ${data.car_brand} ${data.model} ถูกเพิ่มเรียบร้อยแล้ว`,
       });
 
       onCarAdded?.(newCar);
@@ -239,11 +239,11 @@ export function AddCarForm({
                   <Label htmlFor="brand">ยี่ห้อรถ *</Label>
                   <Input
                     id="brand"
-                    {...register("brand")}
+                    {...register("car_brand")}
                     placeholder="เช่น Honda, Toyota, Mazda"
                   />
-                  {errors.brand && (
-                    <p className="text-sm text-red-500">{errors.brand.message}</p>
+                  {errors.car_brand && (
+                    <p className="text-sm text-red-500">{errors.car_brand.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -295,7 +295,7 @@ export function AddCarForm({
                   <Label htmlFor="seats">จำนวนที่นั่ง *</Label>
                   <select
                     id="seats"
-                    {...register("seats")}
+                    {...register("number_of_seats")}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   >
                     {Array.from({ length: 50 }, (_, i) => (
@@ -304,8 +304,8 @@ export function AddCarForm({
                       </option>
                     ))}
                   </select>
-                  {errors.seats && (
-                    <p className="text-sm text-red-500">{errors.seats.message}</p>
+                  {errors.number_of_seats && (
+                    <p className="text-sm text-red-500">{errors.number_of_seats.message}</p>
                   )}
                 </div>
               </div>
