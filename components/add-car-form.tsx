@@ -132,20 +132,9 @@ export function AddCarForm({
 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast({
-        title: "เพิ่มรถสำเร็จ",
-        description: `รถ ${data.car_brand} ${data.model} ถูกเพิ่มเรียบร้อยแล้ว`,
-      });
-
       onCarAdded?.(newCar);
     } catch (error) {
       console.error("Add car error:", error);
-      toast({
-        variant: "destructive",
-        title: "เพิ่มรถไม่สำเร็จ",
-        description: error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการเพิ่มรถ",
-      });
     } finally {
       setIsLoading(false);
     }
