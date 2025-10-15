@@ -16,7 +16,6 @@ export default function CheckoutPage(){
     // const rid = params?.id
     const rid = "222c22a0-7057-477d-8f65-ab197edbda4a";
     const amount = 1000 // example
-    const stripeid = "example_stripe_id" // example
     useEffect(()=>{
         async function createPayment(){
             try{

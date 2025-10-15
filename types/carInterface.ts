@@ -18,3 +18,20 @@ export interface Car {
   created_at?: string;
   updated_at?: string;
 }
+
+export interface CarCheckout {
+  rid: string;
+  r_date: string;
+  total_days: number;
+  p_date: string;
+  e_date: string;
+  localtion_take: string;
+  location_return:string;
+  total_price: number;
+  car_id: string;
+  description: string;
+  car_brand: string;
+  car_model: string;
+  car_image: string;
+  amount: number;
+}
