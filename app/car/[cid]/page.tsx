@@ -15,7 +15,7 @@ export default async function Page({params}:{params:{cid:string}}) {
         <Header />
         <CarDetailsPage cid={cid} car={car} />
         
-        <Footer />
+        <Footer noMargin/>
         </>
     )
 }
