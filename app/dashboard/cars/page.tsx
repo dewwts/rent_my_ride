@@ -10,66 +10,66 @@ import { toast } from "@/components/ui/use-toast";
 import { Car } from "@/types/carInterface";
 
 // Mock data for development
-const mockCars: Car[] = [
-  {
-    id: "1",
-    brand: "Honda",
-    model: "Civic",
-    car_id: "XXXXXXXX",
-    year: 2018,
-    seats: 4,
-    car_type: "เก๋ง",
-    color: "ขาว",
-    mileage: 120000,
-    oil_type: "เบนซิน",
-    gear_type: "ออโต้",
-    price_per_day: 1200,
-    status: "available",
-    location: "กรุงเทพฯ",
-    rating: 4.5,
-    image_url: "https://images.unsplash.com/photo-1704340142770-b52988e5b6eb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1400"
-  },
-  {
-    id: "2",
-    brand: "Toyota",
-    model: "Camry",
-    car_id: "YYYYYYYY",
-    year: 2019,
-    seats: 5,
-    car_type: "เก๋ง",
-    color: "ดำ",
-    mileage: 95000,
-    oil_type: "เบนซิน",
-    gear_type: "ออโต้",
-    price_per_day: 1500,
-    status: "available",
-    location: "กรุงเทพฯ",
-    rating: 4.8,
-    image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170"
-  },
-  {
-    id: "3",
-    brand: "Mazda",
-    model: "CX-5",
-    car_id: "ZZZZZZZZ",
-    year: 2020,
-    seats: 5,
-    car_type: "SUV",
-    color: "แดง",
-    mileage: 75000,
-    oil_type: "เบนซิน",
-    gear_type: "ออโต้",
-    price_per_day: 1800,
-    status: "unavailable",
-    location: "กรุงเทพฯ",
-    rating: 4.2,
-    image_url: "https://images.unsplash.com/photo-1590362891991-f776e747a588?w=400"
-  }
-];
+// const mockCars: Car[] = [
+//   {
+//     id: "1",
+//     brand: "Honda",
+//     model: "Civic",
+//     car_id: "XXXXXXXX",
+//     year: 2018,
+//     seats: 4,
+//     car_type: "เก๋ง",
+//     color: "ขาว",
+//     mileage: 120000,
+//     oil_type: "เบนซิน",
+//     gear_type: "ออโต้",
+//     price_per_day: 1200,
+//     status: "available",
+//     location: "กรุงเทพฯ",
+//     rating: 4.5,
+//     image_url: "https://images.unsplash.com/photo-1704340142770-b52988e5b6eb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1400"
+//   },
+//   {
+//     id: "2",
+//     brand: "Toyota",
+//     model: "Camry",
+//     car_id: "YYYYYYYY",
+//     year: 2019,
+//     seats: 5,
+//     car_type: "เก๋ง",
+//     color: "ดำ",
+//     mileage: 95000,
+//     oil_type: "เบนซิน",
+//     gear_type: "ออโต้",
+//     price_per_day: 1500,
+//     status: "available",
+//     location: "กรุงเทพฯ",
+//     rating: 4.8,
+//     image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170"
+//   },
+//   {
+//     id: "3",
+//     brand: "Mazda",
+//     model: "CX-5",
+//     car_id: "ZZZZZZZZ",
+//     year: 2020,
+//     seats: 5,
+//     car_type: "SUV",
+//     color: "แดง",
+//     mileage: 75000,
+//     oil_type: "เบนซิน",
+//     gear_type: "ออโต้",
+//     price_per_day: 1800,
+//     status: "unavailable",
+//     location: "กรุงเทพฯ",
+//     rating: 4.2,
+//     image_url: "https://images.unsplash.com/photo-1590362891991-f776e747a588?w=400"
+//   }
+// ];
 
 export default function MyCarsPage() {
   const router = useRouter();
-  const [cars, setCars] = useState<Car[]>(mockCars);
+  const [cars, setCars] = useState<Car[]>([]);
   const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; car: Car | null }>({
     isOpen: false,
     car: null,
@@ -86,10 +86,12 @@ export default function MyCarsPage() {
   const loadCars = async () => {
     setIsLoading(true);
     try {
+      const myCar = await getMyCars(supabase);
+      
       // For now, use mock data. Later replace with:
       // const carsData = await getMyCars(supabase);
       // setCars(carsData);
-      setCars(mockCars);
+      setCars(myCar);
     } catch (error) {
       console.error("Error loading cars:", error);
       toast({
@@ -113,11 +115,11 @@ export default function MyCarsPage() {
     try {
       // For now, just remove from state. Later replace with:
       // await deleteCar(supabase, deleteDialog.car.id);
-      setCars(prevCars => prevCars.filter(car => car.id !== deleteDialog.car!.id));
+      setCars(prevCars => prevCars.filter(car => car.car_id !== deleteDialog.car!.car_id));
       
       toast({
         title: "ลบรถสำเร็จ",
-        description: `รถ ${deleteDialog.car.brand} ${deleteDialog.car.model} ถูกลบเรียบร้อยแล้ว`,
+        description: `รถ ${deleteDialog.car.car_brand} ${deleteDialog.car.model} ถูกลบเรียบร้อยแล้ว`,
       });
       
       setDeleteDialog({ isOpen: false, car: null });
@@ -134,7 +136,7 @@ export default function MyCarsPage() {
   };
 
   const handleEditClick = (car: Car) => {
-    router.push(`/dashboard/cars/${car.id}/edit`);
+    router.push(`/dashboard/cars/${car.car_id}/edit`);
   };
 
 
@@ -195,15 +197,15 @@ export default function MyCarsPage() {
             ) : (
               cars.map((car) => (
                 <div
-                  key={car.id}
+                  key={car.car_id}
                   className={`bg-white rounded-xl p-6 shadow-sm border-2 ${getStatusColor(car.status)} hover:shadow-md transition-shadow`}
                 >
                   <div className="flex gap-6">
                     {/* Car Image */}
                     <div className="w-64 h-48 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                       <img
-                        src={car.image_url}
-                        alt={`${car.brand} ${car.model}`}
+                        src={car.car_image}
+                        alt={`${car.car_brand} ${car.model}`}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -213,23 +215,23 @@ export default function MyCarsPage() {
                       {/* Basic Info */}
                       <div className="space-y-2">
                         <h3 className="text-xl font-semibold text-gray-900">
-                          {car.brand}
+                          {car.car_brand}
                         </h3>
                         <p className="text-gray-600">
                           {car.model} ID: {car.car_id}
                         </p>
                         <p className="text-sm text-gray-500">
-                          จำนวนที่นั่ง: {car.seats}
+                          จำนวนที่นั่ง: {car.number_of_seats}
                         </p>
                         <p className="text-sm text-gray-500">
-                          ประเภท: {car.car_type}
+                          ประเภท: {car.model}
                         </p>
                         <p className="text-sm text-gray-500">
                           ปี: {car.year}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        {/* <p className="text-sm text-gray-500">
                           สี: {car.color}
-                        </p>
+                        </p> */}
                         <p className="text-sm text-gray-500">
                           ไมล์: {car.mileage.toLocaleString()} km
                         </p>
@@ -239,7 +241,7 @@ export default function MyCarsPage() {
                       <div className="space-y-2">
                         <p className="text-lg font-semibold text-gray-900">ราคา</p>
                         <p className="text-2xl font-bold text-blue-600">
-                          ฿{car.price_per_day.toLocaleString()}
+                          ฿{car.daily_rental_price ? car.daily_rental_price.toLocaleString(): 'N/A'}
                         </p>
                         <p className="text-sm text-gray-500">/ วัน</p>
                       </div>

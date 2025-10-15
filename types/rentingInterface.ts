@@ -1,6 +1,6 @@
 export enum RentingStatus {
-  CONFIRMED = "confirmed",
-  PENDING = "pending"
+  CONFIRMED = "Confirmed",
+  PENDING = "Pending"
 }
 
 export interface rentingInfo {

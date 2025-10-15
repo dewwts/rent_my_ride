@@ -39,17 +39,17 @@ export const ProfileSchema = z.object({
 });
 
 export const CarSchema = z.object({
-  brand: z.string().min(1, "กรุณากรอกยี่ห้อรถ"),
+  car_brand: z.string().min(1, "กรุณากรอกยี่ห้อรถ"),
   model: z.string().min(1, "กรุณากรอกรุ่นรถ"),
-  car_id: z.string().min(1, "กรุณากรอกหมายเลขทะเบียนรถ"),
+  // car_id: z.string().min(1, "กรุณากรอกหมายเลขทะเบียนรถ"),
   year: z.coerce.number().min(1990, "ปีที่ผลิตต้องไม่ต่ำกว่า 1990").max(new Date().getFullYear() + 1, "ปีที่ผลิตไม่ควรเกินปีปัจจุบัน"),
-  seats: z.coerce.number().min(1, "จำนวนที่นั่งต้องมากกว่า 0").max(50, "จำนวนที่นั่งไม่ควรเกิน 50"),
+  number_of_seats: z.coerce.number().min(1, "จำนวนที่นั่งต้องมากกว่า 0").max(50, "จำนวนที่นั่งไม่ควรเกิน 50"),
   car_type: z.string().min(1, "กรุณาเลือกประเภทรถ"),
-  color: z.string().min(1, "กรุณากรอกสีรถ"),
+  // color: z.string().min(1, "กรุณากรอกสีรถ"),
   mileage: z.coerce.number().min(0, "เลขไมล์ต้องไม่เป็นลบ").max(999999, "เลขไมล์ไม่ควรเกิน 999,999"),
   oil_type: z.string().min(1, "กรุณาเลือกประเภทเชื้อเพลิง"),
   gear_type: z.string().min(1, "กรุณาเลือกประเภทเกียร์"),
-  price_per_day: z.coerce.number().min(1, "ราคาต่อวันต้องมากกว่า 0").max(100000, "ราคาต่อวันไม่ควรเกิน 100,000 บาท"),
+  daily_rental_price: z.coerce.number().min(1, "ราคาต่อวันต้องมากกว่า 0").max(100000, "ราคาต่อวันไม่ควรเกิน 100,000 บาท"),
   status: z.enum(["available", "unavailable"], {
     message: "กรุณาเลือกสถานะรถ",
   }),
