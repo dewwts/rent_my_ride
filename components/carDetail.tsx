@@ -6,13 +6,15 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useState } from "react";
 import dayjs from "dayjs";
 import { Dayjs } from "dayjs";
-import { carAvailable } from "@/lib/carAvailable";
+import { carAvailable } from "@/lib/carServices";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { dateRangeAvailable } from "@/lib/dateRangeAvailable";
+import {Car} from "@/types/carInterface";
+import { da } from "zod/v4/locales";
 
 
-export function CarDetailsPage({cid}:{cid:string}) {
+export function CarDetailsPage({cid,car}:{cid:string, car?:Car|null}) {
     const [startDate, setStartDate] = useState<Dayjs | null>(null);
     const [endDate, setEndDate] = useState<Dayjs | null>(null);
     const { toast } = useToast();
@@ -26,15 +28,15 @@ export function CarDetailsPage({cid}:{cid:string}) {
         {/* === คอลัมน์ซ้าย === */}
         <div className="flex flex-col w-7/12">
           
-          <h1 className="text-4xl font-bold text-slate-900">ชื่อรถยนต์</h1>
+              <h1 className="text-4xl font-bold text-slate-900">{car?.car_brand} {car?.model}</h1>
 
           <div className="inline-block px-5 py-2 mt-4 mb-8 font-semibold text-white bg-slate-900 rounded-full">
-             2222 บาท / วัน
+              {car?.daily_rental_price} บาท / วัน
           </div>
 
           <img
-            src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=500&h=300&fit=crop"
-            alt="Car Image idxxx"
+            src={car?.car_image}
+            alt={`Car Image ${car?.car_id}`}
             className="w-full rounded-2xl object-cover shadow-xl"
           />
 
@@ -92,9 +94,29 @@ export function CarDetailsPage({cid}:{cid:string}) {
                     const end = dayjs(parsed.endDate).startOf("day").add(1, "day").toDate();
                     const isAvailable = await carAvailable(supabase,cid, start, end);
                     if (isAvailable) {
-                      toast({variant:'default',title:"ยืนยันข้อมูล",
-                      description:`คุณได้เลือกจองรถยนต์คันนี้ตั้งแต่ ${startDate.format('DD/MM/YYYY')} ถึง ${endDate.format('DD/MM/YYYY')}`
+                      // คำนวนวันและราคาอย่างปลอดภัย โดยใช้ค่า parsed ที่ผ่านการ validate แล้ว
+                      const parsedStart = dayjs(parsed.startDate);
+                      const parsedEnd = dayjs(parsed.endDate);
+                      const days = parsedEnd.diff(parsedStart, "day") + 1;
+                      const dailyPrice = (car?.daily_rental_price ?? 0);
+                      const price = dailyPrice * days;
+
+                      // แสดง toast ยืนยัน
+                      toast({
+                        variant: 'default',
+                        title: "ยืนยันข้อมูล",
+                        description: `คุณได้เลือกจองรถยนต์คันนี้ตั้งแต่ ${parsedStart.format('DD/MM/YYYY')} ถึง ${parsedEnd.format('DD/MM/YYYY')} ราคาสุทธิ ${price} บาท`
                       });
+
+                      // (ถ้าต้องการบันทึกการจองลงฐานข้อมูล ให้เรียก supabase.insert ที่นี่)
+                      // const { data: booking, error: insertErr } = await supabase
+                      //   .from('bookings')
+                      //   .insert({ car_id: cid, start_date: start, end_date: end, total_price: price });
+                      // if (insertErr) {
+                      //   toast({ variant: 'destructive', title: 'การจองไม่สำเร็จ', description: insertErr.message });
+                      // } else {
+                      //   toast({ variant: 'success', title: 'จองสำเร็จ', description: 'ระบบบันทึกการจองเรียบร้อย' });
+                      // }
                     } else {
                       toast({variant:'destructive',title:"การจองไม่สำเร็จ",
                       description:"รถยนต์นี้ไม่ว่างในช่วงเวลาที่เลือก"});
@@ -126,7 +148,14 @@ export function CarDetailsPage({cid}:{cid:string}) {
           </h2>
           
           <p className="text-base leading-loose text-slate-600 break-words">
-            xxx000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+              <div>{car?.car_brand} {car?.model} </div>
+              <div>Mileage : {car?.mileage} km</div>
+              <div>Seats : {car?.number_of_seats} </div>
+              <div>Oil type : {car?.oil_type}</div>
+              <div>Colors : {car?.color}</div>
+              <div>Model year : {car?.year}</div>
+              <div>Pick-up Location : {car?.location}</div>
+              
           </p>
         </div>
         

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { Star, Users, Fuel, Settings } from "lucide-react";
@@ -100,7 +101,7 @@ export function CarCard({
             <span className="text-sm text-gray-600">/วัน</span>
           </div>
           <Button variant="default" size="sm">
-            เช่าเลย
+            <Link href="/checkout">เช่าเลย</Link>
           </Button>
         </div>
       </div>

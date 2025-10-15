@@ -1,12 +1,20 @@
 export interface Car {
   id: string;
-  brand: string;
+  car_brand: string;
   model: string;
   car_id: string;
-  seats: number;
+  year: number;
+  number_of_seats: number;
+  car_type: string;
+  color: string;
+  mileage: number;
   oil_type: string;
   gear_type: string;
-  price_per_day: number;
   status: "available" | "unavailable";
-  image_url: string;
+  location: string;
+  rating: number;
+  car_image: string;
+  created_at?: string;
+  updated_at?: string;
+  daily_rental_price?: number;
 }
