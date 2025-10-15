@@ -6,9 +6,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import { CarCheckout } from "@/types/carInterface";
-import { object } from "zod";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISH_KEY as string)
 export default function OrderPage( car_info : CarCheckout) {
     //const supabase = createClient();
     const rid = car_info.rid;

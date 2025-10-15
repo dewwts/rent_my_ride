@@ -110,3 +110,11 @@ export const getRentingPrice = async (supabase : SupabaseClient, renting_id:stri
     return data.amount;
 }
 
+export const generateUUID = async(supabase: SupabaseClient)=>{
+  const {data: uuid, error:err} = await  supabase.rpc('generate_uuid')
+  if (err){
+    throw new Error("เกิดความผิดพลาดกับระบบฐานข้อมูล")
+  }
+  return uuid as string
+}
+
