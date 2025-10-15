@@ -11,7 +11,7 @@ export const uploadImageCar = async(supabase: SupabaseClient, file: File, carid:
             throw new Error("โปรดเข้าสู่ระบบก่อน")
         }
         const publicUrl = await uploadImage(mubucket, user.id, file, supabase)
-        console.log(publicUrl);
+        // console.log(publicUrl);
         const {error: dbErr} = await supabase.from('car_information').update({
             car_image:publicUrl
         }).eq("car_id",carid)
