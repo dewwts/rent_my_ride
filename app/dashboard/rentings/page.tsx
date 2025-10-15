@@ -7,6 +7,7 @@ import { rentingInfo,RentingStatus } from "@/types/rentingInterface";
 import { getMyLeasingHistory,getRentingPrice } from "@/lib/rentingServices";
 import { getFirstname } from "@/lib/userServices";
 import CustomPagination from "@/components/customPagination"
+import Link from "next/link";
 
 export default function RentingHistoryPage() { 
   const [loading, setLoading] = useState(true);
@@ -135,7 +136,14 @@ return (
               {/* Mobile Layout */}
               <div className="flex flex-col gap-1 sm:hidden text-sm">
                 <div><span className="font-semibold">หมายเลขการเช่า:</span> {booking.renting_id.slice(0, 15)+"..."}</div>
-                <div><span className="font-semibold">ID รถ:</span> {booking.car_id.slice(0, 15)+"..."}</div>
+                <div><span className="font-semibold">ID รถ:</span>
+                  <Link 
+                    href={`/car/${booking.car_id}`} 
+                    className="text-blue-600 underline hover:text-blue-800 transition"
+                  >
+                    {booking.car_id.slice(0, 15) + "..."}
+                  </Link>
+                </div>
                 <div><span className="font-semibold">ผู้เช่า:</span> {booking.lessee_name}</div>
                 <div><span className="font-semibold">วันที่เช่า:</span> {formatDate(booking.sdate)} - {formatDate(booking.edate)}</div>
                 <div>
@@ -151,7 +159,14 @@ return (
 
               {/* Desktop Layout */}
               <div className="hidden sm:block text-sm font-medium">{booking.renting_id.slice(0, 8)+"..."}</div>
-              <div className="hidden sm:block text-sm">{booking.car_id.slice(0, 8)+"..."}</div>
+              <div className="hidden sm:block text-sm">
+                <Link 
+                  href={`/car/${booking.car_id}`} 
+                  className="text-blue-600 underline hover:text-blue-800 transition"
+                >
+                  {booking.car_id.slice(0, 8) + "..."}
+                </Link>
+              </div>
               <div className="hidden sm:block text-sm">{booking.lessee_name}</div>
               <div className="hidden sm:block text-sm col-span-2">
                 {formatDate(booking.sdate)} - {formatDate(booking.edate)}
