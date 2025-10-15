@@ -11,7 +11,7 @@ import { CarSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
-import { uploadImageCar } from "@/lib/carServices";
+import { updateCar, uploadImageCar } from "@/lib/carServices";
 import { Car } from "@/types/carInterface";
 import { EditCarFormProps } from "@/types/componentProps";
 
@@ -26,11 +26,11 @@ export function EditCarForm({
   ...props
 }: EditCarFormProps & React.ComponentPropsWithoutRef<"div">) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(car.image_url || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(car.car_image || null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const supabase = createClient();
-
+  const [image, setImage] = useState<File | null>(null)
   const {
     register,
     handleSubmit,
@@ -41,21 +41,20 @@ export function EditCarForm({
     resolver: zodResolver(CarSchema) as any,
     mode: "onTouched",
     defaultValues: {
-      brand: car.brand,
+      car_brand: car.car_brand,
       model: car.model,
-      car_id: car.car_id,
       year: car.year,
-      seats: car.seats,
+      number_of_seats: car.number_of_seats,
       car_type: car.car_type,
-      color: car.color,
+      // color: car.color,
       mileage: car.mileage,
       oil_type: car.oil_type,
       gear_type: car.gear_type,
-      price_per_day: car.price_per_day,
+      daily_rental_price: car.daily_rental_price ,
       status: car.status,
       location: car.location,
       rating: car.rating || 0,
-      image_url: car.image_url || "",
+      image_url: car.car_image || "",
     },
   });
 
@@ -91,10 +90,10 @@ export function EditCarForm({
 
       // Generate unique car ID for upload
       const carId = `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+      setImage(file)
       // Upload image
-      const imageUrl = await uploadImageCar(supabase, file, carId);
-      setValue("image_url", imageUrl);
+      // const imageUrl = await uploadImageCar(supabase, file, carId);
+      // setValue("image_url", imageUrl);
       
       toast({
         title: "อัปโหลดสำเร็จ",
@@ -107,7 +106,7 @@ export function EditCarForm({
         title: "อัปโหลดไม่สำเร็จ",
         description: error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการอัปโหลด",
       });
-      setImagePreview(car.image_url || null);
+      setImagePreview(car.car_image || null);
     } finally {
       setUploading(false);
     }
@@ -120,18 +119,18 @@ export function EditCarForm({
         ...car,
         ...data,
         rating: data.rating || car.rating,
-        image_url: data.image_url || car.image_url,
+        car_image: data.image_url || car.car_image
       };
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
+      // // Simulate API call
+      // // await new Promise(resolve => setTimeout(resolve, 1000));
+      // await updateCar(supabase, car.car_id, updatedCar)
       toast({
         title: "อัปเดตรถสำเร็จ",
-        description: `รถ ${data.brand} ${data.model} ถูกอัปเดตเรียบร้อยแล้ว`,
+        description: `รถ ${data.car_brand} ${data.model} ถูกอัปเดตเรียบร้อยแล้ว`,
       });
 
-      onCarUpdated?.(updatedCar);
+      onCarUpdated?.(updatedCar, image);
     } catch (error) {
       console.error("Update car error:", error);
       toast({
@@ -188,8 +187,8 @@ export function EditCarForm({
                     size="sm"
                     className="absolute -top-2 -right-2 h-8 w-8 rounded-full p-0"
                     onClick={() => {
-                      setImagePreview(car.image_url || null);
-                      setValue("image_url", car.image_url || "");
+                      setImagePreview(car.car_image || null);
+                      setValue("image_url", car.car_image || "");
                       if (fileRef.current) fileRef.current.value = "";
                     }}
                   >
@@ -232,11 +231,11 @@ export function EditCarForm({
                 <Label htmlFor="brand">ยี่ห้อรถ *</Label>
                 <Input
                   id="brand"
-                  {...register("brand")}
+                  {...register("car_brand")}
                   placeholder="เช่น Honda, Toyota, Mazda"
                 />
-                {errors.brand && (
-                  <p className="text-sm text-red-500">{errors.brand.message}</p>
+                {errors.car_brand && (
+                  <p className="text-sm text-red-500">{errors.car_brand.message}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -273,7 +272,7 @@ export function EditCarForm({
                   <p className="text-sm text-red-500">{errors.year.message}</p>
                 )}
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="car_id">เลขตัวถัง (ค.) *</Label>
                 <Input
                   id="car_id"
@@ -283,12 +282,12 @@ export function EditCarForm({
                 {errors.car_id && (
                   <p className="text-sm text-red-500">{errors.car_id.message}</p>
                 )}
-              </div>
+              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="seats">จำนวนที่นั่ง *</Label>
                 <select
                   id="seats"
-                  {...register("seats")}
+                  {...register("number_of_seats")}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 >
                   {Array.from({ length: 50 }, (_, i) => (
@@ -297,8 +296,8 @@ export function EditCarForm({
                     </option>
                   ))}
                 </select>
-                {errors.seats && (
-                  <p className="text-sm text-red-500">{errors.seats.message}</p>
+                {errors.number_of_seats && (
+                  <p className="text-sm text-red-500">{errors.number_of_seats.message}</p>
                 )}
               </div>
             </div>
@@ -323,7 +322,7 @@ export function EditCarForm({
                   <p className="text-sm text-red-500">{errors.car_type.message}</p>
                 )}
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="color">สี *</Label>
                 <Input
                   id="color"
@@ -333,7 +332,7 @@ export function EditCarForm({
                 {errors.color && (
                   <p className="text-sm text-red-500">{errors.color.message}</p>
                 )}
-              </div>
+              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="oil_type">ประเภทเชื้อเพลิง *</Label>
                 <select
@@ -414,11 +413,11 @@ export function EditCarForm({
                   type="number"
                   min="1"
                   max="100000"
-                  {...register("price_per_day")}
+                  {...register("daily_rental_price")}
                   placeholder="เช่น 1200"
                 />
-                {errors.price_per_day && (
-                  <p className="text-sm text-red-500">{errors.price_per_day.message}</p>
+                {errors.daily_rental_price && (
+                  <p className="text-sm text-red-500">{errors.daily_rental_price.message}</p>
                 )}
               </div>
               <div className="space-y-2">

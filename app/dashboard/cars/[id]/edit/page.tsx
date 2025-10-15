@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { getCarById, updateCar } from "@/lib/carServices";
+import { getCarById, updateCar, uploadImageCar } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";
 import { Car } from "@/types/carInterface";
 import { EditCarForm } from "@/components/edit-car-form";
@@ -72,15 +72,17 @@ export default function EditCarPage() {
     }
   };
 
-  const handleCarUpdated = async (updatedCar: Car) => {
+  const handleCarUpdated = async (updatedCar: Car, image:File | null) => {
     setIsSaving(true);
     try {
       // Remove fields that shouldn't be updated directly
-      const { id, created_at, updated_at, ...carData } = updatedCar;
+      const {car_id, created_at, updated_at, ...carData } = updatedCar;
 
       // Call your updateCar function, passing carId and carData (partial)
-      await updateCar(supabase, carId, carData);
-
+      await updateCar(supabase, carId, updatedCar);
+      if (image){
+        await uploadImageCar(supabase, image, updatedCar.car_id);
+      }
       toast({
         title: "อัปเดตรถสำเร็จ",
         description: `รถ ${updatedCar.car_brand} ${updatedCar.model} ถูกอัปเดตเรียบร้อยแล้ว`,

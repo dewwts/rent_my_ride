@@ -4,23 +4,24 @@ import { Car } from "@/types/carInterface";
 
 export const uploadImageCar = async(supabase: SupabaseClient, file: File, carid:string)=>{
     try{
-        const mubucket = 'car'
+        const mubucket = "car"
         const {data: sessionData} =await supabase.auth.getUser()
         const user = sessionData?.user
         if (!user){
             throw new Error("โปรดเข้าสู่ระบบก่อน")
         }
         const publicUrl = await uploadImage(mubucket, user.id, file, supabase)
-        const {error: dbErr} = await supabase.from('car_information').upsert({
-            car_id:carid,
+        console.log(publicUrl);
+        const {error: dbErr} = await supabase.from('car_information').update({
             car_image:publicUrl
-        })
+        }).eq("car_id",carid)
         if (dbErr){
             throw new Error("เกิดความขัดข้องกับระบบ")
         }
         return publicUrl
     }catch(err:unknown){
         let message = "Something went wrong"
+        console.error(err);
         if (err instanceof Error){
             message = err.message
         }
@@ -47,8 +48,14 @@ export const getMyCars = async (supabase: SupabaseClient): Promise<Car[]> => {
     if (error) {
       throw new Error("เกิดข้อผิดพลาดในการดึงข้อมูลรถ");
     }
-
-    return data || [];
+    const castedCar:Car[] = data.map(car=>{
+      return {
+        ...car,
+        year: car.year_created,
+        rating: car.car_conditionrating,
+      }
+    })
+    return castedCar || [];
   } catch (err: unknown) {
     let message = "Something went wrong";
     if (err instanceof Error) {
@@ -102,7 +109,8 @@ export const createCar = async (
       .insert({
         car_brand: carData.car_brand,
         model: carData.model,
-        car_id: carData.car_id,
+        // car_id: carData.car_id,
+        mileage: carData.mileage,
         year_created: carData.year,
         number_of_seats: carData.number_of_seats,
         gear_type: carData.gear_type,
@@ -110,8 +118,8 @@ export const createCar = async (
         daily_rental_price: carData.daily_rental_price,
         status: carData.status,
         location: carData.location,
-        car_conditionrating: carData.rating || 0,
-        car_image: carData.car_image,
+        car_conditionrating: carData.rating || 1,
+        car_image: carData.car_image || null,
         owner_id: user.id,
       })
       .select()
@@ -131,7 +139,8 @@ export const createCar = async (
 export const updateCar = async (
   supabase: SupabaseClient,
   carId: string,
-  carData: Partial<Omit<Car, 'id' | 'created_at' | 'updated_at'>>
+  // carData: Omit<Car, 'id' | 'created_at' | 'updated_at'>
+  carData: Car
 ): Promise<Car> => {
   try {
     const { data: sessionData } = await supabase.auth.getUser();
@@ -142,29 +151,41 @@ export const updateCar = async (
     }
 
     // Map your carData fields to DB columns
-    const mappedCarData: any = {
-      ...(carData.car_brand !== undefined && { car_brand: carData.car_brand }),
-      ...(carData.model !== undefined && { car_model: carData.model }),
-      ...(carData.car_id !== undefined && { car_id: carData.car_id }),
-      ...(carData.year !== undefined && { year: carData.year }),
-      ...(carData.number_of_seats !== undefined && { seats: carData.number_of_seats }),
-      ...(carData.oil_type !== undefined && { oil_type: carData.oil_type }),
-      ...(carData.gear_type !== undefined && { gear_type: carData.gear_type }),
-      ...(carData.daily_rental_price !== undefined && { price_per_day: carData.daily_rental_price }),
-      ...(carData.status !== undefined && { status: carData.status }),
-      ...(carData.location !== undefined && { location: carData.location }),
-      ...(carData.rating !== undefined && { rating: carData.rating }),
-      ...(carData.car_image !== undefined && { image_url: carData.car_image }),
-      updated_at: new Date().toISOString(),
-    };
+    // const mappedCarData: any = {
+    //   ...(carData.car_brand !== undefined && { car_brand: carData.car_brand }),
+    //   ...(carData.model !== undefined && { car_model: carData.model }),
+    //   ...(carData.car_id !== undefined && { car_id: carData.car_id }),
+    //   ...(carData.year !== undefined && { year: carData.year }),
+    //   ...(carData.number_of_seats !== undefined && { seats: carData.number_of_seats }),
+    //   ...(carData.oil_type !== undefined && { oil_type: carData.oil_type }),
+    //   ...(carData.gear_type !== undefined && { gear_type: carData.gear_type }),
+    //   ...(carData.daily_rental_price !== undefined && { price_per_day: carData.daily_rental_price }),
+    //   ...(carData.status !== undefined && { status: carData.status }),
+    //   ...(carData.location !== undefined && { location: carData.location }),
+    //   ...(carData.rating !== undefined && { rating: carData.rating }),
+    //   ...(carData.car_image !== undefined && { image_url: carData.car_image }),
+    //   updated_at: new Date().toISOString(),
+    // };
 
     const { data, error } = await supabase
       .from('car_information')
       .update({
+        car_brand: carData.car_brand,
+        model: carData.model,
+        // car_id: carData.car_id,
+        mileage: carData.mileage,
+        year_created: carData.year,
+        number_of_seats: carData.number_of_seats,
+        gear_type: carData.gear_type,
+        oil_type: carData.oil_type,
+        daily_rental_price: carData.daily_rental_price,
         status: carData.status,
-        updated_at: new Date().toISOString(),
+        location: carData.location,
+        car_conditionrating: carData.rating || 1,
+        car_image: carData.car_image || null,
+        owner_id: user.id,
       })
-      .eq('id', carId)
+      .eq('car_id', carId)
       .select()
       .single();
 
