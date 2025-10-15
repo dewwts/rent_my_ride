@@ -77,14 +77,17 @@ export default function EditCarPage() {
   const handleCarUpdated = async (updatedCar: Car) => {
     setIsSaving(true);
     try {
-      // For now, just show success. Later replace with:
-      // await updateCar(supabase, carId, updatedCar);
-      
+      // Remove fields that shouldn't be updated directly
+      const { id, created_at, updated_at, ...carData } = updatedCar;
+
+      // Call your updateCar function, passing carId and carData (partial)
+      await updateCar(supabase, carId, carData);
+
       toast({
         title: "อัปเดตรถสำเร็จ",
         description: `รถ ${updatedCar.brand} ${updatedCar.model} ถูกอัปเดตเรียบร้อยแล้ว`,
       });
-      
+
       router.push("/dashboard/cars");
     } catch (error) {
       console.error("Error updating car:", error);
