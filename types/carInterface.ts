@@ -16,9 +16,8 @@ export interface Car {
   car_image: string;
   created_at?: string;
   updated_at?: string;
-<<<<<<< HEAD
+  daily_rental_price?: number;
 }
-
 export interface CarCheckout {
   rid: string;
   r_date: string;
@@ -35,27 +34,3 @@ export interface CarCheckout {
   car_image: string;
   amount: number;
 }
-=======
-  daily_rental_price?: number;
-}
-
-// export interface CarInput {
-//   car_brand: string;
-//   model: string;
-//   car_id: string;
-//   year: number;
-//   number_of_seats: number;
-//   car_type: string;
-//   color: string;
-//   mileage: number;
-//   oil_type: string;
-//   gear_type: string;
-//   status: "available" | "unavailable";
-//   location: string;
-//   rating: number;
-//   car_image: string;
-//   created_at?: string;
-//   updated_at?: string;
-//   daily_rental_price?: number;
-// }
->>>>>>> 6eb82a3f3fcebd7764c7e0b6c6940a0a0742c3a8
