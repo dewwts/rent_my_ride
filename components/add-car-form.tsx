@@ -48,15 +48,14 @@ export function AddCarForm({
     defaultValues: {
       car_brand: "",
       model: "",
-      car_id: "",
       year: new Date().getFullYear(),
       number_of_seats: 4,
       car_type: "",
-      color: "",
+      // color: "",
       mileage: 0,
       oil_type: "",
       gear_type: "",
-      price_per_day: 0,
+      daily_rental_price: 0,
       status: "available",
       location: "",
       rating: 0,
@@ -124,24 +123,23 @@ export function AddCarForm({
       // Here you would typically save to your database
       // For now, we'll just simulate success
       const newCar: Car = {
-        id: "temp-id",
+        car_id:"",  // id will be ignore on create
         ...data,
         rating: data.rating || 0,
         car_image: data.image_url || "",
       };
-
       // Simulate API call
-      await createCar(supabase, newCar)
-      if (image){
-        const carURL = await uploadImageCar(supabase, image, newCar.car_id)
-        setValue("image_url", carURL)
-      }
+      // await createCar(supabase, newCar)
+      // if (image){
+      //   const carURL = await uploadImageCar(supabase, image, newCar.car_id)
+      //   setValue("image_url", carURL)
+      // }
       toast({
         title: "เพิ่มรถสำเร็จ",
         description: `รถ ${data.car_brand} ${data.model} ถูกเพิ่มเรียบร้อยแล้ว`,
       });
 
-      onCarAdded?.(newCar);
+      onCarAdded?.(newCar,image);
     } catch (error) {
       console.error("Add car error:", error);
       toast({
@@ -283,7 +281,7 @@ export function AddCarForm({
                     <p className="text-sm text-red-500">{errors.year.message}</p>
                   )}
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="car_id">เลขตัวถัง (ค.) *</Label>
                   <Input
                     id="car_id"
@@ -293,7 +291,7 @@ export function AddCarForm({
                   {errors.car_id && (
                     <p className="text-sm text-red-500">{errors.car_id.message}</p>
                   )}
-                </div>
+                </div> */}
                 <div className="space-y-2">
                   <Label htmlFor="seats">จำนวนที่นั่ง *</Label>
                   <select
@@ -333,7 +331,7 @@ export function AddCarForm({
                     <p className="text-sm text-red-500">{errors.car_type.message}</p>
                   )}
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="color">สี *</Label>
                   <Input
                     id="color"
@@ -343,7 +341,7 @@ export function AddCarForm({
                   {errors.color && (
                     <p className="text-sm text-red-500">{errors.color.message}</p>
                   )}
-                </div>
+                </div> */}
                 <div className="space-y-2">
                   <Label htmlFor="oil_type">ประเภทเชื้อเพลิง *</Label>
                   <select
@@ -424,11 +422,11 @@ export function AddCarForm({
                     type="number"
                     min="1"
                     max="100000"
-                    {...register("price_per_day")}
+                    {...register("daily_rental_price")}
                     placeholder="เช่น 1200"
                   />
-                  {errors.price_per_day && (
-                    <p className="text-sm text-red-500">{errors.price_per_day.message}</p>
+                  {errors.daily_rental_price && (
+                    <p className="text-sm text-red-500">{errors.daily_rental_price.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">

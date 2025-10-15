@@ -29,10 +29,13 @@ export default function RentingHistoryPage() {
       const start = (currentPage - 1) * itemsPerPage;
       const end = start + itemsPerPage;
       const pageData = data.slice(start, end);
-
+      // ทำ pagination อย่างไงวะเนี่ย สุดท้ายก็คือ fetch หมดอยู่ดี
       const bookingsWithPriceandLessorName = await Promise.all(
         pageData.map(async (booking) => {
-            const lessor_name = await getFirstname(supabase,booking.car_information.owner_id);
+          // error อยู่ยังไม่ได้แก้ by phaolap
+          const ownerId = booking.car_information.owner_id;
+          console.log(ownerId);
+          const lessor_name = await getFirstname(supabase,ownerId);
           try {
             const price = await getRentingPrice(supabase, booking.renting_id);
             return { ...booking, total_price: price ?? 0 ,lessor_name}; //add total price field

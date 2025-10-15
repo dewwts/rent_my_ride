@@ -18,7 +18,6 @@ export function CarDetailsPage({cid,car}:{cid:string, car?:Car|null}) {
     const [startDate, setStartDate] = useState<Dayjs | null>(null);
     const [endDate, setEndDate] = useState<Dayjs | null>(null);
     const { toast } = useToast();
-
     return (
         <main className="bg-gray-50 flex items-center justify-center min-h-screen p-10 font-mitr text-slate-800">
         
@@ -152,7 +151,7 @@ export function CarDetailsPage({cid,car}:{cid:string, car?:Car|null}) {
               <div>Mileage : {car?.mileage} km</div>
               <div>Seats : {car?.number_of_seats} </div>
               <div>Oil type : {car?.oil_type}</div>
-              <div>Colors : {car?.color}</div>
+              {/* <div>Colors : {car?.color}</div> */}
               <div>Model year : {car?.year}</div>
               <div>Pick-up Location : {car?.location}</div>
               
