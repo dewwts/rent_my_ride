@@ -42,8 +42,7 @@ export default function TransactionHistoryPage() {
         done: response.data.done,
         failed: response.data.failed
       })
-      const transactionResponse = await axios.get(`${process.env.NEXT_PUBLIC_SERVER_URL}api/transactions?page=${currentPage}&
-        limit=${itemsPerPage}&filter=${filter}`)
+      const transactionResponse = await axios.get(`${process.env.NEXT_PUBLIC_SERVER_URL}api/transactions?page=${currentPage}&limit=${itemsPerPage}&filter=${filter}`);
       setTotalCount(transactionResponse.data.pagination.totalItems)
       setTransactions((transactionResponse.data.data as unknown as Transaction[]) || []);
     } catch (err) {
