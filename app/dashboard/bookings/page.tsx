@@ -4,7 +4,7 @@ import { Loader2, History } from "lucide-react"; // เพิ่ม ChevronLeft,
 import { createClient } from "@/lib/supabase/client";
 import { formatDate, formatCurrency } from '@/lib/utils' 
 import { rentingInfo,RentingStatus } from "@/types/rentingInterface";
-import { getMyLeasingHistory,getRentingPrice } from "@/lib/rentingServices";
+import { getMyRentingHistory,getRentingPrice } from "@/lib/rentingServices";
 import { getFirstname } from "@/lib/userServices";
 import CustomPagination from "@/components/customPagination"
 import Link from "next/link";
@@ -23,31 +23,31 @@ export default function RentingHistoryPage() {
       setLoading(true);
       setError(null);
       
-      const data = await getMyLeasingHistory(supabase);
+      const data = await getMyRentingHistory(supabase);
       setTotalCount(data.length);
 
       const start = (currentPage - 1) * itemsPerPage;
       const end = start + itemsPerPage;
       const pageData = data.slice(start, end);
 
-      const LeasingWithPriceandName = await Promise.all(
-        pageData.map(async (leasing) => {
-          const lessee_name = await getFirstname(supabase,leasing.lessee_id)
+      const bookingsWithPriceandLessorName = await Promise.all(
+        pageData.map(async (booking) => {
+            const lessor_name = await getFirstname(supabase,booking.car_information.owner_id);
           try {
-            const price = await getRentingPrice(supabase, leasing.renting_id);
-            return { ...leasing, total_price: price ?? 0 ,lessee_name}; //add total price field and lessee_name
+            const price = await getRentingPrice(supabase, booking.renting_id);
+            return { ...booking, total_price: price ?? 0 ,lessor_name}; //add total price field
           } catch (err) {
-            console.error("Error fetching price for", leasing.renting_id);
-            return { ...leasing, total_price: 0 ,lessee_name}; // fallback
+            console.error("Error fetching price for", booking.renting_id, err);
+            return { ...booking, total_price: 0, lessor_name }; // fallback
           }
         })
       );
 
-    setBookings(LeasingWithPriceandName);
+    setBookings(bookingsWithPriceandLessorName);
       
     } catch (err) {
-      console.log(err)
-      setError('เกิดข้อผิดพลาดในการโหลดประวัติการให้เช่า');
+      console.error('Error fetching mock bookings:', err);
+      setError('เกิดข้อผิดพลาดในการโหลดประวัติการเช่า');
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ export default function RentingHistoryPage() {
       <main className="min-h-screen grid place-items-center" style={{ backgroundColor: '#c9d1d9' }}>
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-[#2B09F7]" />
-          <p className="text-gray-600">กำลังโหลดประวัติการให้เช่า...</p>
+          <p className="text-gray-600">กำลังโหลดประวัติการเช่า...</p>
         </div>
       </main>
     );
@@ -110,7 +110,7 @@ return (
   <main className="min-h-screen" style={{ backgroundColor: '#D4E0E6' }}>
     <div className="p-2 sm:p-5 m-0 sm:m-5">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-900 text-center sm:text-left">
-        ประวัติการให้เช่าทั้งหมด
+        ประวัติการเช่าทั้งหมด
       </h2>
 
       {/* พื้นหลังขาว */}
@@ -120,10 +120,10 @@ return (
         <div className="hidden sm:grid grid-cols-7 gap-4 px-3 py-2 text-sm font-semibold text-gray-700 border-b border-gray-200">
           <div>หมายเลขการเช่า</div>
           <div>ID รถ</div>
-          <div>ผู้เช่า</div>
+          <div>ผู้ให้เช่า</div>
           <div className="col-span-2">วันที่เช่า</div>
           <div>สถานะ</div>
-          <div className="text-right">รายได้</div>
+          <div className="text-right">ราคา</div>
         </div>
 
         {/* Table Body / Card List */}
@@ -144,7 +144,7 @@ return (
                     {booking.car_id.slice(0, 15) + "..."}
                   </Link>
                 </div>
-                <div><span className="font-semibold">ผู้เช่า:</span> {booking.lessee_name}</div>
+                <div><span className="font-semibold">ผู้ให้เช่า:</span> {booking.lessor_name}</div>
                 <div><span className="font-semibold">วันที่เช่า:</span> {formatDate(booking.sdate)} - {formatDate(booking.edate)}</div>
                 <div>
                   <span className="font-semibold">สถานะ:</span>{" "}
@@ -160,14 +160,14 @@ return (
               {/* Desktop Layout */}
               <div className="hidden sm:block text-sm font-medium">{booking.renting_id.slice(0, 8)+"..."}</div>
               <div className="hidden sm:block text-sm">
-                <Link 
-                  href={`/car/${booking.car_id}`} 
-                  className="text-blue-600 underline hover:text-blue-800 transition"
-                >
-                  {booking.car_id.slice(0, 8) + "..."}
-                </Link>
+                  <Link 
+                    href={`/car/${booking.car_id}`} 
+                    className="text-blue-600 underline hover:text-blue-800 transition"
+                  >
+                    {booking.car_id.slice(0, 8) + "..."}
+                  </Link>
               </div>
-              <div className="hidden sm:block text-sm">{booking.lessee_name}</div>
+              <div className="hidden sm:block text-sm">{booking.lessor_name}</div>
               <div className="hidden sm:block text-sm col-span-2">
                 {formatDate(booking.sdate)} - {formatDate(booking.edate)}
               </div>
@@ -186,7 +186,7 @@ return (
           {totalCount === 0 && (
             <div className="p-12 text-center text-gray-500">
               <History className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-              <p>ยังไม่มีประวัติการให้เช่าสำหรับรถของคุณ</p>
+              <p>ยังไม่มีประวัติการเช่า</p>
             </div>
           )}
         </div>
