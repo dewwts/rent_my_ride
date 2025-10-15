@@ -3,12 +3,33 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 //import { createClient } from "@/lib/supabase/client";
 import { QrCode, Wallet, Calendar, MapPin, Clock } from 'lucide-react';
+import { loadStripe } from "@stripe/stripe-js";
+import axios from "axios";
+import { toast } from "@/components/ui/use-toast";
 
-
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISH_KEY as string)
 export default function OrderPage() {
     const router = useRouter();
     //const supabase = createClient();
-    
+    const rid = "222c22a0-7057-477d-8f65-ab197edbda4a";
+    const amount = 1000 // example
+    const handlePaymentWithQR =async ()=>{
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/stripe/create-checkout-session`,{
+            amount:amount,
+            rid:rid
+        })
+        if (!response.data.success){
+            toast({
+                variant:"destructive",
+                title:"ไม่สำเร็จ",
+                description:response.data.error
+            })
+            return
+        }
+        const checkoutUrl = response.data.data.url;
+        const sessionId = response.data.data.session_id;
+        window.location.href = checkoutUrl
+    }
     return (
         <main className="flex-1 py-8">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -98,7 +119,8 @@ export default function OrderPage() {
                     
                     <div className="space-y-3">
                     
-                    <button className="w-full flex items-center justify-center gap-4 p-5 rounded-full border-2 border-gray-300 hover:border-gray-400 bg-white transition-all">
+                    <button className="w-full flex items-center justify-center gap-4 p-5 rounded-full border-2 border-gray-300 hover:border-gray-400 bg-white transition-all"
+                    onClick={handlePaymentWithQR}>
                         <img src="/icons/qr_payment.png" alt="QR Payment" className="w-8 h-8" />
                         <span className="font-semibold text-lg text-gray-900">ชำระเงินด้วย QR Payment</span>
                     </button>

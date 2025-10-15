@@ -65,7 +65,7 @@ const DropdownMenuItemComponent = ({
       </button>
 
       {isOpen && (
-        <div className="flex flex-col gap-1 mt-1 pl-8 hidden md:flex">
+        <div className="flex flex-col gap-1 mt-1 pl-8 md:flex">
           {item.subItems.map((sub: StandardMenuItem) => ( 
             <Link
               key={sub.href}

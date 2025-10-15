@@ -15,12 +15,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 export async function POST(req: Request) {
     try {
         const body = await req.json()
-        const { amount, renting_id } = body
+        const { amount, rid } = body
 
-        if (!amount || amount <= 0 || !renting_id) {
+        if (!amount || amount <= 0 || !rid) {
             return NextResponse.json({ success: false, error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 })
         }
-
+        console.log("run checkout");
         // สร้าง Checkout Session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card', 'promptpay'],
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
                         currency: 'thb',
                         product_data: {
                             name: 'ค่าเช่ารถ',
-                            description: `Renting ID: ${renting_id}`,
+                            description: `Renting ID: ${rid}`,
                         },
                         unit_amount: Math.round(amount * 100), // convert to satangs
                     },
@@ -38,13 +38,13 @@ export async function POST(req: Request) {
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}&renting_id=${renting_id}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/payment-cancel?renting_id=${renting_id}`,
+            success_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/${rid}/success`,
+            cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/${rid}/cancle`,
             metadata: {
-                renting_id: renting_id
+                renting_id: rid
             }
         })
-
+        console.log('Checkout session created:', session.id)
         return NextResponse.json({
             success: true,
             data: {

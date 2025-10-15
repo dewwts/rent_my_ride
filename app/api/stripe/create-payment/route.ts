@@ -11,8 +11,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 export async function POST(req:Request){
     try{
         const body = await req.json()
-        const {amount, renting_id} = body
-        if (!amount || amount <= 0 || !renting_id) {
+        const {amount, rid} = body
+        if (!amount || amount <= 0 || !rid) {
             return NextResponse.json({success: false, error:"ข้อมูลไม่ถูกต้อง"},{status:400})
         }
         const totalAmount = Math.round(amount * 100)
@@ -22,7 +22,7 @@ export async function POST(req:Request){
             currency: 'thb',
             payment_method_types:['promptpay', 'card'],
             metadata:{
-                renting_id: renting_id
+                renting_id: rid
             }
         })
 
