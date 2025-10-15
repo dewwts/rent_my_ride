@@ -85,11 +85,14 @@ export const getCarById = async (supabase: SupabaseClient, carId: string): Promi
 };
 
 // Create new car
-export const createCar = async (supabase: SupabaseClient, carData: Omit<Car, 'id' | 'created_at' | 'updated_at'>): Promise<Car> => {
+export const createCar = async (
+  supabase: SupabaseClient,
+  carData: Omit<Car, 'id' | 'created_at' | 'updated_at'>
+): Promise<Car> => {
   try {
     const { data: sessionData } = await supabase.auth.getUser();
     const user = sessionData?.user;
-    
+
     if (!user) {
       throw new Error("โปรดเข้าสู่ระบบก่อน");
     }
@@ -97,29 +100,39 @@ export const createCar = async (supabase: SupabaseClient, carData: Omit<Car, 'id
     const { data, error } = await supabase
       .from('car_information')
       .insert({
-        ...carData,
+        car_brand: carData.brand,
+        model: carData.model,
+        car_id: carData.car_id,
+        year_created: carData.year,
+        number_of_seats: carData.seats,
+        gear_type: carData.gear_type,
+        oil_type: carData.oil_type,
+        daily_rental_price: carData.price_per_day,
+        status: carData.status,
+        location: carData.location,
+        car_conditionrating: carData.rating || 0,
+        car_image: carData.image_url,
         owner_id: user.id,
-        rating: carData.rating || 0,
       })
       .select()
       .single();
 
     if (error) {
-      throw new Error("เกิดข้อผิดพลาดในการเพิ่มรถ");
+      throw new Error(error.message);
     }
 
-    return data;
+    return data as Car;
   } catch (err: unknown) {
-    let message = "Something went wrong";
-    if (err instanceof Error) {
-      message = err.message;
-    }
-    throw new Error(message);
+    throw new Error(err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการเพิ่มรถ");
   }
 };
 
 // Update car
-export const updateCar = async (supabase: SupabaseClient, carId: string, carData: Partial<Omit<Car, 'id' | 'created_at' | 'updated_at'>>): Promise<Car> => {
+export const updateCar = async (
+  supabase: SupabaseClient,
+  carId: string,
+  carData: Partial<Omit<Car, 'id' | 'created_at' | 'updated_at'>>
+): Promise<Car> => {
   try {
     const { data: sessionData } = await supabase.auth.getUser();
     const user = sessionData?.user;
@@ -128,19 +141,36 @@ export const updateCar = async (supabase: SupabaseClient, carId: string, carData
       throw new Error("โปรดเข้าสู่ระบบก่อน");
     }
 
+    // Map your carData fields to DB columns
+    const mappedCarData: any = {
+      ...(carData.brand !== undefined && { car_brand: carData.brand }),
+      ...(carData.model !== undefined && { car_model: carData.model }),
+      ...(carData.car_id !== undefined && { car_id: carData.car_id }),
+      ...(carData.year !== undefined && { year: carData.year }),
+      ...(carData.seats !== undefined && { seats: carData.seats }),
+      ...(carData.oil_type !== undefined && { oil_type: carData.oil_type }),
+      ...(carData.gear_type !== undefined && { gear_type: carData.gear_type }),
+      ...(carData.price_per_day !== undefined && { price_per_day: carData.price_per_day }),
+      ...(carData.status !== undefined && { status: carData.status }),
+      ...(carData.location !== undefined && { location: carData.location }),
+      ...(carData.rating !== undefined && { rating: carData.rating }),
+      ...(carData.image_url !== undefined && { image_url: carData.image_url }),
+      updated_at: new Date().toISOString(),
+    };
+
     const { data, error } = await supabase
       .from('car_information')
       .update({
-        ...carData,
+        status: carData.status,
         updated_at: new Date().toISOString(),
       })
       .eq('id', carId)
-      .eq('owner_id', user.id) // Ensure user can only update their own cars
       .select()
       .single();
 
     if (error) {
-      throw new Error("เกิดข้อผิดพลาดในการอัปเดตรถ");
+    console.error("Supabase update error:", error);
+    throw new Error("เกิดข้อผิดพลาดในการอัปเดตรถ");
     }
 
     return data;
