@@ -18,7 +18,7 @@ import { CarSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
-import { uploadImageCar } from "@/lib/carServices";
+import { createCar, uploadImageCar } from "@/lib/carServices";
 import { Car } from "@/types/carInterface";
 import { AddCarFormProps } from "@/types/componentProps";
 
@@ -35,7 +35,7 @@ export function AddCarForm({
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const supabase = createClient();
-
+  const [image, setImage] = useState<File | null>(null)
   const {
     register,
     handleSubmit,
@@ -48,15 +48,14 @@ export function AddCarForm({
     defaultValues: {
       car_brand: "",
       model: "",
-      car_id: "",
       year: new Date().getFullYear(),
       number_of_seats: 4,
       car_type: "",
-      color: "",
+      // color: "",
       mileage: 0,
       oil_type: "",
       gear_type: "",
-      price_per_day: 0,
+      daily_rental_price: 0,
       status: "available",
       location: "",
       rating: 0,
@@ -98,9 +97,9 @@ export function AddCarForm({
       const carId = `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       // Upload image
-      const imageUrl = await uploadImageCar(supabase, file, carId);
-      setValue("image_url", imageUrl);
-      
+      // const imageUrl = await uploadImageCar(supabase, file, carId);
+      // setValue("image_url", imageUrl);
+      setImage(file)
       toast({
         title: "อัปโหลดสำเร็จ",
         description: "รูปภาพรถถูกอัปโหลดเรียบร้อยแล้ว",
@@ -124,15 +123,18 @@ export function AddCarForm({
       // Here you would typically save to your database
       // For now, we'll just simulate success
       const newCar: Car = {
-        id: "temp-id",
+        car_id:"",  // id will be ignore on create
         ...data,
         rating: data.rating || 0,
         car_image: data.image_url || "",
       };
-
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      onCarAdded?.(newCar);
+      // await createCar(supabase, newCar)
+      // if (image){
+      //   const carURL = await uploadImageCar(supabase, image, newCar.car_id)
+      //   setValue("image_url", carURL)
+      // }
+      onCarAdded?.(newCar,image);
     } catch (error) {
       console.error("Add car error:", error);
     } finally {
@@ -269,7 +271,7 @@ export function AddCarForm({
                     <p className="text-sm text-red-500">{errors.year.message}</p>
                   )}
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="car_id">เลขตัวถัง (ค.) *</Label>
                   <Input
                     id="car_id"
@@ -279,7 +281,7 @@ export function AddCarForm({
                   {errors.car_id && (
                     <p className="text-sm text-red-500">{errors.car_id.message}</p>
                   )}
-                </div>
+                </div> */}
                 <div className="space-y-2">
                   <Label htmlFor="seats">จำนวนที่นั่ง *</Label>
                   <select
@@ -319,7 +321,7 @@ export function AddCarForm({
                     <p className="text-sm text-red-500">{errors.car_type.message}</p>
                   )}
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="color">สี *</Label>
                   <Input
                     id="color"
@@ -329,7 +331,7 @@ export function AddCarForm({
                   {errors.color && (
                     <p className="text-sm text-red-500">{errors.color.message}</p>
                   )}
-                </div>
+                </div> */}
                 <div className="space-y-2">
                   <Label htmlFor="oil_type">ประเภทเชื้อเพลิง *</Label>
                   <select
@@ -410,11 +412,11 @@ export function AddCarForm({
                     type="number"
                     min="1"
                     max="100000"
-                    {...register("price_per_day")}
+                    {...register("daily_rental_price")}
                     placeholder="เช่น 1200"
                   />
-                  {errors.price_per_day && (
-                    <p className="text-sm text-red-500">{errors.price_per_day.message}</p>
+                  {errors.daily_rental_price && (
+                    <p className="text-sm text-red-500">{errors.daily_rental_price.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">

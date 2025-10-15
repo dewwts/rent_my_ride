@@ -88,7 +88,11 @@ const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
       upsert: false,
       contentType: file.type,
     });
-  if (upErr) throw new Error("เกิดปัญหากับพื้นที่เก็บข้อมูล");
+  
+  if (upErr){ 
+    console.error(upErr);
+    throw new Error("เกิดปัญหากับพื้นที่เก็บข้อมูล");
+  }
 
   const { data: pub } = supabase.storage.from(mbucket).getPublicUrl(path);
   const publicUrl = pub?.publicUrl;

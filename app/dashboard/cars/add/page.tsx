@@ -3,21 +3,34 @@
 import { useRouter } from "next/navigation";
 import { AddCarForm } from "@/components/add-car-form";
 import { Car } from "@/types/carInterface";
-import { useToast } from "@/components/ui/use-toast"; // Corrected import
+import { createCar, uploadImageCar } from "@/lib/carServices";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 export default function AddCarPage() {
   const router = useRouter();
-  const { toast } = useToast(); // Destructure from useToast hook
-
-  const handleCarAdded = (car: Car) => {
-    // Redirect back to cars list after successful addition
+  const supabase = createClient();
+  
+  const handleCarAdded = async (car: Omit<Car, 'id' | 'created_at' | 'updated_at'>, image:File | null) => {
+  try {
+    const newCar = await createCar(supabase, car);
+    if (image){
+      await uploadImageCar(supabase, image, newCar.car_id);
+    }
     toast({
       variant: "success",
       title: "เพิ่มรถสำเร็จ",
       description: `รถ ${car.car_brand} ${car.model} ถูกเพิ่มเรียบร้อยแล้ว`,
     });
     router.push("/dashboard/cars");
-  };
+  } catch (error) {
+    toast({
+      variant: "destructive",
+      title: "เพิ่มรถไม่สำเร็จ",
+      description: "เกิดข้อผิดพลาดในการเพิ่มรถ",
+    });
+  }
+};
 
   const handleCancel = () => {
     // Redirect back to cars list
