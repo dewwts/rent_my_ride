@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { log } from "console"
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 
@@ -25,13 +26,13 @@ export async function POST(req: Request){
         }
 
         let event: Stripe.Event
+        
         try{
             event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
         }catch(err: unknown){
             console.error('Webhook signature verification failed:', err);
             return NextResponse.json({success: false, error: "Invalid signature"},{status:400})
         }
-
         console.log('Webhook event received:', event.type)
 
         // Handle Checkout Session completion (สำคัญสำหรับ Checkout Session flow)
