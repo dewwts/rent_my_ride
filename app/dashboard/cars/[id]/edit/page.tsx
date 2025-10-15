@@ -28,39 +28,37 @@ export default function EditCarPage() {
   const loadCar = async () => {
     setIsLoading(true);
     try {
-      // For now, use mock data. Later replace with:
-      // const carData = await getCarById(supabase, carId);
-      // if (!carData) {
-      //   toast({
-      //     variant: "destructive",
-      //     title: "ไม่พบรถ",
-      //     description: "ไม่พบรถที่ต้องการแก้ไข",
-      //   });
-      //   router.push("/dashboard/cars");
-      //   return;
-      // }
-      // setCar(carData);
+      const carData = await getCarById(supabase, carId);
+      if (!carData) {
+        toast({
+          variant: "destructive",
+          title: "ไม่พบรถ",
+          description: "ไม่พบรถที่ต้องการแก้ไข",
+        });
+        router.push("/dashboard/cars");
+        return;
+      }
+      setCar(carData);
 
       // Mock data for development
-      const mockCar: Car = {
-        id: carId,
-        brand: "Honda",
-        model: "Civic",
-        car_id: "XXXXXXXX",
-        year: 2018,
-        seats: 4,
-        car_type: "เก๋ง",
-        color: "ขาว",
-        mileage: 120000,
-        oil_type: "เบนซิน",
-        gear_type: "ออโต้",
-        price_per_day: 1200,
-        status: "available",
-        location: "กรุงเทพฯ",
-        rating: 4.5,
-        image_url: "https://images.unsplash.com/photo-1704340142770-b52988e5b6eb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1400"
-      };
-      setCar(mockCar);
+      // const mockCar: Car = {
+      //   id: carId,
+      //   car_brand: "Honda",
+      //   model: "Civic",
+      //   car_id: "XXXXXXXX",
+      //   year: 2018,
+      //   number_of_seats: 4,
+      //   car_type: "เก๋ง",
+      //   color: "ขาว",
+      //   mileage: 120000,
+      //   oil_type: "เบนซิน",
+      //   gear_type: "ออโต้",
+      //   daily_rental_price: 1200,
+      //   status: "available",
+      //   location: "กรุงเทพฯ",
+      //   rating: 4.5,
+      //   car_image: "https://images.unsplash.com/photo-1704340142770-b52988e5b6eb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1400"
+      // };
     } catch (error) {
       console.error("Error loading car:", error);
       toast({
@@ -85,7 +83,7 @@ export default function EditCarPage() {
 
       toast({
         title: "อัปเดตรถสำเร็จ",
-        description: `รถ ${updatedCar.brand} ${updatedCar.model} ถูกอัปเดตเรียบร้อยแล้ว`,
+        description: `รถ ${updatedCar.car_brand} ${updatedCar.model} ถูกอัปเดตเรียบร้อยแล้ว`,
       });
 
       router.push("/dashboard/cars");

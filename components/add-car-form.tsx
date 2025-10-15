@@ -18,7 +18,7 @@ import { CarSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
-import { uploadImageCar } from "@/lib/carServices";
+import { createCar, uploadImageCar } from "@/lib/carServices";
 import { Car } from "@/types/carInterface";
 import { AddCarFormProps } from "@/types/componentProps";
 
@@ -35,7 +35,7 @@ export function AddCarForm({
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const supabase = createClient();
-
+  const [image, setImage] = useState<File | null>(null)
   const {
     register,
     handleSubmit,
@@ -98,9 +98,9 @@ export function AddCarForm({
       const carId = `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       // Upload image
-      const imageUrl = await uploadImageCar(supabase, file, carId);
-      setValue("image_url", imageUrl);
-      
+      // const imageUrl = await uploadImageCar(supabase, file, carId);
+      // setValue("image_url", imageUrl);
+      setImage(file)
       toast({
         title: "อัปโหลดสำเร็จ",
         description: "รูปภาพรถถูกอัปโหลดเรียบร้อยแล้ว",
@@ -131,8 +131,11 @@ export function AddCarForm({
       };
 
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
+      await createCar(supabase, newCar)
+      if (image){
+        const carURL = await uploadImageCar(supabase, image, newCar.car_id)
+        setValue("image_url", carURL)
+      }
       toast({
         title: "เพิ่มรถสำเร็จ",
         description: `รถ ${data.car_brand} ${data.model} ถูกเพิ่มเรียบร้อยแล้ว`,

@@ -100,18 +100,18 @@ export const createCar = async (
     const { data, error } = await supabase
       .from('car_information')
       .insert({
-        car_brand: carData.brand,
+        car_brand: carData.car_brand,
         model: carData.model,
         car_id: carData.car_id,
         year_created: carData.year,
-        number_of_seats: carData.seats,
+        number_of_seats: carData.number_of_seats,
         gear_type: carData.gear_type,
         oil_type: carData.oil_type,
-        daily_rental_price: carData.price_per_day,
+        daily_rental_price: carData.daily_rental_price,
         status: carData.status,
         location: carData.location,
         car_conditionrating: carData.rating || 0,
-        car_image: carData.image_url,
+        car_image: carData.car_image,
         owner_id: user.id,
       })
       .select()
@@ -143,18 +143,18 @@ export const updateCar = async (
 
     // Map your carData fields to DB columns
     const mappedCarData: any = {
-      ...(carData.brand !== undefined && { car_brand: carData.brand }),
+      ...(carData.car_brand !== undefined && { car_brand: carData.car_brand }),
       ...(carData.model !== undefined && { car_model: carData.model }),
       ...(carData.car_id !== undefined && { car_id: carData.car_id }),
       ...(carData.year !== undefined && { year: carData.year }),
-      ...(carData.seats !== undefined && { seats: carData.seats }),
+      ...(carData.number_of_seats !== undefined && { seats: carData.number_of_seats }),
       ...(carData.oil_type !== undefined && { oil_type: carData.oil_type }),
       ...(carData.gear_type !== undefined && { gear_type: carData.gear_type }),
-      ...(carData.price_per_day !== undefined && { price_per_day: carData.price_per_day }),
+      ...(carData.daily_rental_price !== undefined && { price_per_day: carData.daily_rental_price }),
       ...(carData.status !== undefined && { status: carData.status }),
       ...(carData.location !== undefined && { location: carData.location }),
       ...(carData.rating !== undefined && { rating: carData.rating }),
-      ...(carData.image_url !== undefined && { image_url: carData.image_url }),
+      ...(carData.car_image !== undefined && { image_url: carData.car_image }),
       updated_at: new Date().toISOString(),
     };
 
