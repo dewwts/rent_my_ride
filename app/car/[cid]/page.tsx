@@ -7,7 +7,7 @@ import { getCarById } from "@/lib/carServices";
 
 
 export default async function Page({params}:{params:{cid:string}}) {
-    const {cid} = params;
+    const {cid} = await params;
     const car = await getCarById(createClient(), cid);
     console.log(car);
     return (
@@ -15,7 +15,7 @@ export default async function Page({params}:{params:{cid:string}}) {
         <Header />
         <CarDetailsPage cid={cid} car={car} />
         
-        <Footer />
+        <Footer noMargin/>
         </>
     )
 }

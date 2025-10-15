@@ -147,7 +147,7 @@ export function CarDetailsPage({cid,car}:{cid:string, car?:Car|null}) {
             รายละเอียดของรถ
           </h2>
           
-          <p className="text-base leading-loose text-slate-600 break-words">
+          <div className="text-base leading-loose text-slate-600 break-words">
               <div>{car?.car_brand} {car?.model} </div>
               <div>Mileage : {car?.mileage} km</div>
               <div>Seats : {car?.number_of_seats} </div>
@@ -156,7 +156,7 @@ export function CarDetailsPage({cid,car}:{cid:string, car?:Car|null}) {
               <div>Model year : {car?.year}</div>
               <div>Pick-up Location : {car?.location}</div>
               
-          </p>
+          </div>
         </div>
         
       </div>
