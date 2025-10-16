@@ -118,6 +118,7 @@ export default function MyCarsPage() {
       setCars(prevCars => prevCars.filter(car => car.car_id !== deleteDialog.car!.car_id));
       
       toast({
+        variant: "success",
         title: "ลบรถสำเร็จ",
         description: `รถ ${deleteDialog.car.car_brand} ${deleteDialog.car.model} ถูกลบเรียบร้อยแล้ว`,
       });

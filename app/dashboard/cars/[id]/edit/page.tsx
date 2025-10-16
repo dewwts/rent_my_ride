@@ -84,6 +84,7 @@ export default function EditCarPage() {
         await uploadImageCar(supabase, image, updatedCar.car_id);
       }
       toast({
+        variant: "success",
         title: "อัปเดตรถสำเร็จ",
         description: `รถ ${updatedCar.car_brand} ${updatedCar.model} ถูกอัปเดตเรียบร้อยแล้ว`,
       });
