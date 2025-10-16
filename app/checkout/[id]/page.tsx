@@ -77,15 +77,12 @@
 //     )
 // }
 "use client";
-import { useEffect, useState } from "react";
 //import { createClient } from "@/lib/supabase/client";
 import { QrCode, Wallet, Calendar, MapPin, Clock } from 'lucide-react';
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import { CarCheckout } from "@/types/carInterface";
-import { createClient } from "@/lib/supabase/client";
-import { generateUUID } from "@/lib/rentingServices";
 import { useParams } from "next/navigation";
 
 export default function CheckoutPage( car_info : CarCheckout) {
