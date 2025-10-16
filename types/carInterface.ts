@@ -3,7 +3,7 @@ export interface Car {
   car_brand: string;
   model: string;
   car_id: string;
-  year: number;
+  year_created?: number;
   number_of_seats: number;
   car_type: string;
   // color: string;
@@ -59,6 +59,7 @@ export interface CarCardProps {
   rating?: number;              // optional; default 0
   reviewCount?: number;         // optional; default 0
   seats: number;
+  year_created?: number;
   fuelType: string;
   transmission: string;
   availability: string;         // "พร้อมเช่า" | "จองล่วงหน้า" | ...
