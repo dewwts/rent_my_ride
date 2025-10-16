@@ -101,7 +101,7 @@ export function CarCard({
             <span className="text-sm text-gray-600">/วัน</span>
           </div>
           <Button variant="default" size="sm">
-            <Link href="/checkout">เช่าเลย</Link>
+            <Link href="/book">เช่าเลย</Link>
           </Button>
         </div>
       </div>
