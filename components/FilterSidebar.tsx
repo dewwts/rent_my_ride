@@ -1,6 +1,6 @@
 // components/FilterSidebar.tsx
 "use client";
-import { UIRangeFilter } from "@/lib/filterCars";
+import { UIRangeFilter } from "@/types/carInterface";
 
 type Props = { value: UIRangeFilter; onChange: (v: UIRangeFilter) => void };
 

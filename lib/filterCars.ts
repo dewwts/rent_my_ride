@@ -1,25 +1,7 @@
 // lib/filterCars.ts
-export interface UIRangeFilter {
-  price?: { min?: number; max?: number };
-  seats?: { min?: number; max?: number };
-  gear_types?: string[];        // "ออโต้", "ธรรมดา", ...
-  includeUnavailable?: boolean; // default false
-}
+import { UIRangeFilter } from "@/types/carInterface";
+import { CardForUI } from "./types";
 
-export type CardForUI = {
-  id: string;
-  name: string;
-  model: string;
-  image: string;
-  pricePerDay: number;
-  rating: number;
-  reviewCount: number;
-  seats: number;
-  fuelType: string;
-  transmission: string;
-  availability: string; // "พร้อมเช่า" | "จองล่วงหน้า"
-  features: string[];
-};
 
 const inRange = (v: number, min?: number, max?: number) =>
   (min == null || v >= min) && (max == null || v <= max);

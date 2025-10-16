@@ -3,14 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import "server-only";
 import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import type { CardForUI, CarRow } from "./types"; // or inline the types like before
+import type { CardForUI, CarRow } from "@/types/carInterface"; // or inline the types like before
 
 
 function getSupabaseAdmin() {
-  // ใช้ service role บนเซิร์ฟเวอร์เท่านั้น
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!, // <— service role
+    process.env.SUPABASE_ANON_KEY!, 
     {
       auth: { persistSession: false, autoRefreshToken: false },
     }
@@ -18,7 +17,7 @@ function getSupabaseAdmin() {
 }
 function toAvailability(status: string | null | undefined) {
   if (status === "available" || status === "พร้อมเช่า") return "พร้อมเช่า";
-  return "จองล่วงหน้า";
+  return "ไม่พร้อมเช่า";
 }
 export async function fetchAllCars(): Promise<CardForUI[]> {
   const supabase = getSupabaseAdmin(); // <— เปลี่ยนมาใช้ admin
