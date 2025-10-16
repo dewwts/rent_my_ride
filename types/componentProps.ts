@@ -8,13 +8,13 @@ export interface AddCarModalProps {
 
 export interface AddCarFormProps {
   className?: string;
-  onCarAdded?: (car: Car) => void;
+  onCarAdded?: (car: Car, image: File | null) => void;
   onCancel?: () => void;
 }
 
 export interface EditCarFormProps {
   car: Car;
-  onCarUpdated?: (car: Car) => void;
+  onCarUpdated?: (car: Car, image: File | null) => void;
   onCancel?: () => void;
   isLoading?: boolean;
   className?: string;
