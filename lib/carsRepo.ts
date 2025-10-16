@@ -28,7 +28,7 @@ async function getSupabaseAnon() {
 }
 
 function toAvailability(status: string | null | undefined) {
-  return status === "available" || status === "พร้อมเช่า" ? "พร้อมเช่า" : "จองล่วงหน้า";
+  return status === "available" || status === "พร้อมเช่า" ? "พร้อมเช่า" : "ไม่พร้อมเช่า";
 }
 
 export async function fetchAllCars(): Promise<CardForUI[]> {
