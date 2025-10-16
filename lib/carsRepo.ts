@@ -1,26 +1,38 @@
-
-import { createClient } from "@supabase/supabase-js";
+// lib/carsRepo.ts
 import "server-only";
 import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import type { CardForUI, CarRow } from "@/types/carInterface"; // or inline the types like before
+import type { CardForUI, CarRow } from "@/types/carInterface"; 
 
+async function getSupabaseAnon() {
+  const cookieStore = await cookies();
 
-function getSupabaseAdmin() {
-  return createClient(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!, 
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      auth: { persistSession: false, autoRefreshToken: false },
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value ?? null;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          cookieStore.set(name, value, options);
+        },
+        // old API expects `remove`, not `delete`
+        remove(name: string, options: CookieOptions) {
+          cookieStore.set(name, "", { ...options, maxAge: 0 });
+        },
+      },
     }
   );
 }
+
 function toAvailability(status: string | null | undefined) {
-  if (status === "available" || status === "พร้อมเช่า") return "พร้อมเช่า";
-  return "ไม่พร้อมเช่า";
+  return status === "available" || status === "พร้อมเช่า" ? "พร้อมเช่า" : "จองล่วงหน้า";
 }
+
 export async function fetchAllCars(): Promise<CardForUI[]> {
-  const supabase = getSupabaseAdmin(); // <— เปลี่ยนมาใช้ admin
+  const supabase = await getSupabaseAnon(); // <-- use anon client
   const { data, error } = await supabase
     .from("car_information")
     .select(
@@ -37,10 +49,7 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
       ].join(",")
     );
 
-  if (error) {
-    // โยน error ให้ page ตัดสินใจจัดการ หรือจะ return [] ก็ได้
-    throw error;
-  }
+  if (error) throw error;
 
   const rows = (data ?? []) as unknown as CarRow[];
 
