@@ -1,38 +1,9 @@
-// lib/carsRepo.ts
+
+import { createClient } from "@supabase/supabase-js";
 import "server-only";
 import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { createClient } from "@supabase/supabase-js";
-
-// ---- types (ย้ายมาที่นี่เพื่อให้ไฟล์เดียวจบ; ถ้ามี lib/types.ts อยู่แล้วจะ import จากนั้นแทนก็ได้)
-export type CarRow = {
-  car_id: string;
-  daily_rental_price: number | null;
-  car_image: string | null;
-  car_brand: string | null;
-  model: string | null;
-  number_of_seats: number | null;
-  oil_type: string | null;
-  gear_type: string | null;
-  status: string | null;
-};
-
-export type CardForUI = {
-  id: string;
-  name: string;
-  model: string;
-  image: string;
-  pricePerDay: number;
-  rating: number;
-  reviewCount: number;
-  seats: number;
-  fuelType: string;
-  transmission: string;
-  availability: string; // "พร้อมเช่า" | "จองล่วงหน้า"
-  features: string[];
-};
-
-
+import type { CardForUI, CarRow } from "./types"; // or inline the types like before
 
 
 function getSupabaseAdmin() {
