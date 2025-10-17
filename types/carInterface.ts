@@ -76,6 +76,7 @@ export type DbCar = {
   gear_type: string | null;
   status: string | null;
   location: string | null;
+  year_created?: number | null;
 };
 // export interface CarInput {
 //   car_brand: string;

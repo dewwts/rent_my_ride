@@ -1,57 +1,21 @@
+// components/hero.tsx
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Search, MapPin, Calendar } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { carAvailable } from "@/lib/carServices";
 import dayjs from "dayjs";
-import { DbCar } from "@/types/carInterface";
+import { createClient } from "@/lib/supabase/client";
+import type { DbCar } from "@/types/carInterface";
 
-// ------------------ Helpers ------------------
-// (1) ยืนยันซ้ำ: เช็ค overlap แบบ DATE-to-DATE + กรองสถานะ Pending/Confirmed
-async function hasDateOverlapPendingOrConfirmed(
-  supabase: ReturnType<typeof createClient>,
-  carId: string,
-  startAt: Date,
-  endAt: Date
-) {
-  const startDATE = dayjs(startAt).format("YYYY-MM-DD");
-  const endExclusiveDATE = dayjs(endAt).format("YYYY-MM-DD");
+// 👇 ย้าย logic ออกไป lib/
+import {
+  fetchLocationOptions,
+  pickPopularLocations,
+  searchAvailableCars,
+} from "@/lib/searchServices";
 
-  const { data, error } = await supabase
-    .from("renting")
-    .select("renting_id")
-    .eq("car_id", carId)
-    .in("status", ["Pending", "Confirmed"])
-    .gt("edate", startDATE)
-    .lt("sdate", endExclusiveDATE);
-
-  if (error) return true; // กันพลาด: เช็คไม่ได้ให้ถือว่าทับ
-  return (data?.length ?? 0) > 0;
-}
-
-async function fetchLocationOptions(supabase: ReturnType<typeof createClient>): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("car_information")
-    .select("location")
-    .not("location", "is", null);
-
-  if (error) return [];
-  const all = (data ?? [])
-    .map((r: any) => (r.location ?? "").trim())
-    .filter(Boolean);
-
-  return Array.from(new Set(all)).sort((a, b) => a.localeCompare(b));
-}
-
-// (3) เลือก “ยอดนิยม” ง่าย ๆ จากรายการทั้งหมด (หน้าบ้าน)
-function pickPopularLocations(all: string[], n = 6): string[] {
-  return all.slice(0, n);
-}
-
-// ------------------ Component ------------------
 export function Hero() {
   // state
   const [location, setLocation] = useState("");
@@ -59,7 +23,7 @@ export function Hero() {
   const [end, setEnd] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  // UI: autocomplete locations
+  // autocomplete
   const [allLocations, setAllLocations] = useState<string[]>([]);
   const [openSuggest, setOpenSuggest] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
@@ -67,12 +31,12 @@ export function Hero() {
 
   const supabase = useMemo(() => createClient(), []);
 
-  // load locations once
+  // load locations once (เรียกผ่าน lib)
   useEffect(() => {
     fetchLocationOptions(supabase).then(setAllLocations).catch(() => {});
   }, [supabase]);
 
-  // filter suggestions
+  // suggestions
   const suggestions = useMemo(() => {
     const q = location.trim().toLowerCase();
     if (!q) return allLocations.slice(0, 10);
@@ -81,7 +45,7 @@ export function Hero() {
 
   const popular = useMemo(() => pickPopularLocations(allLocations), [allLocations]);
 
-  // close dropdown on outside click
+  // close dropdown
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (!boxRef.current) return;
@@ -91,7 +55,6 @@ export function Hero() {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  // keyboard navigation
   const onLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!openSuggest && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
       setOpenSuggest(true);
@@ -116,14 +79,12 @@ export function Hero() {
     }
   };
 
-  // ------------------ Search handler ------------------
+  // search
   const onSearch = async () => {
     if (!start || !end) {
       alert("กรุณาเลือกวันที่รับและคืนรถ");
       return;
     }
-
-    // หน้าต่าง [start, endExclusive)
     const startAt = dayjs(start).startOf("day").toDate();
     const endAt = dayjs(end).add(1, "day").startOf("day").toDate();
 
@@ -138,43 +99,16 @@ export function Hero() {
 
     try {
       setLoading(true);
-
-      // 1) ค้นรถตามสถานที่ (ilike)
-      let query = supabase
-        .from("car_information")
-        .select(
-          "car_id, car_brand, model, car_image, daily_rental_price, car_conditionrating, number_of_seats, oil_type, gear_type, status, location"
-        );
-
-      if (location.trim()) {
-        query = query.ilike("location", `%${location.trim()}%`);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      const cars = (data ?? []) as DbCar[];
-
-      // 2) เช็คว่างรอบแรกด้วย carAvailable (TS/ISO logic)
-      const flags = await Promise.all(
-        cars.map((c) => carAvailable(supabase, c.car_id, startAt, endAt))
+      const cars: DbCar[] = await searchAvailableCars(
+        supabase,
+        { location, startAt, endAt },
+        { verifyPendingConfirmed: true }
       );
-      const availableCars = cars.filter((_, i) => flags[i] === true);
 
-      // 3) ยืนยันซ้ำแบบ DATE-only + สถานะที่ถือว่า "จองจริง"
-      const verifyFlags = await Promise.all(
-        availableCars.map((c) =>
-          hasDateOverlapPendingOrConfirmed(supabase, c.car_id, startAt, endAt)
-        )
-      );
-      const verifiedCars = availableCars.filter((_, i) => verifyFlags[i] === false);
-
-      // 4) ส่งผลลัพธ์ให้ HomeClient
+      // ส่งผลลัพธ์ให้ HomeClient
       window.dispatchEvent(
         new CustomEvent("cars:search-results", {
-          detail: {
-            cars: verifiedCars,
-            meta: { location, start, end },
-          },
+          detail: { cars, meta: { location, start, end } },
         })
       );
     } catch (e: any) {
@@ -185,23 +119,17 @@ export function Hero() {
     }
   };
 
-  // ------------------ UI (your original look & feel, now wired up) ------------------
+  // --- UI เหมือนเดิม (ตัดโค้ด helper ออกแล้ว) ---
   return (
     <div className="w-full max-w-5xl mx-auto text-center space-y-8">
-      {/* Hero Text - More minimal */}
       <div className="space-y-4">
-        <h1 className="font-medium text-4xl md:text-5xl text-black">
-          เช่ารถง่าย ใช้ได้จริง
-        </h1>
-        <p className="text-lg text-gray-600 max-w-xl mx-auto">
-          เลือกรถที่ใช่ สำหรับทุกการเดินทาง
-        </p>
+        <h1 className="font-medium text-4xl md:text-5xl text-black">เช่ารถง่าย ใช้ได้จริง</h1>
+        <p className="text-lg text-gray-600 max-w-xl mx-auto">เลือกรถที่ใช่ สำหรับทุกการเดินทาง</p>
       </div>
 
-      {/* Modern Search Bar - Simplified */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Location Input + suggestions */}
+          {/* Location */}
           <div className="flex-1 relative" ref={boxRef}>
             <div className="absolute left-3 top-1/2 -translate-y-1/2">
               <MapPin className="h-5 w-5 text-gray-400" />
@@ -217,8 +145,6 @@ export function Hero() {
               onFocus={() => setOpenSuggest(true)}
               onKeyDown={onLocationKeyDown}
             />
-
-            {/* Suggestions dropdown */}
             {openSuggest && suggestions.length > 0 && (
               <div className="absolute z-20 mt-2 w-full rounded-xl border bg-white shadow">
                 <ul className="max-h-64 overflow-auto py-2">
@@ -239,8 +165,7 @@ export function Hero() {
                     </li>
                   ))}
                 </ul>
-
-                {/* Popular quick chips */}
+                {/* popular chips */}
                 {popular.length > 0 && (
                   <div className="border-t px-3 py-2 text-left">
                     <div className="text-xs text-gray-500 mb-2">ยอดนิยม</div>
@@ -265,7 +190,7 @@ export function Hero() {
             )}
           </div>
 
-          {/* Date Range */}
+          {/* Date range */}
           <div className="flex flex-col sm:flex-row gap-4 lg:flex-1">
             <div className="relative flex-1">
               <div className="absolute left-3 top-1/2 -translate-y-1/2">
@@ -293,14 +218,8 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Search Button */}
-          <Button
-            variant="default"
-            size="lg"
-            onClick={onSearch}
-            disabled={loading}
-            className="h-12"
-          >
+          {/* Search */}
+          <Button variant="default" size="lg" onClick={onSearch} disabled={loading} className="h-12">
             <Search className="h-5 w-5 mr-2" />
             {loading ? "กำลังค้นหา..." : "ค้นหา"}
           </Button>
