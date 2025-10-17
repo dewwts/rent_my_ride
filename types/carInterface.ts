@@ -48,6 +48,7 @@ export type CardForUI = {
   transmission: string;
   availability: string; // "พร้อมเช่า" | "จองล่วงหน้า"
   features: string[];
+  year?: number;
 };
 export interface CarCardProps {
   id: string;
@@ -63,6 +64,19 @@ export interface CarCardProps {
   availability: string;         // "พร้อมเช่า" | "จองล่วงหน้า" | ...
   features?: string[];          // optional
 }
+export type DbCar = {
+  car_id: string;
+  car_brand: string | null;
+  model: string | null;
+  car_image: string | null;
+  daily_rental_price: number | null;
+  car_conditionrating: number | null;
+  number_of_seats: number | null;
+  oil_type: string | null;
+  gear_type: string | null;
+  status: string | null;
+  location: string | null;
+};
 // export interface CarInput {
 //   car_brand: string;
 //   model: string;
