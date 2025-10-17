@@ -3,12 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Search, MapPin, Calendar, X } from "lucide-react";
+import { Search, MapPin, Calendar } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { carAvailable } from "@/lib/carServices";
 import dayjs from "dayjs";
 import { DbCar } from "@/types/carInterface";
-
 
 // ------------------ Helpers ------------------
 // (1) ยืนยันซ้ำ: เช็ค overlap แบบ DATE-to-DATE + กรองสถานะ Pending/Confirmed
@@ -40,19 +39,21 @@ async function fetchLocationOptions(supabase: ReturnType<typeof createClient>): 
     .not("location", "is", null);
 
   if (error) return [];
-  const all = (data ?? []).map((r: any) => (r.location ?? "").trim()).filter(Boolean);
-  // unique + sort (ไทย/อังกฤษปนได้)
+  const all = (data ?? [])
+    .map((r: any) => (r.location ?? "").trim())
+    .filter(Boolean);
+
   return Array.from(new Set(all)).sort((a, b) => a.localeCompare(b));
 }
 
 // (3) เลือก “ยอดนิยม” ง่าย ๆ จากรายการทั้งหมด (หน้าบ้าน)
 function pickPopularLocations(all: string[], n = 6): string[] {
-  // heuristic เล็ก ๆ: เอาอันสั้น/เจอบ่อย (ไม่มีตัวนับความถี่จาก DB ก็สุ่ม ๆ/เรียงเอา)
   return all.slice(0, n);
 }
 
 // ------------------ Component ------------------
 export function Hero() {
+  // state
   const [location, setLocation] = useState("");
   const [start, setStart] = useState<string>("");
   const [end, setEnd] = useState<string>("");
@@ -64,14 +65,14 @@ export function Hero() {
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const boxRef = useRef<HTMLDivElement>(null);
 
-  const supabase = useMemo(() => createClient(), []); // reuse client
+  const supabase = useMemo(() => createClient(), []);
 
+  // load locations once
   useEffect(() => {
-    // โหลดรายการสถานที่ครั้งแรก
     fetchLocationOptions(supabase).then(setAllLocations).catch(() => {});
   }, [supabase]);
 
-  // filter คำแนะนำตามที่พิมพ์ (case-insensitive, contains)
+  // filter suggestions
   const suggestions = useMemo(() => {
     const q = location.trim().toLowerCase();
     if (!q) return allLocations.slice(0, 10);
@@ -80,7 +81,7 @@ export function Hero() {
 
   const popular = useMemo(() => pickPopularLocations(allLocations), [allLocations]);
 
-  // ปิด dropdown เมื่อคลิกนอกกล่อง
+  // close dropdown on outside click
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (!boxRef.current) return;
@@ -90,7 +91,7 @@ export function Hero() {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  // คีย์บอร์ดควบคุม suggestion
+  // keyboard navigation
   const onLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!openSuggest && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
       setOpenSuggest(true);
@@ -184,10 +185,10 @@ export function Hero() {
     }
   };
 
-  // ------------------ UI ------------------
+  // ------------------ UI (your original look & feel, now wired up) ------------------
   return (
-    <div className="w-full max-w-7xl mx-auto text-center space-y-8">
-      {/* Headline */}
+    <div className="w-full max-w-5xl mx-auto text-center space-y-8">
+      {/* Hero Text - More minimal */}
       <div className="space-y-4">
         <h1 className="font-medium text-4xl md:text-5xl text-black">
           เช่ารถง่าย ใช้ได้จริง
@@ -197,83 +198,69 @@ export function Hero() {
         </p>
       </div>
 
-      {/* Quick popular locations */}
-      {popular.length > 0 && (
-        <div className="flex flex-wrap gap-2 justify-center">
-          {popular.map((loc) => (
-            <button
-              key={loc}
-              type="button"
-              onClick={() => {
-                setLocation(loc);
-                setOpenSuggest(false);
-              }}
-              className="px-3 py-1 rounded-full border border-gray-200 hover:border-black text-sm"
-            >
-              {loc}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Search Bar */}
+      {/* Modern Search Bar - Simplified */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Location with suggestions */}
+          {/* Location Input + suggestions */}
           <div className="flex-1 relative" ref={boxRef}>
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2">
               <MapPin className="h-5 w-5 text-gray-400" />
             </div>
             <Input
-              placeholder="เลือกสถานที่รับรถ (เช่น เชียงใหม่, ขอนแก่น)"
-              className="pl-10 pr-10 h-12 border-gray-200 focus:border-black focus:ring-0"
+              placeholder="เลือกสถานที่รับรถ"
+              className="pl-10 h-12 border-gray-200 focus:border-black focus:ring-0"
               value={location}
               onChange={(e) => {
                 setLocation(e.target.value);
                 setOpenSuggest(true);
-                setActiveIndex(-1);
               }}
               onFocus={() => setOpenSuggest(true)}
               onKeyDown={onLocationKeyDown}
             />
-            {/* Clear button */}
-            {location && (
-              <button
-                type="button"
-                aria-label="ล้างสถานที่"
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100"
-                onClick={() => {
-                  setLocation("");
-                  setOpenSuggest(true);
-                  setActiveIndex(-1);
-                }}
-              >
-                <X className="h-4 w-4 text-gray-500" />
-              </button>
-            )}
 
             {/* Suggestions dropdown */}
             {openSuggest && suggestions.length > 0 && (
-              <div className="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden">
-                <ul className="max-h-64 overflow-auto">
+              <div className="absolute z-20 mt-2 w-full rounded-xl border bg-white shadow">
+                <ul className="max-h-64 overflow-auto py-2">
                   {suggestions.map((s, i) => (
-                    <li key={s}>
-                      <button
-                        type="button"
-                        onMouseEnter={() => setActiveIndex(i)}
-                        onClick={() => {
-                          setLocation(s);
-                          setOpenSuggest(false);
-                        }}
-                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
-                          i === activeIndex ? "bg-gray-50" : ""
-                        }`}
-                      >
-                        {s}
-                      </button>
+                    <li
+                      key={s + i}
+                      className={`px-3 py-2 text-left cursor-pointer ${
+                        i === activeIndex ? "bg-gray-100" : "hover:bg-gray-50"
+                      }`}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setLocation(s);
+                        setOpenSuggest(false);
+                      }}
+                      onMouseEnter={() => setActiveIndex(i)}
+                    >
+                      {s}
                     </li>
                   ))}
                 </ul>
+
+                {/* Popular quick chips */}
+                {popular.length > 0 && (
+                  <div className="border-t px-3 py-2 text-left">
+                    <div className="text-xs text-gray-500 mb-2">ยอดนิยม</div>
+                    <div className="flex flex-wrap gap-2">
+                      {popular.map((p) => (
+                        <button
+                          key={p}
+                          className="text-sm px-2 py-1 rounded-full border hover:bg-gray-50"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setLocation(p);
+                            setOpenSuggest(false);
+                          }}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -281,31 +268,39 @@ export function Hero() {
           {/* Date Range */}
           <div className="flex flex-col sm:flex-row gap-4 lg:flex-1">
             <div className="relative flex-1">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2">
                 <Calendar className="h-5 w-5 text-gray-400" />
               </div>
               <Input
                 type="date"
                 className="pl-10 h-12 border-gray-200 focus:border-black focus:ring-0"
                 value={start}
+                min={dayjs().format("YYYY-MM-DD")}
                 onChange={(e) => setStart(e.target.value)}
               />
             </div>
             <div className="relative flex-1">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2">
                 <Calendar className="h-5 w-5 text-gray-400" />
               </div>
               <Input
                 type="date"
                 className="pl-10 h-12 border-gray-200 focus:border-black focus:ring-0"
                 value={end}
+                min={start || dayjs().format("YYYY-MM-DD")}
                 onChange={(e) => setEnd(e.target.value)}
               />
             </div>
           </div>
 
-          {/* Search */}
-          <Button variant="default" size="lg" onClick={onSearch} disabled={loading}>
+          {/* Search Button */}
+          <Button
+            variant="default"
+            size="lg"
+            onClick={onSearch}
+            disabled={loading}
+            className="h-12"
+          >
             <Search className="h-5 w-5 mr-2" />
             {loading ? "กำลังค้นหา..." : "ค้นหา"}
           </Button>
