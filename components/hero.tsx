@@ -193,7 +193,7 @@ export function Hero() {
           เช่ารถง่าย ใช้ได้จริง
         </h1>
         <p className="text-lg text-gray-600 max-w-xl mx-auto">
-          เลือกสถานที่ + วันที่ แล้วค้นหา
+          เลือกรถที่ใช่ สำหรับทุกการเดินทาง
         </p>
       </div>
 
