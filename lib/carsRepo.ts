@@ -9,7 +9,7 @@ function toAvailability(status: string | null | undefined) {
 
 type RowWithCondition = CarRow & {
   car_conditionrating: number | null;
-  year_created: number | null; // ✅ เพิ่มให้ชัดเจน
+  year_created: number | null; // พิ่มให้ชัดเจน
 };
 
 export async function fetchAllCars(): Promise<CardForUI[]> {
@@ -29,7 +29,7 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         "gear_type",
         "status",
         "car_conditionrating",
-        "year_created", // ✅ ดึงปีผลิตจาก DB
+        "year_created", //ดึงปีผลิตจาก DB
       ].join(",")
     );
 
