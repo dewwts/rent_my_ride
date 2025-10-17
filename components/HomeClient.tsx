@@ -4,17 +4,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CarCard } from "@/components/car-card";
-import {filterCars} from "@/lib/filterCars";
-import { UIRangeFilter,CardForUI } from "@/types/carInterface";
+import { filterCars } from "@/lib/filterCars";
+import { UIRangeFilter, CardForUI, DbCar } from "@/types/carInterface";
 import FilterSidebar from "@/components/FilterSidebar";
-import { DbCar } from "@/types/carInterface";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { ArrowUpDown, ChevronDown, Check } from "lucide-react";
+
 type Props = { initialCars: CardForUI[] };
-
-// shape ของ row ที่ Hero ส่งมา (ตรงกับ select ใน hero.tsx)
-
 
 type SearchMeta = { location?: string; start?: string; end?: string };
 
+// ----- utils -----
 function toAvailability(status: string | null | undefined) {
   return status === "available" || status === "พร้อมเช่า" ? "พร้อมเช่า" : "ไม่พร้อมเช่า";
 }
@@ -33,8 +38,20 @@ function mapDbCarToCard(c: DbCar): CardForUI {
     transmission: c.gear_type ?? "",
     availability: toAvailability(c.status),
     features: [],
+    // ถ้า fetchAllCars เติม year แล้ว ฝั่ง Hero ยังไม่ map -> year อาจว่าง ให้เป็น undefined
+    year: (c as any)?.year_created ?? (c as any)?.year ?? undefined,
   };
 }
+
+// ----- sort -----
+type SortKey = "popularity" | "price_asc" | "rating_desc" | "year_desc";
+
+const SORT_LABEL: Record<SortKey, string> = {
+  popularity: "ความนิยม",
+  price_asc: "ราคา (ต่ำไปสูง)",
+  rating_desc: "คะแนนรีวิว",
+  year_desc: "ปีที่ผลิต (รุ่นใหม่ก่อน)",
+};
 
 export default function HomeClient({ initialCars }: Props) {
   const [filter, setFilter] = useState<UIRangeFilter>({
@@ -42,21 +59,19 @@ export default function HomeClient({ initialCars }: Props) {
     gear_types: [],
   });
 
-  // ✅ เก็บผลค้นหาจาก Hero (ถ้ายังไม่ค้นหา ให้เป็น null → ใช้ initialCars)
+  // รับผลค้นหาจาก Hero (ถ้ายังไม่ค้นหา ใช้ initialCars)
   const [dynamicCars, setDynamicCars] = useState<CardForUI[] | null>(null);
   const [meta, setMeta] = useState<SearchMeta | null>(null);
 
-  // ✅ ฟังผลลัพธ์จาก Hero
+  // เรียงลำดับ
+  const [sortBy, setSortBy] = useState<SortKey>("popularity");
+
+  // ฟังผลลัพธ์จาก Hero
   useEffect(() => {
     const handler = (e: Event) => {
       const { cars, meta } = (e as CustomEvent<{ cars: DbCar[]; meta: SearchMeta }>).detail;
 
-      console.log("[HomeClient] received cars: ", cars?.length ?? 0, meta);
-      console.table((cars ?? []).map((c) => ({ car_id: c.car_id, location: c.location })));
-
       const mapped = (cars ?? []).map(mapDbCarToCard);
-      console.log("[HomeClient] mapped to CardForUI:", mapped.length);
-
       setDynamicCars(mapped);
       setMeta(meta ?? null);
     };
@@ -65,18 +80,38 @@ export default function HomeClient({ initialCars }: Props) {
     return () => window.removeEventListener("cars:search-results", handler as EventListener);
   }, []);
 
-  // ใช้ dynamicCars ถ้ามี ไม่งั้น fallback เป็น initialCars
+  // แหล่งข้อมูลเริ่มต้น
   const sourceCars = dynamicCars ?? initialCars;
 
-  // ใช้ฟิลเตอร์เดิมของคุณ
-  const filtered = useMemo(() => {
-    const out = filterCars(sourceCars, filter);
-    console.log(
-      "[HomeClient] filtering:",
-      { source: sourceCars.length, afterFilter: out.length, filter }
-    );
-    return out;
-  }, [sourceCars, filter]);
+  // กรองก่อน
+  const filtered = useMemo(() => filterCars(sourceCars, filter), [sourceCars, filter]);
+
+  // แล้วค่อยเรียง
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+
+    switch (sortBy) {
+      case "price_asc":
+        arr.sort((a, b) => (a.pricePerDay ?? 0) - (b.pricePerDay ?? 0));
+        break;
+
+      case "rating_desc":
+        arr.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        break;
+
+      case "year_desc": {
+        const ya = (c: CardForUI) => (c as any)?.year ?? 0;
+        arr.sort((a, b) => ya(b) - ya(a));
+        break;
+      }
+
+      case "popularity":
+      default:
+        // ยังไม่มี metric ความนิยม → คงลำดับเดิม
+        break;
+    }
+    return arr;
+  }, [filtered, sortBy]);
 
   return (
     <section className="mt-12 grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
@@ -85,7 +120,7 @@ export default function HomeClient({ initialCars }: Props) {
       <div>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-semibold">ผลการค้นหา {filtered.length} คัน</h2>
+            <h2 className="text-xl font-semibold">ผลการค้นหา {sorted.length} คัน</h2>
             {meta && (
               <p className="text-sm text-gray-600 mt-1">
                 {meta.location ? `สถานที่: ${meta.location} • ` : ""}
@@ -94,11 +129,37 @@ export default function HomeClient({ initialCars }: Props) {
               </p>
             )}
           </div>
-          <Button variant="outline">เรียงโดย: ความนิยม</Button>
+
+          {/* Dropdown: เรียงโดย */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="inline-flex items-center gap-2 rounded-full px-4">
+                <ArrowUpDown className="h-4 w-4" />
+                <span>เรียงโดย : {SORT_LABEL[sortBy]}</span>
+                <ChevronDown className="h-4 w-4 opacity-70" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={() => setSortBy("price_asc")}>
+                <span className="flex-1">ราคา (ต่ำไปสูง)</span>
+                {sortBy === "price_asc" && <Check className="h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("rating_desc")}>
+                <span className="flex-1">คะแนนรีวิว</span>
+                {sortBy === "rating_desc" && <Check className="h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("year_desc")}>
+                <span className="flex-1">ปีที่ผลิต (รุ่นใหม่ก่อน)</span>
+                {sortBy === "year_desc" && <Check className="h-4 w-4" />}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
+        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((car) => (
+          {sorted.map((car) => (
             <CarCard key={car.id} {...car} />
           ))}
         </div>
