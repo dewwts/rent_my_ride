@@ -111,7 +111,7 @@ export function CarCard({
 
           {/* (Optional) deep link to car details using id */}
           <Button asChild size="sm">
-            <Link href={`/dcar/${id}`} aria-label={`เช่า ${name} ${model}`}>
+            <Link href={`/car/${id}`} aria-label={`เช่า ${name} ${model}`}>
               เช่าเลย
             </Link>
           </Button>
