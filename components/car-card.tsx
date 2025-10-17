@@ -2,29 +2,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { Star, Users, Fuel, Settings } from "lucide-react";
-
-interface CarCardProps {
-  id: string;
-  name: string;
-  model: string;
-  image?: string;               // make optional for fallback
-  pricePerDay: number;
-  rating?: number;              // optional; default 0
-  reviewCount?: number;         // optional; default 0
-  seats: number;
-  fuelType: string;
-  transmission: string;
-  availability: string;         // "พร้อมเช่า" | "จองล่วงหน้า" | ...
-  features?: string[];          // optional
-}
+import type { CarCardProps } from "@/types/carInterface";
 
 export function CarCard({
+  id,
   name,
   model,
   image,
   pricePerDay,
-  rating = 0,
-  reviewCount = 0,
+  rating,
+  reviewCount,
   seats,
   fuelType,
   transmission,
@@ -37,7 +24,6 @@ export function CarCard({
     ? "bg-emerald-50 text-emerald-700"
     : "bg-gray-100 text-gray-600";
 
-  // if image missing, use a subtle gradient placeholder
   const hasImage = !!image && image.trim() !== "";
 
   return (
@@ -72,11 +58,11 @@ export function CarCard({
           <p className="text-gray-600 text-sm">{model}</p>
         </div>
 
-        {/* Rating */}
+        {/* Rating (match first component’s feel) */}
         <div className="flex items-center gap-1" aria-label="rating">
           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-          <span className="text-sm font-medium">{Number(rating).toFixed(1)}</span>
-          <span className="text-sm text-gray-500">({reviewCount.toLocaleString()} รีวิว)</span>
+          <span className="text-sm font-medium">{rating}</span>
+          <span className="text-sm text-gray-500">({reviewCount} รีวิว)</span>
         </div>
 
         {/* Car Features (icons row) */}
@@ -118,14 +104,14 @@ export function CarCard({
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div>
             <span className="text-2xl font-bold text-black">
-              ฿{Number(pricePerDay).toLocaleString()}
+              ฿{pricePerDay.toLocaleString()}
             </span>
             <span className="text-sm text-gray-600">/วัน</span>
           </div>
 
-          {/* ใช้ asChild เพื่อหลีกเลี่ยง nested interactive */}
+          {/* (Optional) deep link to car details using id */}
           <Button asChild size="sm">
-            <Link href="/checkout" aria-label={`เช่า ${name} ${model}`}>
+            <Link href={`/dcar/${id}`} aria-label={`เช่า ${name} ${model}`}>
               เช่าเลย
             </Link>
           </Button>

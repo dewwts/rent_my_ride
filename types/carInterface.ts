@@ -49,6 +49,20 @@ export type CardForUI = {
   availability: string; // "พร้อมเช่า" | "จองล่วงหน้า"
   features: string[];
 };
+export interface CarCardProps {
+  id: string;
+  name: string;
+  model: string;
+  image?: string;               // make optional for fallback
+  pricePerDay: number;
+  rating?: number;              // optional; default 0
+  reviewCount?: number;         // optional; default 0
+  seats: number;
+  fuelType: string;
+  transmission: string;
+  availability: string;         // "พร้อมเช่า" | "จองล่วงหน้า" | ...
+  features?: string[];          // optional
+}
 // export interface CarInput {
 //   car_brand: string;
 //   model: string;
