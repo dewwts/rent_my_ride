@@ -24,19 +24,18 @@ export default function RentingHistoryPage() {
       setError(null);
       
       const data = await getMyRentingHistory(supabase);
-      setTotalCount(data.length);
 
-      const start = (currentPage - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      const pageData = data.slice(start, end);
       // ทำ pagination อย่างไงวะเนี่ย สุดท้ายก็คือ fetch หมดอยู่ดี
       const bookingsWithPriceandLessorName = await Promise.all(
-        pageData.map(async (booking) => {
+        data.map(async (booking) => {
           // error อยู่ยังไม่ได้แก้ by phaolap
           const ownerId = booking.car_information.owner_id;
           const lessor_name = await getFirstname(supabase,ownerId);
           try {
             const price = await getRentingPrice(supabase, booking.renting_id);
+            if(price == null){
+              return null;
+            }
             return { ...booking, total_price: price ?? 0 ,lessor_name}; //add total price field
           } catch (err) {
             console.error("Error fetching price for", booking.renting_id, err);
@@ -45,7 +44,16 @@ export default function RentingHistoryPage() {
         })
       );
 
-    setBookings(bookingsWithPriceandLessorName);
+      const filterNullPrice = bookingsWithPriceandLessorName.filter(
+        (item): item is NonNullable<typeof item> => item !== null
+      );
+
+      setTotalCount(filterNullPrice.length);
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageData = filterNullPrice.slice(start, end);
+
+      setBookings(pageData);
       
     } catch (err) {
       console.error('Error fetching mock bookings:', err);

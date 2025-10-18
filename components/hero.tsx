@@ -1,60 +1,246 @@
+// components/hero.tsx
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Search, MapPin, Calendar } from "lucide-react";
+import dayjs from "dayjs";
+import { createClient } from "@/lib/supabase/client";
+import type { DbCar } from "@/types/carInterface";
+import {
+  fetchLocationOptions,
+  searchAvailableCars,
+  searchCarsByLocation,
+} from "@/lib/searchServices";
+import { useToast } from "@/components/ui/use-toast"; 
 
 export function Hero() {
+  // state
+  const [location, setLocation] = useState("");
+  const [start, setStart] = useState<string>("");
+  const [end, setEnd] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+
+  // autocomplete
+  const [allLocations, setAllLocations] = useState<string[]>([]);
+  const [openSuggest, setOpenSuggest] = useState(false);
+  const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  const supabase = useMemo(() => createClient(), []);
+  const { toast } = useToast(); 
+
+  // load locations once (เรียกผ่าน lib)
+  useEffect(() => {
+    fetchLocationOptions(supabase).then(setAllLocations).catch(() => {});
+  }, [supabase]);
+
+  // suggestions
+  const suggestions = useMemo(() => {
+    const q = location.trim().toLowerCase();
+    if (!q) return allLocations.slice(0, 10);
+    return allLocations.filter((loc) => loc.toLowerCase().includes(q)).slice(0, 10);
+  }, [location, allLocations]);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!boxRef.current) return;
+      if (!boxRef.current.contains(e.target as Node)) setOpenSuggest(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  const onLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!openSuggest && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+      setOpenSuggest(true);
+      setActiveIndex(0);
+      return;
+    }
+    if (!openSuggest) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => (i + 1) % Math.max(1, suggestions.length));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => (i - 1 + Math.max(1, suggestions.length)) % Math.max(1, suggestions.length));
+    } else if (e.key === "Enter") {
+      if (activeIndex >= 0 && suggestions[activeIndex]) {
+        setLocation(suggestions[activeIndex]);
+        setOpenSuggest(false);
+      }
+    } else if (e.key === "Escape") {
+      setOpenSuggest(false);
+    }
+  };
+
+  // search (รองรับ 3 โหมด + กันเคสใส่วันไม่ครบคู่)
+  const onSearch = async () => {
+    const hasStart = !!start;
+    const hasEnd = !!end;
+
+    // ใส่วันไม่ครบคู่ → เตือน
+    if ((hasStart && !hasEnd) || (!hasStart && hasEnd)) {
+      toast({
+        title: "เลือกวันที่ไม่ครบ",
+        description: "โปรดเลือกทั้งวันรับและคืนรถ หรือเว้นว่างทั้งคู่",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // ไม่กรอกทั้งวันและสถานที่ → รีเซ็ตกลับ initialCars
+    if (!hasStart && !hasEnd && !location.trim()) {
+      window.dispatchEvent(new CustomEvent("cars:reset"));
+      toast({
+        title: "รีเซ็ตผลการค้นหาแล้ว",
+        description: "แสดงรายการเริ่มต้นทั้งหมด",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // ไม่กรอกวัน → ค้นหาตามสถานที่อย่างเดียว
+      if (!hasStart && !hasEnd) {
+        const cars: DbCar[] = await searchCarsByLocation(supabase, location);
+        window.dispatchEvent(
+          new CustomEvent("cars:search-results", {
+            detail: { cars, meta: { location, start, end } },
+          })
+        );
+        return;
+      }
+
+      // ใส่วันครบคู่ → validate + ค้นหาเช็คว่างจริง (location ว่างได้ = ค้นหาทุกที่)
+      const startAt = dayjs(start).startOf("day").toDate();
+      const endAt = dayjs(end).add(1, "day").startOf("day").toDate();
+
+      if (isNaN(startAt.getTime()) || isNaN(endAt.getTime())) {
+        toast({
+          title: "วันที่ไม่ถูกต้อง",
+          description: "รูปแบบวันที่ไม่ถูกต้อง",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (startAt >= endAt) {
+        toast({
+          title: "ช่วงวันไม่ถูกต้อง",
+          description: "วันเริ่มต้องไม่เกินวันสิ้นสุด",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const cars: DbCar[] = await searchAvailableCars(
+        supabase,
+        { location, startAt, endAt },
+        { verifyPendingConfirmed: true }
+      );
+
+      window.dispatchEvent(
+        new CustomEvent("cars:search-results", {
+          detail: { cars, meta: { location, start, end } },
+        })
+      );
+    } catch (e: any) {
+      console.error(e);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: e?.message ?? "เกิดข้อผิดพลาดขณะค้นหา",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- UI ---
   return (
     <div className="w-full max-w-5xl mx-auto text-center space-y-8">
-      {/* Hero Text - More minimal */}
       <div className="space-y-4">
-        <h1 className=" font-medium text-4xl md:text-5xl text-black">
-          เช่ารถง่าย ใช้ได้จริง
-        </h1>
-        <p className="text-lg text-gray-600 max-w-xl mx-auto">
-          เลือกรถที่ใช่ สำหรับทุกการเดินทาง
-        </p>
+        <h1 className="font-medium text-4xl md:text-5xl text-black">เช่ารถง่าย ใช้ได้จริง</h1>
+        <p className="text-lg text-gray-600 max-w-xl mx-auto">เลือกรถที่ใช่ สำหรับทุกการเดินทาง</p>
       </div>
 
-      {/* Modern Search Bar - Simplified */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Location Input */}
-          <div className="flex-1 relative">
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+          {/* Location */}
+          <div className="flex-1 relative" ref={boxRef}>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2">
               <MapPin className="h-5 w-5 text-gray-400" />
             </div>
             <Input
               placeholder="เลือกสถานที่รับรถ"
               className="pl-10 h-12 border-gray-200 focus:border-black focus:ring-0"
+              value={location}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                setOpenSuggest(true);
+              }}
+              onFocus={() => setOpenSuggest(true)}
+              onKeyDown={onLocationKeyDown}
             />
+            {openSuggest && suggestions.length > 0 && (
+              <div className="absolute z-20 mt-2 w-full rounded-xl border bg-white shadow">
+                <ul className="max-h-64 overflow-auto py-2">
+                  {suggestions.map((s, i) => (
+                    <li
+                      key={s + i}
+                      className={`px-3 py-2 text-left cursor-pointer ${
+                        i === activeIndex ? "bg-gray-100" : "hover:bg-gray-50"
+                      }`}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setLocation(s);
+                        setOpenSuggest(false);
+                      }}
+                      onMouseEnter={() => setActiveIndex(i)}
+                    >
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
-          {/* Date Range */}
+          {/* Date range */}
           <div className="flex flex-col sm:flex-row gap-4 lg:flex-1">
             <div className="relative flex-1">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2">
                 <Calendar className="h-5 w-5 text-gray-400" />
               </div>
               <Input
                 type="date"
                 className="pl-10 h-12 border-gray-200 focus:border-black focus:ring-0"
+                value={start}
+                min={dayjs().format("YYYY-MM-DD")}
+                onChange={(e) => setStart(e.target.value)}
               />
             </div>
             <div className="relative flex-1">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2">
                 <Calendar className="h-5 w-5 text-gray-400" />
               </div>
               <Input
                 type="date"
                 className="pl-10 h-12 border-gray-200 focus:border-black focus:ring-0"
+                value={end}
+                min={start || dayjs().format("YYYY-MM-DD")}
+                onChange={(e) => setEnd(e.target.value)}
               />
             </div>
           </div>
 
-          {/* Search Button */}
-          <Button variant="default" size="lg">
+          {/* Search */}
+          <Button variant="default" size="lg" onClick={onSearch} disabled={loading} className="h-12">
             <Search className="h-5 w-5 mr-2" />
-            ค้นหา
+            {loading ? "กำลังค้นหา..." : "ค้นหา"}
           </Button>
         </div>
       </div>
