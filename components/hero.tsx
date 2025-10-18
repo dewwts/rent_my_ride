@@ -8,12 +8,12 @@ import { Search, MapPin, Calendar } from "lucide-react";
 import dayjs from "dayjs";
 import { createClient } from "@/lib/supabase/client";
 import type { DbCar } from "@/types/carInterface";
-
 import {
   fetchLocationOptions,
   searchAvailableCars,
   searchCarsByLocation,
 } from "@/lib/searchServices";
+import { useToast } from "@/components/ui/use-toast"; 
 
 export function Hero() {
   // state
@@ -29,6 +29,7 @@ export function Hero() {
   const boxRef = useRef<HTMLDivElement>(null);
 
   const supabase = useMemo(() => createClient(), []);
+  const { toast } = useToast(); 
 
   // load locations once (เรียกผ่าน lib)
   useEffect(() => {
@@ -82,13 +83,21 @@ export function Hero() {
 
     // ใส่วันไม่ครบคู่ → เตือน
     if ((hasStart && !hasEnd) || (!hasStart && hasEnd)) {
-      alert("โปรดเลือกทั้งวันรับและคืนรถ หรือเว้นว่างทั้งคู่");
+      toast({
+        title: "เลือกวันที่ไม่ครบ",
+        description: "โปรดเลือกทั้งวันรับและคืนรถ หรือเว้นว่างทั้งคู่",
+        variant: "destructive",
+      });
       return;
     }
 
     // ไม่กรอกทั้งวันและสถานที่ → รีเซ็ตกลับ initialCars
     if (!hasStart && !hasEnd && !location.trim()) {
       window.dispatchEvent(new CustomEvent("cars:reset"));
+      toast({
+        title: "รีเซ็ตผลการค้นหาแล้ว",
+        description: "แสดงรายการเริ่มต้นทั้งหมด",
+      });
       return;
     }
 
@@ -111,11 +120,19 @@ export function Hero() {
       const endAt = dayjs(end).add(1, "day").startOf("day").toDate();
 
       if (isNaN(startAt.getTime()) || isNaN(endAt.getTime())) {
-        alert("รูปแบบวันที่ไม่ถูกต้อง");
+        toast({
+          title: "วันที่ไม่ถูกต้อง",
+          description: "รูปแบบวันที่ไม่ถูกต้อง",
+          variant: "destructive",
+        });
         return;
       }
       if (startAt >= endAt) {
-        alert("วันเริ่มต้องไม่เกินวันสิ้นสุด");
+        toast({
+          title: "ช่วงวันไม่ถูกต้อง",
+          description: "วันเริ่มต้องไม่เกินวันสิ้นสุด",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -132,7 +149,11 @@ export function Hero() {
       );
     } catch (e: any) {
       console.error(e);
-      alert(e?.message ?? "เกิดข้อผิดพลาดขณะค้นหา");
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: e?.message ?? "เกิดข้อผิดพลาดขณะค้นหา",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
