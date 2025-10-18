@@ -9,10 +9,8 @@ import dayjs from "dayjs";
 import { createClient } from "@/lib/supabase/client";
 import type { DbCar } from "@/types/carInterface";
 
-// 👇 ย้าย logic ออกไป lib/
 import {
   fetchLocationOptions,
-  pickPopularLocations,
   searchAvailableCars,
 } from "@/lib/searchServices";
 
@@ -43,9 +41,6 @@ export function Hero() {
     return allLocations.filter((loc) => loc.toLowerCase().includes(q)).slice(0, 10);
   }, [location, allLocations]);
 
-  const popular = useMemo(() => pickPopularLocations(allLocations), [allLocations]);
-
-  // close dropdown
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (!boxRef.current) return;
@@ -119,7 +114,7 @@ export function Hero() {
     }
   };
 
-  // --- UI เหมือนเดิม (ตัดโค้ด helper ออกแล้ว) ---
+  // --- UI ---
   return (
     <div className="w-full max-w-5xl mx-auto text-center space-y-8">
       <div className="space-y-4">
@@ -165,27 +160,6 @@ export function Hero() {
                     </li>
                   ))}
                 </ul>
-                {/* popular chips */}
-                {popular.length > 0 && (
-                  <div className="border-t px-3 py-2 text-left">
-                    <div className="text-xs text-gray-500 mb-2">ยอดนิยม</div>
-                    <div className="flex flex-wrap gap-2">
-                      {popular.map((p) => (
-                        <button
-                          key={p}
-                          className="text-sm px-2 py-1 rounded-full border hover:bg-gray-50"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            setLocation(p);
-                            setOpenSuggest(false);
-                          }}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </div>
