@@ -1,18 +1,14 @@
 // lib/carsRepo.ts
 import "server-only";
-import type { CardForUI, CarRow } from "@/types/carInterface";
-import { createClient } from "@/lib/supabase/server"; 
+import type { CardForUI, DbCar } from "@/types/carInterface";
+import { createClient } from "@/lib/supabase/server";
 
 function toAvailability(status: string | null | undefined) {
   return status === "available" || status === "พร้อมเช่า" ? "พร้อมเช่า" : "ไม่พร้อมเช่า";
 }
 
-type RowWithCondition = CarRow & {
-  car_conditionrating: number | null;
-};
-
 export async function fetchAllCars(): Promise<CardForUI[]> {
-  const supabase = await createClient(); // ใช้จาก server.ts
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("car_information")
@@ -28,32 +24,40 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         "gear_type",
         "status",
         "car_conditionrating",
+        "year_created", 
       ].join(",")
     );
 
   if (error) throw error;
 
-  const rows = (data ?? []) as unknown as RowWithCondition[];
+  const rows = (data ?? []) as unknown as DbCar[];
 
-  return rows.map((r) => {
-    const conditionRating =
+  return rows.map((r): CardForUI => {
+    const price = Number(r.daily_rental_price ?? 0);
+    const rating =
       typeof r.car_conditionrating === "number" && Number.isFinite(r.car_conditionrating)
         ? r.car_conditionrating
         : 0;
+    const seats = Number(r.number_of_seats ?? 0);
+    const year =
+      typeof r.year_created === "number" && Number.isFinite(r.year_created)
+        ? r.year_created
+        : undefined;
 
     return {
       id: r.car_id,
       name: r.car_brand ?? "ไม่ระบุ",
       model: r.model ?? "",
       image: r.car_image ?? "",
-      pricePerDay: Number(r.daily_rental_price ?? 0),
-      rating: conditionRating,       // แสดงค่าจาก car_conditionrating
-      reviewCount: 0,                // ยังไม่ดึงรีวิวจากตาราง reviews
-      seats: r.number_of_seats ?? 0,
+      pricePerDay: price,
+      rating,
+      reviewCount: 0,
+      seats,
       fuelType: r.oil_type ?? "",
       transmission: r.gear_type ?? "",
       availability: toAvailability(r.status),
       features: [],
+      year, 
     };
   });
 }

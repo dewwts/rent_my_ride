@@ -160,7 +160,7 @@ export default function FilterSidebar({ value, onChange }: Props) {
             onChange({ ...value, includeUnavailable: e.target.checked })
           }
         />
-        <span className="text-sm text-slate-800">แสดงรถที่ไม่ว่าง (รวมด้วย)</span>
+        <span className="text-sm text-slate-800">แสดงรถที่ไม่พร้อมเช่า (รวมด้วย)</span>
       </label>
     </aside>
   );
