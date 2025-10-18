@@ -12,6 +12,7 @@ import type { DbCar } from "@/types/carInterface";
 import {
   fetchLocationOptions,
   searchAvailableCars,
+  searchCarsByLocation,
 } from "@/lib/searchServices";
 
 export function Hero() {
@@ -74,33 +75,56 @@ export function Hero() {
     }
   };
 
-  // search
+  // search (รองรับ 3 โหมด + กันเคสใส่วันไม่ครบคู่)
   const onSearch = async () => {
-    if (!start || !end) {
-      alert("กรุณาเลือกวันที่รับและคืนรถ");
-      return;
-    }
-    const startAt = dayjs(start).startOf("day").toDate();
-    const endAt = dayjs(end).add(1, "day").startOf("day").toDate();
+    const hasStart = !!start;
+    const hasEnd = !!end;
 
-    if (isNaN(startAt.getTime()) || isNaN(endAt.getTime())) {
-      alert("รูปแบบวันที่ไม่ถูกต้อง");
+    // ใส่วันไม่ครบคู่ → เตือน
+    if ((hasStart && !hasEnd) || (!hasStart && hasEnd)) {
+      alert("โปรดเลือกทั้งวันรับและคืนรถ หรือเว้นว่างทั้งคู่");
       return;
     }
-    if (startAt >= endAt) {
-      alert("วันเริ่มต้องไม่เกินวันสิ้นสุด");
+
+    // ไม่กรอกทั้งวันและสถานที่ → รีเซ็ตกลับ initialCars
+    if (!hasStart && !hasEnd && !location.trim()) {
+      window.dispatchEvent(new CustomEvent("cars:reset"));
       return;
     }
 
     try {
       setLoading(true);
+
+      // ไม่กรอกวัน → ค้นหาตามสถานที่อย่างเดียว
+      if (!hasStart && !hasEnd) {
+        const cars: DbCar[] = await searchCarsByLocation(supabase, location);
+        window.dispatchEvent(
+          new CustomEvent("cars:search-results", {
+            detail: { cars, meta: { location, start, end } },
+          })
+        );
+        return;
+      }
+
+      // ใส่วันครบคู่ → validate + ค้นหาเช็คว่างจริง (location ว่างได้ = ค้นหาทุกที่)
+      const startAt = dayjs(start).startOf("day").toDate();
+      const endAt = dayjs(end).add(1, "day").startOf("day").toDate();
+
+      if (isNaN(startAt.getTime()) || isNaN(endAt.getTime())) {
+        alert("รูปแบบวันที่ไม่ถูกต้อง");
+        return;
+      }
+      if (startAt >= endAt) {
+        alert("วันเริ่มต้องไม่เกินวันสิ้นสุด");
+        return;
+      }
+
       const cars: DbCar[] = await searchAvailableCars(
         supabase,
         { location, startAt, endAt },
         { verifyPendingConfirmed: true }
       );
 
-      // ส่งผลลัพธ์ให้ HomeClient
       window.dispatchEvent(
         new CustomEvent("cars:search-results", {
           detail: { cars, meta: { location, start, end } },
