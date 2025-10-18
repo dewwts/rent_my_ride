@@ -34,7 +34,6 @@ export default function RentingHistoryPage() {
         pageData.map(async (booking) => {
           // error อยู่ยังไม่ได้แก้ by phaolap
           const ownerId = booking.car_information.owner_id;
-          console.log(ownerId);
           const lessor_name = await getFirstname(supabase,ownerId);
           try {
             const price = await getRentingPrice(supabase, booking.renting_id);
