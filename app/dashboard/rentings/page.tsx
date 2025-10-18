@@ -24,17 +24,16 @@ export default function RentingHistoryPage() {
       setError(null);
       
       const data = await getMyLeasingHistory(supabase);
-      setTotalCount(data.length);
-
-      const start = (currentPage - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      const pageData = data.slice(start, end);
 
       const LeasingWithPriceandName = await Promise.all(
-        pageData.map(async (leasing) => {
+        data.map(async (leasing) => {
           const lessee_name = await getFirstname(supabase,leasing.lessee_id)
           try {
             const price = await getRentingPrice(supabase, leasing.renting_id);
+            console.log(price)
+            if (price == null) {
+              return null;
+            }
             return { ...leasing, total_price: price ?? 0 ,lessee_name}; //add total price field and lessee_name
           } catch (err) {
             console.error("Error fetching price for", leasing.renting_id);
@@ -43,7 +42,16 @@ export default function RentingHistoryPage() {
         })
       );
 
-    setBookings(LeasingWithPriceandName);
+      const filterNullPrice = LeasingWithPriceandName.filter(
+        (item): item is NonNullable<typeof item> => item !== null
+      );
+
+      setTotalCount(filterNullPrice.length);
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageData = filterNullPrice.slice(start, end);
+
+      setBookings(pageData);
       
     } catch (err) {
       console.log(err)
