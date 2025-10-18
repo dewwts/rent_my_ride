@@ -3,6 +3,37 @@ import dayjs from "dayjs";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { DbCar } from "@/types/carInterface";
 
+
+export async function searchCarsByLocation(
+  supabase: SupabaseClient,
+  location?: string
+): Promise<DbCar[]> {
+  let query = supabase
+    .from("car_information")
+    .select([
+      "car_id",
+      "car_brand",
+      "model",
+      "car_image",
+      "daily_rental_price",
+      "car_conditionrating",
+      "number_of_seats",
+      "oil_type",
+      "gear_type",
+      "status",
+      "location",
+      "year_created",
+    ].join(","));
+
+  if (location?.trim()) {
+    query = query.ilike("location", `%${location.trim()}%`);
+  }
+
+  const { data, error } = await query.returns<DbCar[]>();
+  if (error) throw error;
+  return data ?? [];
+}
+
 /** เช็คซ้ำแบบ DATE-only + กรองสถานะที่ถือว่าจองจริง */
 export async function hasDateOverlapPendingOrConfirmed(
   supabase: SupabaseClient,
