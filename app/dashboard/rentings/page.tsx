@@ -30,7 +30,6 @@ export default function RentingHistoryPage() {
           const lessee_name = await getFirstname(supabase,leasing.lessee_id)
           try {
             const price = await getRentingPrice(supabase, leasing.renting_id);
-            console.log(price)
             if (price == null) {
               return null;
             }
