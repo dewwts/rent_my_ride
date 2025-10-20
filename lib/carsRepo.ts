@@ -1,5 +1,5 @@
 // lib/carsRepo.ts
-import "server-only";
+// import "server-only";
 import type { CardForUI, DbCar } from "@/types/carInterface";
 import { createClient } from "@/lib/supabase/server";
 

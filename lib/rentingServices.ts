@@ -40,7 +40,7 @@ export const getRentingById = async (supabase: SupabaseClient, id: string) => {
   
   const {data , error} = await supabase
     .from("renting")
-    .select()
+    .select("*")
     .eq("renting_id",id)
     .single();
 
@@ -120,6 +120,14 @@ export const getRentingPrice = async (supabase : SupabaseClient, renting_id:stri
     if(error) throw error;
     if(!data) return null;
     return data.amount;
+}
+
+export const generateUUID = async(supabase: SupabaseClient)=>{
+  const {data: uuid, error:err} = await  supabase.rpc('generate_uuid')
+  if (err){
+    throw new Error("เกิดความผิดพลาดกับระบบฐานข้อมูล")
+  }
+  return uuid as string
 }
 
 export const getMyLeasingHistory = async (supabase : SupabaseClient) => {

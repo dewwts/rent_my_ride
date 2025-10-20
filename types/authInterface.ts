@@ -16,5 +16,6 @@ export interface profileInfo {
     u_email:string, 
     u_phone:string, 
     u_address:string, 
-    url:string
+    url:string,
+    stripe_account_id:string | null
 }

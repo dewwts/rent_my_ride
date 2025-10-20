@@ -49,8 +49,8 @@ export async function hasDateOverlapPendingOrConfirmed(
     .select("renting_id")
     .eq("car_id", carId)
     .in("status", ["Pending", "Confirmed"])
-    .gt("edate", startDATE)          // edate > start
-    .lt("sdate", endExclusiveDATE)   // sdate < end
+    .gte("edate", startDATE)          // edate >= start
+    .lte("sdate", endExclusiveDATE)   // sdate <= end
     .returns<{ renting_id: string }[]>(); 
   if (error) return true; // เช็คไม่ได้ให้ถือว่าทับ ป้องกันพลาด
   return (data?.length ?? 0) > 0;

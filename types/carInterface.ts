@@ -18,6 +18,22 @@ export interface Car {
   updated_at?: string;
   daily_rental_price?: number;
 }
+export interface CarCheckout {
+  rid: string;
+  r_date: string;
+  total_days: number;
+  p_date: string;
+  e_date: string;
+  localtion_take: string | undefined;
+  location_return:string | undefined;
+  total_price: number;
+  car_id: string;
+  description: string;
+  car_brand: string;
+  car_model: string;
+  car_image: string;
+  amount: number;
+}
 export interface UIRangeFilter {
   price?: { min?: number; max?: number };
   seats?: { min?: number; max?: number };

@@ -1,6 +1,6 @@
 // lib/filterCars.ts
 import { UIRangeFilter } from "@/types/carInterface";
-import { CardForUI } from "./types";
+import { CardForUI } from "@/types/carInterface";
 
 
 const inRange = (v: number, min?: number, max?: number) =>
