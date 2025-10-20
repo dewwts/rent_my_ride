@@ -14,6 +14,7 @@ export default function AddCarPage() {
   const handleCarAdded = async (car: Omit<Car, 'id' | 'created_at' | 'updated_at'>, image:File | null) => {
   try {
     const newCar = await createCar(supabase, car);
+    console.log(newCar);
     if (image){
       await uploadImageCar(supabase, image, newCar.car_id);
     }
@@ -24,6 +25,7 @@ export default function AddCarPage() {
     });
     router.push("/dashboard/cars");
   } catch (error) {
+    console.error(error);
     toast({
       variant: "destructive",
       title: "เพิ่มรถไม่สำเร็จ",

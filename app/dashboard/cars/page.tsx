@@ -9,64 +9,6 @@ import { getMyCars, deleteCar } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";
 import { Car } from "@/types/carInterface";
 
-// Mock data for development
-// const mockCars: Car[] = [
-//   {
-//     id: "1",
-//     brand: "Honda",
-//     model: "Civic",
-//     car_id: "XXXXXXXX",
-//     year: 2018,
-//     seats: 4,
-//     car_type: "เก๋ง",
-//     color: "ขาว",
-//     mileage: 120000,
-//     oil_type: "เบนซิน",
-//     gear_type: "ออโต้",
-//     price_per_day: 1200,
-//     status: "available",
-//     location: "กรุงเทพฯ",
-//     rating: 4.5,
-//     image_url: "https://images.unsplash.com/photo-1704340142770-b52988e5b6eb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1400"
-//   },
-//   {
-//     id: "2",
-//     brand: "Toyota",
-//     model: "Camry",
-//     car_id: "YYYYYYYY",
-//     year: 2019,
-//     seats: 5,
-//     car_type: "เก๋ง",
-//     color: "ดำ",
-//     mileage: 95000,
-//     oil_type: "เบนซิน",
-//     gear_type: "ออโต้",
-//     price_per_day: 1500,
-//     status: "available",
-//     location: "กรุงเทพฯ",
-//     rating: 4.8,
-//     image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170"
-//   },
-//   {
-//     id: "3",
-//     brand: "Mazda",
-//     model: "CX-5",
-//     car_id: "ZZZZZZZZ",
-//     year: 2020,
-//     seats: 5,
-//     car_type: "SUV",
-//     color: "แดง",
-//     mileage: 75000,
-//     oil_type: "เบนซิน",
-//     gear_type: "ออโต้",
-//     price_per_day: 1800,
-//     status: "unavailable",
-//     location: "กรุงเทพฯ",
-//     rating: 4.2,
-//     image_url: "https://images.unsplash.com/photo-1590362891991-f776e747a588?w=400"
-//   }
-// ];
-
 export default function MyCarsPage() {
   const router = useRouter();
   const [cars, setCars] = useState<Car[]>([]);
@@ -87,10 +29,6 @@ export default function MyCarsPage() {
     setIsLoading(true);
     try {
       const myCar = await getMyCars(supabase);
-      
-      // For now, use mock data. Later replace with:
-      // const carsData = await getMyCars(supabase);
-      // setCars(carsData);
       setCars(myCar);
     } catch (error) {
       console.error("Error loading cars:", error);
@@ -113,8 +51,6 @@ export default function MyCarsPage() {
 
     setIsDeleting(true);
     try {
-      // For now, just remove from state. Later replace with:
-      // await deleteCar(supabase, deleteDialog.car.id);
       setCars(prevCars => prevCars.filter(car => car.car_id !== deleteDialog.car!.car_id));
       
       toast({
@@ -228,7 +164,7 @@ export default function MyCarsPage() {
                           ประเภท: {car.model}
                         </p>
                         <p className="text-sm text-gray-500">
-                          ปี: {car.year}
+                          ปี: {car.year_created}
                         </p>
                         {/* <p className="text-sm text-gray-500">
                           สี: {car.color}

@@ -103,7 +103,7 @@ export const createCar = async (
     if (!user) {
       throw new Error("โปรดเข้าสู่ระบบก่อน");
     }
-
+    console.log(carData);
     const { data, error } = await supabase
       .from('car_information')
       .insert({
@@ -124,7 +124,7 @@ export const createCar = async (
       })
       .select()
       .single();
-
+    console.log(data);
     if (error) {
       throw new Error(error.message);
     }
