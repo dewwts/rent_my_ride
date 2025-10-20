@@ -17,15 +17,28 @@ export default function AddCarPage() {
     if (image){
       await uploadImageCar(supabase, image, newCar.car_id);
     }
-    console.log(`เพิ่มรถสำเร็จ: รถ ${newCar.car_brand} ${newCar.model} ถูกเพิ่มเรียบร้อยแล้ว`);
+    toast({
+      variant: "success",
+      title: "เพิ่มรถสำเร็จ",
+      description: `รถ ${car.car_brand} ${car.model} ถูกเพิ่มเรียบร้อยแล้ว`,
+    });
     router.push("/dashboard/cars");
   } catch (error) {
-    console.error("เพิ่มรถไม่สำเร็จ:", error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการเพิ่มรถ");
+    toast({
+      variant: "destructive",
+      title: "เพิ่มรถไม่สำเร็จ",
+      description: "เกิดข้อผิดพลาดในการเพิ่มรถ",
+    });
   }
 };
 
   const handleCancel = () => {
     // Redirect back to cars list
+    toast({
+      variant: "destructive",
+      title: "เพิ่มรถไม่สำเร็จ",
+      description: "เกิดข้อผิดพลาดในการเพิ่มรถ",
+    });
     router.push("/dashboard/cars");
   };
 

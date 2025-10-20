@@ -125,19 +125,10 @@ export function EditCarForm({
       // // Simulate API call
       // // await new Promise(resolve => setTimeout(resolve, 1000));
       // await updateCar(supabase, car.car_id, updatedCar)
-      toast({
-        title: "อัปเดตรถสำเร็จ",
-        description: `รถ ${data.car_brand} ${data.model} ถูกอัปเดตเรียบร้อยแล้ว`,
-      });
 
       onCarUpdated?.(updatedCar, image);
     } catch (error) {
       console.error("Update car error:", error);
-      toast({
-        variant: "destructive",
-        title: "อัปเดตรถไม่สำเร็จ",
-        description: error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการอัปเดตรถ",
-      });
     } finally {
       setIsSubmitting(false);
     }

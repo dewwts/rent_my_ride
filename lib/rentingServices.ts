@@ -115,13 +115,13 @@ export const getRentingPrice = async (supabase : SupabaseClient, renting_id:stri
     .from("transactions")
     .select("amount")
     .eq("renting_id",renting_id)
-    .single();
+    .maybeSingle(); //if cannot find return null
     
     if(error) throw error;
+    if(!data) return null;
     return data.amount;
 }
 
-<<<<<<< HEAD
 export const generateUUID = async(supabase: SupabaseClient)=>{
   const {data: uuid, error:err} = await  supabase.rpc('generate_uuid')
   if (err){
@@ -130,7 +130,6 @@ export const generateUUID = async(supabase: SupabaseClient)=>{
   return uuid as string
 }
 
-=======
 export const getMyLeasingHistory = async (supabase : SupabaseClient) => {
   const {data: { user }} = await supabase.auth.getUser();
   if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
@@ -159,4 +158,3 @@ export const getMyLeasingHistory = async (supabase : SupabaseClient) => {
 
   return rentings;
 }
->>>>>>> 6eb82a3f3fcebd7764c7e0b6c6940a0a0742c3a8

@@ -134,19 +134,9 @@ export function AddCarForm({
       //   const carURL = await uploadImageCar(supabase, image, newCar.car_id)
       //   setValue("image_url", carURL)
       // }
-      toast({
-        title: "เพิ่มรถสำเร็จ",
-        description: `รถ ${data.car_brand} ${data.model} ถูกเพิ่มเรียบร้อยแล้ว`,
-      });
-
       onCarAdded?.(newCar,image);
     } catch (error) {
       console.error("Add car error:", error);
-      toast({
-        variant: "destructive",
-        title: "เพิ่มรถไม่สำเร็จ",
-        description: error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการเพิ่มรถ",
-      });
     } finally {
       setIsLoading(false);
     }
