@@ -51,6 +51,7 @@ export default function MyCarsPage() {
 
     setIsDeleting(true);
     try {
+      await deleteCar(supabase, deleteDialog.car.car_id)
       setCars(prevCars => prevCars.filter(car => car.car_id !== deleteDialog.car!.car_id));
       
       toast({

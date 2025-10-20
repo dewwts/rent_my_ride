@@ -217,7 +217,7 @@ export const deleteCar = async (supabase: SupabaseClient, carId: string): Promis
     const { error } = await supabase
       .from('car_information')
       .delete()
-      .eq('id', carId)
+      .eq('car_id', carId)
       .eq('owner_id', user.id); // Ensure user can only delete their own cars
 
     if (error) {
