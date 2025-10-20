@@ -32,7 +32,7 @@ export async function POST(req: Request) {
                             name: 'ค่าเช่ารถ',
                             description: `Renting ID: ${rid}`,
                         },
-                        unit_amount: Math.round(amount * 100), // convert to satangs
+                        unit_amount: Math.round(amount * 100),
                     },
                     quantity: 1,
                 },

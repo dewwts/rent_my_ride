@@ -252,13 +252,12 @@ export const carAvailable = async(supabase: SupabaseClient, carid:string, startA
         .from("renting")
         .select("renting_id, sdate, edate")
         .eq("car_id", carid)
-        .gt("edate", startISO) // edate > start
-        .lt("sdate", endISO) // sdate < end
+        .lte("sdate", endISO)
+        .gte("edate", startISO);
 
         if (error) {
             throw error;
         }
-
         const available = carData.length === 0;
         return available;
     }catch(err: unknown){

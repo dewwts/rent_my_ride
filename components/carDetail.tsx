@@ -47,7 +47,6 @@ export function CarDetailsPage({
       const end = dayjs(parsed.endDate).startOf("day").add(1, "day").toDate();
 
       const isAvailable = await carAvailable(supabase, cid, start, end);
-
       if (!isAvailable) {
         toast({
           variant: "destructive",
@@ -83,14 +82,11 @@ export function CarDetailsPage({
 
       // ไปหน้า checkout พร้อม query ที่ต้องใช้
       router.push(
-        `/checkout?renting_id=${encodeURIComponent(
+        `/checkout/${encodeURIComponent(
           rentingId
-        )}&car_id=${encodeURIComponent(
-          cid
-        )}&sdate=${sdateStr}&edate=${edateStr}&days=${days}`
+        )}`
       );
     } catch (error: any) {
-      // ✅ ดึงเฉพาะข้อความจาก ZodError (หรือ error ทั่วไป)
       const zodIssues = error?.errors ?? error?.issues;
       const messages =
         Array.isArray(zodIssues) && zodIssues.length
