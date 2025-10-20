@@ -29,7 +29,7 @@ export function CarDetailsPage({ cid, car }: { cid: string; car?: Car | null }) 
             {car?.car_brand} {car?.model}
           </h1>
 
-          <div className="inline-block px-5 py-2 mt-4 mb-8 font-semibold text-white bg-slate-900 rounded-full">
+          <div className="w-fit px-5 py-2 mt-4 mb-8 font-semibold text-white bg-slate-900 rounded-full">
             {car?.daily_rental_price} บาท / วัน
           </div>
 
@@ -158,12 +158,13 @@ export function CarDetailsPage({ cid, car }: { cid: string; car?: Car | null }) 
         </div>
 
         {/* === ขวา: รายละเอียดรถ === */}
-        <div className="w-5/12 pt-16">
-          <h2 className="mb-6 text-3xl font-semibold text-slate-900">
-            รายละเอียดของรถ
-          </h2>
+        <div className="w-5/12 pt-16 ">
+          
 
           <div className="text-base leading-loose text-slate-600 break-words">
+            <h2 className=" mb-6 text-3xl font-semibold text-slate-900 pt-16">
+              รายละเอียดของรถ
+            </h2>
             <div>
               {car?.car_brand} {car?.model}
             </div>
