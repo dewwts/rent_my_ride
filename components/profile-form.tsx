@@ -1,72 +1,31 @@
-// components/profile-form.tsx
 "use client";
 
 import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
+import { set, type z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import { ProfileSchema } from "@/lib/schemas";
 import InputField from "@/components/ui/inputfield";
 import { toast } from "./ui/use-toast";
+import { useRouter } from "next/navigation";
+import { getProfile, removeAvatar, updateAvatar, updateProfile } from "@/lib/authServices";
+import { parseAddress } from "@/lib/utils";
+import {MAX_BYTES, BUCKET, ALLOWED_TYPES} from "@/types/avatarConstraint"
+import { Button } from "./ui/button";
+import axios, { AxiosError } from "axios";
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
-
-const ADDRESS_SEP = " | ";
-const PFX = {
-  sub: "แขวง/ตำบล ",
-  dist: "เขต/อำเภอ ",
-  prov: "จังหวัด ",
-  post: "รหัสไปรษณีย์ ",
-  country: "ประเทศ ",
-};
-
-// ---- Helpers ----
-function buildAddress(v: ProfileValues): string | null {
-  const parts: string[] = [];
-  if (v.addr_line?.trim()) parts.push(v.addr_line.trim());
-  if (v.subdistrict?.trim()) parts.push(PFX.sub + v.subdistrict.trim());
-  if (v.district?.trim()) parts.push(PFX.dist + v.district.trim());
-  if (v.province?.trim()) parts.push(PFX.prov + v.province.trim());
-  if (v.postcode?.trim()) parts.push(PFX.post + v.postcode.trim());
-  if (v.country?.trim()) parts.push(PFX.country + v.country.trim());
-  return parts.length ? parts.join(ADDRESS_SEP) : null;
-}
-function stripPrefix(s: string, prefix: string) {
-  return s.startsWith(prefix) ? s.slice(prefix.length) : s;
-}
-function parseAddress(s: string | null | undefined) {
-  let addr_line = "", subdistrict = "", district = "", province = "", postcode = "", country = "";
-  if (!s) return { addr_line, subdistrict, district, province, postcode, country };
-  const tokens = s.split(ADDRESS_SEP).map(t => t.trim()).filter(Boolean);
-  const freeTexts: string[] = [];
-  for (const t of tokens) {
-    if (t.startsWith(PFX.sub)) subdistrict = stripPrefix(t, PFX.sub);
-    else if (t.startsWith(PFX.dist)) district = stripPrefix(t, PFX.dist);
-    else if (t.startsWith(PFX.prov)) province = stripPrefix(t, PFX.prov);
-    else if (t.startsWith(PFX.post)) postcode = stripPrefix(t, PFX.post);
-    else if (t.startsWith(PFX.country)) country = stripPrefix(t, PFX.country);
-    else if (/^\d{5}$/.test(t) && !postcode) postcode = t;
-    else freeTexts.push(t);
-  }
-  if (freeTexts.length) addr_line = freeTexts.join(" ");
-  return { addr_line, subdistrict, district, province, postcode, country };
-}
-
-// ---- Configs for upload ----
-const BUCKET = "mbucket";
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 
 export function ProfileForm() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
+  const [stripeID, setStripeID] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-
+  const router = useRouter()
   const fileRef = useRef<HTMLInputElement | null>(null);
   const disabled = loading || saving;
 
@@ -96,20 +55,10 @@ export function ProfileForm() {
     let active = true;
     (async () => {
       try {
-        const { data: sessionData } = await supabase.auth.getUser();
-        const user = sessionData?.user;
-        if (!user) { setLoading(false); return; }
-
-        const { data: row, error } = await supabase
-          .from("user_info")
-          .select("u_firstname, u_lastname, u_email, u_phone, u_address, url")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (error) throw error;
+        const row = await getProfile(supabase)
         if (!active) return;
 
-        setValue("email", row?.u_email ?? user.email ?? "");
+        setValue("email", row?.u_email ??  "");
         setValue("firstname", row?.u_firstname ?? "");
         setValue("lastname", row?.u_lastname ?? "");
         setValue("phone", row?.u_phone ?? "");
@@ -124,9 +73,19 @@ export function ProfileForm() {
           setValue("country", p.country);
         }
 
-        setAvatarUrl(row?.url ?? null);
+        setAvatarUrl(row?.url ?? null); 
+        setStripeID(row?.stripe_account_id ?? null)
       } catch (e: unknown) {
-        console.error(e instanceof Error ? e.message : "โหลดข้อมูลไม่สำเร็จ");
+        let error = "โหลดข้อมูลไม่สำเร็จ"
+        if (e instanceof Error){
+          error = e.message
+        }
+        console.error(error);
+        toast({
+            variant:"destructive",
+            title:"ไม่สำเร็จ",
+            description:error
+        })
       } finally {
         setLoading(false);
       }
@@ -137,41 +96,20 @@ export function ProfileForm() {
   const onSubmit = async (values: ProfileValues) => {
     setSaving(true);
     try {
-      const { data: sessionData } = await supabase.auth.getUser();
-      const user = sessionData?.user;
-      if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
-
-      const email = values.email?.trim() || user.email?.trim();
-      if (!email) throw new Error("ไม่พบอีเมลใน session");
-
-      const u_address = buildAddress(values);
-      const { error } = await supabase
-        .from("user_info")
-        .upsert(
-          {
-            user_id: user.id,
-            u_email: email, // กัน NOT NULL
-            u_firstname: values.firstname,
-            u_lastname: values.lastname,
-            u_phone: values.phone || null,
-            u_address,
-          },
-          { onConflict: "user_id" }
-        );
-      if (error) throw error;
-
+      await updateProfile(supabase, values)
       toast({
         variant:"success",
         title:"สำเร็จ",
         description:"บันทึกโปรไฟล์สำเร็จ"
       })
+      router.refresh()
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "บันทึกไม่สำเร็จ";
       console.error(errorMessage);
       toast({
         variant:"destructive",
         title:"ไม่สำเร็จ",
-        description:"บันทึกข้อมูลไม่สำเร็จ"
+        description:errorMessage
       })
     } finally {
       setSaving(false);
@@ -179,7 +117,6 @@ export function ProfileForm() {
   };
 
   async function handleFileSelected(file: File) {
-    // validate ก่อน อัปโหลด
     if (!ALLOWED_TYPES.includes(file.type)) {
       console.error("รองรับเฉพาะ JPG, PNG, WEBP, GIF");
       return;
@@ -188,48 +125,10 @@ export function ProfileForm() {
       console.error("ไฟล์ต้องไม่เกิน 5MB");
       return;
     }
-
     setAvatarPreview(URL.createObjectURL(file)); // โชว์ทันที
     setUploading(true);
-
     try {
-      const { data: sessionData } = await supabase.auth.getUser();
-      const user = sessionData?.user;
-      if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
-
-      // path: userId/uuid.ext
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const uid = (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
-      const path = `${user.id}/${uid}.${ext}`;
-
-      // อัปโหลดตรงไป Storage (เลี่ยง Server Actions limit)
-      const { error: upErr } = await supabase.storage
-        .from(BUCKET)
-        .upload(path, file, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: file.type,
-        });
-      if (upErr) throw upErr;
-
-      // สร้าง public URL (ต้องเปิด select policy/public bucket)
-      const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      const publicUrl = pub?.publicUrl;
-      if (!publicUrl) throw new Error("ไม่สามารถสร้าง URL ของรูปได้");
-
-      // อัปเดต DB: url + u_email (กัน NOT NULL)
-      const email = (await supabase.auth.getUser()).data.user?.email ?? null;
-      if (!email) throw new Error("ไม่พบอีเมลใน session");
-
-      const { error: dbErr } = await supabase
-        .from("user_info")
-        .upsert(
-          { user_id: user.id, u_email: email, url: publicUrl },
-          { onConflict: "user_id" }
-        );
-      if (dbErr) throw dbErr;
-
-      // อัปเดต state ให้ UI
+      const publicUrl = await updateAvatar(supabase, file) 
       setAvatarUrl(publicUrl);
       toast({
         variant:"success",
@@ -252,13 +151,7 @@ export function ProfileForm() {
 
   async function handleRemoveAvatar() {
     try {
-      const { data: sessionData } = await supabase.auth.getUser();
-      const user = sessionData?.user;
-      if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
-
-      const { error } = await supabase.from("user_info").update({ url: null }).eq("user_id", user.id);
-      if (error) throw error;
-
+      await removeAvatar(supabase)
       setAvatarUrl(null);
       setAvatarPreview(null);
       toast({
@@ -278,7 +171,25 @@ export function ProfileForm() {
   }
 
   const busy = disabled || isSubmitting;
-
+  const handleConnectBank = async()=>{
+    try{
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/stripe/create-connect-account`)
+      setStripeID(response.data.data.aid)
+      window.location.href = response.data.data.url
+    }catch(err: unknown){
+      let msg = "เกิดปัญหา"
+      if (err instanceof AxiosError){
+        msg = err.response?.data.error
+      }else if (err instanceof Error){
+        msg = err.message
+      }
+      toast({
+        variant:"destructive",
+        title:"ไม่สำเร็จ",
+        description:msg
+      })
+    }
+  }
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-4 m-5" noValidate>
       {/* Avatar section */}
@@ -337,7 +248,9 @@ export function ProfileForm() {
       <InputField label="จังหวัด" placeholder="กรุงเทพมหานคร" disabled={busy} {...register("province")} error={errors.province?.message} />
       <InputField label="รหัสไปรษณีย์" placeholder="10500" disabled={busy} {...register("postcode")} error={errors.postcode?.message} />
       <InputField label="ประเทศ" placeholder="ไทย" disabled={busy} {...register("country")} error={errors.country?.message} />
-
+      <Button size='sm' variant={stripeID ? "secondary":"destructive"} disabled={stripeID ? true:false} onClick={handleConnectBank} type="button">
+        {stripeID ? "เชื่อมต่อบัญชีธนาคารแล้ว":"เชื่อมต่อบัญชีธนาคาร"}
+      </Button>
       {/* <div className="sm:col-span-2 mt-1">
         {formError && <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">{formError}</div>}
         {formSuccess && <div className="p-3 bg-green-50 border border-green-200 rounded-md text-sm text-green-600">{formSuccess}</div>}
