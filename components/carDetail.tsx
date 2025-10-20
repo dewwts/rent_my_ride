@@ -37,7 +37,6 @@ export function CarDetailsPage({
 
     const supabase = createClient();
     try {
-      // ✅ validate ด้วย zod
       const parsed = await dateRangeAvailable.parseAsync({
         startDate,
         endDate,

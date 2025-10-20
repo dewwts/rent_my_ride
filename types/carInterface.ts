@@ -24,8 +24,8 @@ export interface CarCheckout {
   total_days: number;
   p_date: string;
   e_date: string;
-  localtion_take: string;
-  location_return:string;
+  localtion_take: string | undefined;
+  location_return:string | undefined;
   total_price: number;
   car_id: string;
   description: string;

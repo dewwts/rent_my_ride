@@ -40,7 +40,7 @@ export const getRentingById = async (supabase: SupabaseClient, id: string) => {
   
   const {data , error} = await supabase
     .from("renting")
-    .select()
+    .select("*")
     .eq("renting_id",id)
     .single();
 
