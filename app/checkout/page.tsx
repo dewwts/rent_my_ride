@@ -19,7 +19,7 @@ export default function OrderPage() {
       if (!rentingId) return;
       const supabase = createClient();
       try {
-        // ✅ ดึงข้อมูลการจอง sadasdsadsadasd
+        // ✅ ดึงข้อมูลการจอง
         const rentingData = await getRentingById(supabase, rentingId);
 
         // ✅ ดึงข้อมูลรถจาก service เดิม
