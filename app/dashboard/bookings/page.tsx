@@ -24,7 +24,7 @@ export default function RentingHistoryPage() {
       setError(null);
       
       const data = await getMyRentingHistory(supabase);
-
+      console.log(data)
       // ทำ pagination อย่างไงวะเนี่ย สุดท้ายก็คือ fetch หมดอยู่ดี
       const bookingsWithPriceandLessorName = await Promise.all(
         data.map(async (booking) => {
@@ -47,6 +47,7 @@ export default function RentingHistoryPage() {
       const filterNullPrice = bookingsWithPriceandLessorName.filter(
         (item): item is NonNullable<typeof item> => item !== null
       );
+      console.log(filterNullPrice)
 
       setTotalCount(filterNullPrice.length);
       const start = (currentPage - 1) * itemsPerPage;
