@@ -3,7 +3,7 @@ export interface Car {
   car_brand: string;
   model: string;
   car_id: string;
-  year: number;
+  year_created?: number;
   number_of_seats: number;
   car_type: string;
   // color: string;
@@ -17,6 +17,22 @@ export interface Car {
   created_at?: string;
   updated_at?: string;
   daily_rental_price?: number;
+}
+export interface CarCheckout {
+  rid: string;
+  r_date: string;
+  total_days: number;
+  p_date: string;
+  e_date: string;
+  localtion_take: string | undefined;
+  location_return:string | undefined;
+  total_price: number;
+  car_id: string;
+  description: string;
+  car_brand: string;
+  car_model: string;
+  car_image: string;
+  amount: number;
 }
 export interface UIRangeFilter {
   price?: { min?: number; max?: number };
@@ -59,6 +75,7 @@ export interface CarCardProps {
   rating?: number;              // optional; default 0
   reviewCount?: number;         // optional; default 0
   seats: number;
+  year_created?: number;
   fuelType: string;
   transmission: string;
   availability: string;         // "พร้อมเช่า" | "จองล่วงหน้า" | ...

@@ -103,7 +103,7 @@ export const createCar = async (
     if (!user) {
       throw new Error("โปรดเข้าสู่ระบบก่อน");
     }
-
+    console.log(carData);
     const { data, error } = await supabase
       .from('car_information')
       .insert({
@@ -111,7 +111,7 @@ export const createCar = async (
         model: carData.model,
         // car_id: carData.car_id,
         mileage: carData.mileage,
-        year_created: carData.year,
+        year_created: carData.year_created,
         number_of_seats: carData.number_of_seats,
         gear_type: carData.gear_type,
         oil_type: carData.oil_type,
@@ -124,7 +124,7 @@ export const createCar = async (
       })
       .select()
       .single();
-
+    console.log(data);
     if (error) {
       throw new Error(error.message);
     }
@@ -174,7 +174,7 @@ export const updateCar = async (
         model: carData.model,
         // car_id: carData.car_id,
         mileage: carData.mileage,
-        year_created: carData.year,
+        year_created: carData.year_created,
         number_of_seats: carData.number_of_seats,
         gear_type: carData.gear_type,
         oil_type: carData.oil_type,
@@ -217,7 +217,7 @@ export const deleteCar = async (supabase: SupabaseClient, carId: string): Promis
     const { error } = await supabase
       .from('car_information')
       .delete()
-      .eq('id', carId)
+      .eq('car_id', carId)
       .eq('owner_id', user.id); // Ensure user can only delete their own cars
 
     if (error) {
@@ -252,13 +252,12 @@ export const carAvailable = async(supabase: SupabaseClient, carid:string, startA
         .from("renting")
         .select("renting_id, sdate, edate")
         .eq("car_id", carid)
-        .gt("edate", startISO) // edate > start
-        .lt("sdate", endISO) // sdate < end
+        .lte("sdate", endISO)
+        .gte("edate", startISO);
 
         if (error) {
             throw error;
         }
-
         const available = carData.length === 0;
         return available;
     }catch(err: unknown){

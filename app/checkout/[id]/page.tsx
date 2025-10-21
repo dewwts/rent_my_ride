@@ -1,31 +1,29 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getRentingById } from "@/lib/rentingServices";
-import { getCarById } from "@/lib/carServices"; // ✅ ใช้ service ที่มีอยู่แล้ว
+import { getCarById } from "@/lib/carServices";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import dayjs from "dayjs";
 import type { RentingDetail } from "@/types/rentingInterface";
+import axios, { AxiosError } from "axios";
+import { toast } from "@/components/ui/use-toast";
 
 export default function OrderPage() {
-  const sp = useSearchParams();
-  const rentingId = sp.get("renting_id");
+  const params = useParams();
+  const rentingId = params.id as string
   const [renting, setRenting] = useState<RentingDetail | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const router = useRouter()
   useEffect(() => {
     const fetchRenting = async () => {
       if (!rentingId) return;
       const supabase = createClient();
       try {
-        // ✅ ดึงข้อมูลการจอง
         const rentingData = await getRentingById(supabase, rentingId);
 
-        // ✅ ดึงข้อมูลรถจาก service เดิม
         const carData = await getCarById(supabase, rentingData.car_id);
-
-        // ✅ รวมข้อมูลก่อน setState
         setRenting({
           ...rentingData,
           car_information: carData,
@@ -38,6 +36,7 @@ export default function OrderPage() {
     };
     fetchRenting();
   }, [rentingId]);
+  
 
   if (loading) {
     return (
@@ -60,7 +59,31 @@ export default function OrderPage() {
   const edate = dayjs(renting.edate);
   const days = edate.diff(sdate, "day") + 1;
   const total = (car?.daily_rental_price ?? 0) * days;
+  const handleClickPayment = async()=>{
+    try{
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/stripe/create-checkout-session`,{
+            amount: total,
+            rid: rentingId
+            
+        })
+        const success_url = response.data.data.url
+        router.push(success_url)
+    }catch(err: unknown){
+        let messsage = "มีปัญหาผิดพลาดบางอย่าง"
+        if (err instanceof AxiosError){
+            messsage = err.response?.data.error
+        }else if (err instanceof Error){
+            messsage = err.message
+        }
+        toast({
+            variant:"destructive",
+            title:"ไม่สำเร็จ",
+            description:messsage
+        })
+    }
 
+
+  }
   return (
     <main className="flex-1 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -135,14 +158,16 @@ export default function OrderPage() {
           <div>
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">
-                ยอดชำระรวม
+                ยอดชำระรวม {total} บาท
               </h2>
               <div className="space-y-3 mb-4 border-t border-gray-200 pt-4">
                 <div className="flex justify-between text-gray-600">
                   <span>
                     {car?.car_brand} {car?.model}
                   </span>
-                  <span>{car?.daily_rental_price?.toLocaleString()} บาท/วัน</span>
+                  <span>
+                    {car?.daily_rental_price?.toLocaleString()} บาท/วัน
+                  </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>จำนวนวัน</span>
@@ -163,7 +188,8 @@ export default function OrderPage() {
                 เลือกวิธีการชำระเงิน
               </h2>
               <div className="space-y-3">
-                <button className="w-full flex items-center justify-center gap-4 p-5 rounded-full border-2 border-gray-300 hover:border-gray-400 bg-white transition-all">
+                <button className="w-full flex items-center justify-center gap-4 p-5 rounded-full border-2 border-gray-300 hover:border-gray-400 bg-white transition-all"
+                onClick={handleClickPayment}>
                   <img
                     src="/icons/qr_payment.png"
                     alt="QR Payment"
@@ -171,17 +197,6 @@ export default function OrderPage() {
                   />
                   <span className="font-semibold text-lg text-gray-900">
                     ชำระเงินด้วย QR Payment
-                  </span>
-                </button>
-
-                <button className="w-full flex items-center justify-center gap-4 p-5 rounded-full border-2 border-gray-300 hover:border-gray-400 bg-white transition-all">
-                  <img
-                    src="/icons/true_money.png"
-                    alt="True Wallet"
-                    className="w-8 h-8"
-                  />
-                  <span className="font-semibold text-lg text-gray-900">
-                    ชำระเงินด้วย True Wallet
                   </span>
                 </button>
               </div>

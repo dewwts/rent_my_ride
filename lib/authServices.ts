@@ -3,8 +3,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import z from "zod";
 import { ProfileSchema } from "./schemas";
 import { buildAddress, uploadImage } from "./utils";
-import { MAX_BYTES, BUCKET, ALLOWED_TYPES } from "@/types/avatarConstraint";
-import { createClient } from "./supabase/server";
+import { BUCKET } from "@/types/avatarConstraint";
+
 export const SignUp = async (data: userInfo, supabase: SupabaseClient) => {
   const { data: user } = await supabase
     .from("user_info")
@@ -89,7 +89,7 @@ export const getProfile = async (supabase: SupabaseClient) => {
   if (!user) throw new Error("โปรดเข้าสู่ระบบก่อนใช้งาน");
   const { data: row, error } = await supabase
     .from("user_info")
-    .select("u_firstname, u_lastname, u_email, u_phone, u_address, url")
+    .select("u_firstname, u_lastname, u_email, u_phone, u_address, url, stripe_account_id")
     .eq("user_id", user.id)
     .maybeSingle();
   if (error) throw error;
@@ -100,6 +100,7 @@ export const getProfile = async (supabase: SupabaseClient) => {
     u_address: row?.u_address,
     u_phone: row?.u_phone,
     url: row?.url,
+    stripe_account_id: row?.stripe_account_id
   };
   return object;
 };

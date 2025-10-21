@@ -10,7 +10,6 @@ export const revalidate = 0; // helpful while testing so results update immediat
 export default async function Home() {
   // ดึงข้อมูลรถทั้งหมดจากฝั่งเซิร์ฟเวอร์ (ไม่มีพารามิเตอร์)
   const cars = await fetchAllCars();
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />

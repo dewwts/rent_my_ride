@@ -51,7 +51,6 @@ export function AddCarForm({
       year: new Date().getFullYear(),
       number_of_seats: 4,
       car_type: "",
-      // color: "",
       mileage: 0,
       oil_type: "",
       gear_type: "",
@@ -66,8 +65,6 @@ export function AddCarForm({
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast({
         variant: "destructive",
@@ -76,8 +73,6 @@ export function AddCarForm({
       });
       return;
     }
-
-    // Validate file size (max 20MB)
     if (file.size > 20 * 1024 * 1024) {
       toast({
         variant: "destructive",
@@ -89,16 +84,9 @@ export function AddCarForm({
 
     setUploading(true);
     try {
-      // Create preview
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-
-      // Generate unique car ID for upload
       const carId = `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Upload image
-      // const imageUrl = await uploadImageCar(supabase, file, carId);
-      // setValue("image_url", imageUrl);
       setImage(file)
       toast({
         title: "อัปโหลดสำเร็จ",
@@ -120,20 +108,12 @@ export function AddCarForm({
   const handleAddCar = async (data: CarFormValues) => {
     setIsLoading(true);
     try {
-      // Here you would typically save to your database
-      // For now, we'll just simulate success
       const newCar: Car = {
         car_id:"",  // id will be ignore on create
         ...data,
-        rating: data.rating || 0,
+        rating: data.rating || 1,
         car_image: data.image_url || "",
       };
-      // Simulate API call
-      // await createCar(supabase, newCar)
-      // if (image){
-      //   const carURL = await uploadImageCar(supabase, image, newCar.car_id)
-      //   setValue("image_url", carURL)
-      // }
       onCarAdded?.(newCar,image);
     } catch (error) {
       console.error("Add car error:", error);
@@ -289,7 +269,7 @@ export function AddCarForm({
                     {...register("number_of_seats")}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   >
-                    {Array.from({ length: 50 }, (_, i) => (
+                    {Array.from({ length: 20 }, (_, i) => (
                       <option key={i + 1} value={i + 1}>
                         {i + 1}
                       </option>

@@ -43,7 +43,7 @@ export function EditCarForm({
     defaultValues: {
       car_brand: car.car_brand,
       model: car.model,
-      year: car.year,
+      year: car.year_created,
       number_of_seats: car.number_of_seats,
       car_type: car.car_type,
       // color: car.color,

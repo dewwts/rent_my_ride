@@ -22,7 +22,7 @@ export function DeleteCarDialog({
             ยืนยันการลบรถ
           </h3>
           <p className="text-gray-600 mb-6">
-            คุณต้องการลบรถ {car.brand} {car.model} ID: {car.car_id} ใช่หรือไม่?
+            คุณต้องการลบรถ {car.car_brand} {car.model} ID: {car.car_id} ใช่หรือไม่?
           </p>
           <p className="text-sm text-red-600 mb-6">
             การกระทำนี้ไม่สามารถย้อนกลับได้

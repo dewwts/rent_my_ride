@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./ui/button";
-import { Star, Users, Fuel, Settings } from "lucide-react";
+import { Star, Users, Fuel, Settings, Calendar } from "lucide-react";
 import type { CarCardProps } from "@/types/carInterface";
 
 export function CarCard({
@@ -17,8 +17,8 @@ export function CarCard({
   transmission,
   availability,
   features = [],
+  year_created,
 }: CarCardProps) {
-  // badge color by availability
   const isAvailable = availability === "พร้อมเช่า";
   const badgeClass = isAvailable
     ? "bg-emerald-50 text-emerald-700"
@@ -36,16 +36,15 @@ export function CarCard({
             alt={`${name} ${model}`}
             fill
             className="object-cover"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            // ถ้ายังมีปัญหา host ภาพ ให้ตั้ง images.remotePatterns ใน next.config.*
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 grid place-items-center text-gray-400 text-sm">
             ไม่มีรูปภาพ
           </div>
         )}
-
-        <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${badgeClass}`}>
+        <div
+          className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${badgeClass}`}
+        >
           {availability}
         </div>
       </div>
@@ -56,16 +55,26 @@ export function CarCard({
         <div>
           <h3 className="font-bold text-lg text-black leading-tight">{name}</h3>
           <p className="text-gray-600 text-sm">{model}</p>
+          {year_created ? (
+            <div className="flex items-center gap-1 text-gray-500 text-sm mt-1">
+              <Calendar className="h-4 w-4" />
+              <span>ปี {year_created}</span>
+            </div>
+          ) : null}
         </div>
 
-        {/* Rating (match first component’s feel) */}
+        {/* Rating */}
         <div className="flex items-center gap-1" aria-label="rating">
           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-          <span className="text-sm font-medium">{rating}</span>
-          <span className="text-sm text-gray-500">({reviewCount} รีวิว)</span>
+          <span className="text-sm font-medium">
+            {Number(rating ?? 0).toFixed(1)}
+          </span>
+          <span className="text-sm text-gray-500">
+            ({(reviewCount ?? 0).toLocaleString()} รีวิว)
+          </span>
         </div>
 
-        {/* Car Features (icons row) */}
+        {/* Icons Row */}
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div className="flex items-center gap-1" title="ที่นั่ง">
             <Users className="h-4 w-4" />
@@ -104,16 +113,31 @@ export function CarCard({
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div>
             <span className="text-2xl font-bold text-black">
-              ฿{pricePerDay.toLocaleString()}
+              ฿{Number(pricePerDay).toLocaleString()}
             </span>
             <span className="text-sm text-gray-600">/วัน</span>
           </div>
 
-          {/* (Optional) deep link to car details using id */}
-          <Button asChild size="sm">
-            <Link href={`/car/${id}`} aria-label={`เช่า ${name} ${model}`}>
-              เช่าเลย
-            </Link>
+          <Button
+            asChild={isAvailable}
+            size="sm"
+            disabled={!isAvailable}
+            className={
+              isAvailable
+                ? "bg-slate-800 hover:bg-slate-700 text-white"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }
+            title={
+              isAvailable
+                ? "คลิกเพื่อดูรายละเอียดรถ"
+                : "รถคันนี้ถูกจองล่วงหน้า ไม่สามารถเช่าได้ในขณะนี้"
+            }
+          >
+            {isAvailable ? (
+              <Link href={`/car/${encodeURIComponent(id)}`}>เช่าเลย</Link>
+            ) : (
+              <span>ไม่พร้อมเช่า</span>
+            )}
           </Button>
         </div>
       </div>
