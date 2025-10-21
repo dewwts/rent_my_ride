@@ -18,11 +18,10 @@ export const getMyRentingHistory = async (supabase: SupabaseClient) => {
       sdate,
       edate,
       status,
-      car_information(
+      car_information:car_id(
         car_id,
         owner_id
-      )
-    `)
+      )`)
     .eq("lessee_id",user.id)
     .order("sdate",{ascending:false}); //เรียงจากใหม่สุดไปเก่าสุด
 

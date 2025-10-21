@@ -3,8 +3,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import z from "zod";
 import { ProfileSchema } from "./schemas";
 import { buildAddress, uploadImage } from "./utils";
-import { MAX_BYTES, BUCKET, ALLOWED_TYPES } from "@/types/avatarConstraint";
-import { createClient } from "./supabase/server";
+import { BUCKET } from "@/types/avatarConstraint";
+
 export const SignUp = async (data: userInfo, supabase: SupabaseClient) => {
   const { data: user } = await supabase
     .from("user_info")

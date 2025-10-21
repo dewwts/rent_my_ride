@@ -29,7 +29,15 @@ export default function RentingHistoryPage() {
       const bookingsWithPriceandLessorName = await Promise.all(
         data.map(async (booking) => {
           // error อยู่ยังไม่ได้แก้ by phaolap
-          const ownerId = booking.car_information.owner_id;
+          const carInfo = Array.isArray(booking.car_information) 
+              ? booking.car_information[0]
+              : booking.car_information; 
+
+          if (!carInfo || !carInfo.owner_id) {
+               console.error("ไม่พบ owner_id ใน car_information:", booking.renting_id);
+               return { ...booking, total_price: 0, lessor_name: "ไม่พบเจ้าของ" }; 
+          }
+          const ownerId = carInfo.owner_id;
           const lessor_name = await getFirstname(supabase,ownerId);
           try {
             const price = await getRentingPrice(supabase, booking.renting_id);
