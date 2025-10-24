@@ -3,6 +3,9 @@ import { twMerge } from "tailwind-merge";
 import { ProfileSchema } from "./schemas";
 import z from "zod";
 import { SupabaseClient } from "@supabase/supabase-js";
+import dayjs, { Dayjs } from "dayjs";
+import { UIRangeFilter } from "@/types/carInterface";
+import { CardForUI } from "@/types/carInterface";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -38,9 +41,18 @@ export function stripPrefix(s: string, prefix: string) {
   return s.startsWith(prefix) ? s.slice(prefix.length) : s;
 }
 export function parseAddress(s: string | null | undefined) {
-  let addr_line = "", subdistrict = "", district = "", province = "", postcode = "", country = "";
-  if (!s) return { addr_line, subdistrict, district, province, postcode, country };
-  const tokens = s.split(ADDRESS_SEP).map(t => t.trim()).filter(Boolean);
+  let addr_line = "",
+    subdistrict = "",
+    district = "",
+    province = "",
+    postcode = "",
+    country = "";
+  if (!s)
+    return { addr_line, subdistrict, district, province, postcode, country };
+  const tokens = s
+    .split(ADDRESS_SEP)
+    .map((t) => t.trim())
+    .filter(Boolean);
   const freeTexts: string[] = [];
   for (const t of tokens) {
     if (t.startsWith(PFX.sub)) subdistrict = stripPrefix(t, PFX.sub);
@@ -56,10 +68,10 @@ export function parseAddress(s: string | null | undefined) {
 }
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
+  return date.toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 };
 export const calculateDuration = (startDate: string, endDate: string) => {
@@ -70,11 +82,16 @@ export const calculateDuration = (startDate: string, endDate: string) => {
   return `${diffDays} วัน`;
 };
 export const formatCurrency = (amount: number) => {
-  return `฿${amount.toLocaleString('th-TH')}`;
+  return `฿${amount.toLocaleString("th-TH")}`;
 };
 
-export const uploadImage = async(mbucket: string, userid: string, file: File, supabase: SupabaseClient)=>{
-const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+export const uploadImage = async (
+  mbucket: string,
+  userid: string,
+  file: File,
+  supabase: SupabaseClient
+) => {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
   const uid =
     typeof crypto !== "undefined" && crypto.randomUUID
       ? crypto.randomUUID()
@@ -88,8 +105,8 @@ const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
       upsert: false,
       contentType: file.type,
     });
-  
-  if (upErr){ 
+
+  if (upErr) {
     console.error(upErr);
     throw new Error("เกิดปัญหากับพื้นที่เก็บข้อมูล");
   }
@@ -97,5 +114,76 @@ const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
   const { data: pub } = supabase.storage.from(mbucket).getPublicUrl(path);
   const publicUrl = pub?.publicUrl;
   if (!publicUrl) throw new Error("ไม่สามารถสร้าง URL ของรูปได้");
-  return publicUrl
+  return publicUrl;
+};
+
+export function toAvailability(status: string | null | undefined) {
+  return status === "available" || status === "พร้อมเช่า"
+    ? "พร้อมเช่า"
+    : "ไม่พร้อมเช่า";
+}
+
+const dayjsToDate = (v: unknown) => {
+  if (v == null || v === "") return undefined;
+  if (dayjs.isDayjs(v)) return (v as Dayjs).toDate();
+  return v as Date | undefined;
+};
+
+export const dateRangeAvailable = z
+  .object({
+    startDate: z.preprocess(
+      dayjsToDate,
+      z.date({ error: "กรุณาเลือกวันเริ่มต้น" })
+    ),
+    endDate: z.preprocess(
+      dayjsToDate,
+      z.date({ error: "กรุณาเลือกวันสิ้นสุด" })
+    ),
+  })
+  .superRefine((d, ctx) => {
+    const today = dayjs().startOf("day").toDate();
+    if (d.startDate < today) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["startDate"],
+        message: "วันเริ่มต้นต้องไม่ย้อนหลัง",
+      });
+    }
+    if (d.endDate < today) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["endDate"],
+        message: "วันสิ้นสุดต้องไม่ย้อนหลัง",
+      });
+    }
+    if (d.startDate > d.endDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["startDate"],
+        message: "วันเริ่มต้องไม่เกินวันสิ้นสุด",
+      });
+    }
+  });
+
+
+
+
+const inRange = (v: number, min?: number, max?: number) =>
+  (min == null || v >= min) && (max == null || v <= max);
+
+const norm = (s: string) =>
+  (s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+
+export function filterCars(cards: CardForUI[], f: UIRangeFilter): CardForUI[] {
+  const { price, seats, gear_types, includeUnavailable = false } = f ?? {};
+  const hasGear = !!(gear_types && gear_types.length);
+  const gears = hasGear ? gear_types!.map(norm) : [];
+
+  return cards.filter((c) => {
+    if (!includeUnavailable && c.availability !== "พร้อมเช่า") return false;
+    if (price && !inRange(c.pricePerDay, price.min, price.max)) return false;
+    if (seats && !inRange(c.seats, seats.min, seats.max)) return false;
+    if (hasGear && !gears.includes(norm(c.transmission))) return false;
+    return true;
+  });
 }

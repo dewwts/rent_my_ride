@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { carAvailable } from "@/lib/carServices";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { dateRangeAvailable } from "@/lib/dateRangeAvailable";
+import { dateRangeAvailable } from "@/lib/utils";
 import { createRenting } from "@/lib/rentingServices";
 import type { Car } from "@/types/carInterface";
 

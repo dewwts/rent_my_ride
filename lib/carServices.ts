@@ -1,60 +1,70 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { uploadImage } from "./utils";
 import { Car } from "@/types/carInterface";
+import type { CardForUI, DbCar } from "@/types/carInterface";
+import { createClient } from "@/lib/supabase/server";
+import { toAvailability } from "./utils";
 
-export const uploadImageCar = async(supabase: SupabaseClient, file: File, carid:string)=>{
-    try{
-        const mubucket = "car"
-        const {data: sessionData} =await supabase.auth.getUser()
-        const user = sessionData?.user
-        if (!user){
-            throw new Error("โปรดเข้าสู่ระบบก่อน")
-        }
-        const publicUrl = await uploadImage(mubucket, user.id, file, supabase)
-        // console.log(publicUrl);
-        const {error: dbErr} = await supabase.from('car_information').update({
-            car_image:publicUrl
-        }).eq("car_id",carid)
-        if (dbErr){
-            throw new Error("เกิดความขัดข้องกับระบบ")
-        }
-        return publicUrl
-    }catch(err:unknown){
-        let message = "Something went wrong"
-        console.error(err);
-        if (err instanceof Error){
-            message = err.message
-        }
-        throw new Error(message)
+export const uploadImageCar = async (
+  supabase: SupabaseClient,
+  file: File,
+  carid: string
+) => {
+  try {
+    const mubucket = "car";
+    const { data: sessionData } = await supabase.auth.getUser();
+    const user = sessionData?.user;
+    if (!user) {
+      throw new Error("โปรดเข้าสู่ระบบก่อน");
     }
-}
+    const publicUrl = await uploadImage(mubucket, user.id, file, supabase);
+    // console.log(publicUrl);
+    const { error: dbErr } = await supabase
+      .from("car_information")
+      .update({
+        car_image: publicUrl,
+      })
+      .eq("car_id", carid);
+    if (dbErr) {
+      throw new Error("เกิดความขัดข้องกับระบบ");
+    }
+    return publicUrl;
+  } catch (err: unknown) {
+    let message = "Something went wrong";
+    console.error(err);
+    if (err instanceof Error) {
+      message = err.message;
+    }
+    throw new Error(message);
+  }
+};
 
 // Get all cars for a user (My Listings)
 export const getMyCars = async (supabase: SupabaseClient): Promise<Car[]> => {
   try {
     const { data: sessionData } = await supabase.auth.getUser();
     const user = sessionData?.user;
-    
+
     if (!user) {
       throw new Error("โปรดเข้าสู่ระบบก่อน");
     }
 
     const { data, error } = await supabase
-      .from('car_information')
-      .select('*')
-      .eq('owner_id', user.id)
-      .order('created_at', { ascending: false });
+      .from("car_information")
+      .select("*")
+      .eq("owner_id", user.id)
+      .order("created_at", { ascending: false });
 
     if (error) {
       throw new Error("เกิดข้อผิดพลาดในการดึงข้อมูลรถ");
     }
-    const castedCar:Car[] = data.map(car=>{
+    const castedCar: Car[] = data.map((car) => {
       return {
         ...car,
         year: car.year_created,
         rating: car.car_conditionrating,
-      }
-    })
+      };
+    });
     return castedCar || [];
   } catch (err: unknown) {
     let message = "Something went wrong";
@@ -66,16 +76,19 @@ export const getMyCars = async (supabase: SupabaseClient): Promise<Car[]> => {
 };
 
 // Get single car by ID
-export const getCarById = async (supabase: SupabaseClient, carId: string): Promise<Car | null> => {
+export const getCarById = async (
+  supabase: SupabaseClient,
+  carId: string
+): Promise<Car | null> => {
   try {
     const { data, error } = await supabase
-      .from('car_information')
-      .select('*')
-      .eq('car_id', carId)
+      .from("car_information")
+      .select("*")
+      .eq("car_id", carId)
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error.code === "PGRST116") {
         return null; // Car not found
       }
       throw new Error("เกิดข้อผิดพลาดในการดึงข้อมูลรถ");
@@ -94,7 +107,7 @@ export const getCarById = async (supabase: SupabaseClient, carId: string): Promi
 // Create new car
 export const createCar = async (
   supabase: SupabaseClient,
-  carData: Omit<Car, 'id' | 'created_at' | 'updated_at'>
+  carData: Omit<Car, "id" | "created_at" | "updated_at">
 ): Promise<Car> => {
   try {
     const { data: sessionData } = await supabase.auth.getUser();
@@ -105,7 +118,7 @@ export const createCar = async (
     }
     console.log(carData);
     const { data, error } = await supabase
-      .from('car_information')
+      .from("car_information")
       .insert({
         car_brand: carData.car_brand,
         model: carData.model,
@@ -131,7 +144,9 @@ export const createCar = async (
 
     return data as Car;
   } catch (err: unknown) {
-    throw new Error(err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการเพิ่มรถ");
+    throw new Error(
+      err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการเพิ่มรถ"
+    );
   }
 };
 
@@ -145,30 +160,13 @@ export const updateCar = async (
   try {
     const { data: sessionData } = await supabase.auth.getUser();
     const user = sessionData?.user;
-    
+
     if (!user) {
       throw new Error("โปรดเข้าสู่ระบบก่อน");
     }
 
-    // Map your carData fields to DB columns
-    // const mappedCarData: any = {
-    //   ...(carData.car_brand !== undefined && { car_brand: carData.car_brand }),
-    //   ...(carData.model !== undefined && { car_model: carData.model }),
-    //   ...(carData.car_id !== undefined && { car_id: carData.car_id }),
-    //   ...(carData.year !== undefined && { year: carData.year }),
-    //   ...(carData.number_of_seats !== undefined && { seats: carData.number_of_seats }),
-    //   ...(carData.oil_type !== undefined && { oil_type: carData.oil_type }),
-    //   ...(carData.gear_type !== undefined && { gear_type: carData.gear_type }),
-    //   ...(carData.daily_rental_price !== undefined && { price_per_day: carData.daily_rental_price }),
-    //   ...(carData.status !== undefined && { status: carData.status }),
-    //   ...(carData.location !== undefined && { location: carData.location }),
-    //   ...(carData.rating !== undefined && { rating: carData.rating }),
-    //   ...(carData.car_image !== undefined && { image_url: carData.car_image }),
-    //   updated_at: new Date().toISOString(),
-    // };
-
     const { data, error } = await supabase
-      .from('car_information')
+      .from("car_information")
       .update({
         car_brand: carData.car_brand,
         model: carData.model,
@@ -185,13 +183,13 @@ export const updateCar = async (
         car_image: carData.car_image || null,
         owner_id: user.id,
       })
-      .eq('car_id', carId)
+      .eq("car_id", carId)
       .select()
       .single();
 
     if (error) {
-    console.error("Supabase update error:", error);
-    throw new Error("เกิดข้อผิดพลาดในการอัปเดตรถ");
+      console.error("Supabase update error:", error);
+      throw new Error("เกิดข้อผิดพลาดในการอัปเดตรถ");
     }
 
     return data;
@@ -205,20 +203,23 @@ export const updateCar = async (
 };
 
 // Delete car
-export const deleteCar = async (supabase: SupabaseClient, carId: string): Promise<void> => {
+export const deleteCar = async (
+  supabase: SupabaseClient,
+  carId: string
+): Promise<void> => {
   try {
     const { data: sessionData } = await supabase.auth.getUser();
     const user = sessionData?.user;
-    
+
     if (!user) {
       throw new Error("โปรดเข้าสู่ระบบก่อน");
     }
 
     const { error } = await supabase
-      .from('car_information')
+      .from("car_information")
       .delete()
-      .eq('car_id', carId)
-      .eq('owner_id', user.id); // Ensure user can only delete their own cars
+      .eq("car_id", carId)
+      .eq("owner_id", user.id); // Ensure user can only delete their own cars
 
     if (error) {
       throw new Error("เกิดข้อผิดพลาดในการลบรถ");
@@ -232,36 +233,104 @@ export const deleteCar = async (supabase: SupabaseClient, carId: string): Promis
   }
 };
 
-export const carAvailable = async(supabase: SupabaseClient, carid:string, startAt:Date, endAt:Date)=>{
-    try{
-         if (!(startAt instanceof Date) || !(endAt instanceof Date)) {
-            throw new Error("รูปแบบวันที่ไม่ถูกต้อง");
-        }
-        if (startAt > endAt) {
-            throw new Error("วันเริ่มต้องไม่เกินวันสิ้นสุด");
-      }
-        const startISO = startAt.toISOString();
-        const endISO = endAt.toISOString();
-        console.log("Checking availability for car:", carid, "from", startISO, "to", endISO);
-        const {data: sessionData} = await supabase.auth.getUser();
-        if (!sessionData.user) {
-            throw new Error("User not authenticated");
-        }
-
-        const {data: carData, error} = await supabase
-        .from("renting")
-        .select("renting_id, sdate, edate")
-        .eq("car_id", carid)
-        .lte("sdate", endISO)
-        .gte("edate", startISO);
-
-        if (error) {
-            throw error;
-        }
-        const available = carData.length === 0;
-        return available;
-    }catch(err: unknown){
-        console.log(err)
-        return false;
+export const carAvailable = async (
+  supabase: SupabaseClient,
+  carid: string,
+  startAt: Date,
+  endAt: Date
+) => {
+  try {
+    if (!(startAt instanceof Date) || !(endAt instanceof Date)) {
+      throw new Error("รูปแบบวันที่ไม่ถูกต้อง");
     }
+    if (startAt > endAt) {
+      throw new Error("วันเริ่มต้องไม่เกินวันสิ้นสุด");
+    }
+    const startISO = startAt.toISOString();
+    const endISO = endAt.toISOString();
+    console.log(
+      "Checking availability for car:",
+      carid,
+      "from",
+      startISO,
+      "to",
+      endISO
+    );
+    const { data: sessionData } = await supabase.auth.getUser();
+    if (!sessionData.user) {
+      throw new Error("User not authenticated");
+    }
+
+    const { data: carData, error } = await supabase
+      .from("renting")
+      .select("renting_id, sdate, edate")
+      .eq("car_id", carid)
+      .lte("sdate", endISO)
+      .gte("edate", startISO);
+
+    if (error) {
+      throw error;
+    }
+    const available = carData.length === 0;
+    return available;
+  } catch (err: unknown) {
+    console.log(err);
+    return false;
+  }
+};
+
+export async function fetchAllCars(): Promise<CardForUI[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("car_information")
+    .select(
+      [
+        "car_id",
+        "daily_rental_price",
+        "car_image",
+        "car_brand",
+        "model",
+        "number_of_seats",
+        "oil_type",
+        "gear_type",
+        "status",
+        "car_conditionrating",
+        "year_created",
+      ].join(",")
+    );
+
+  if (error) throw error;
+
+  const rows = (data ?? []) as unknown as DbCar[];
+
+  return rows.map((r): CardForUI => {
+    const price = Number(r.daily_rental_price ?? 0);
+    const rating =
+      typeof r.car_conditionrating === "number" &&
+      Number.isFinite(r.car_conditionrating)
+        ? r.car_conditionrating
+        : 0;
+    const seats = Number(r.number_of_seats ?? 0);
+    const year =
+      typeof r.year_created === "number" && Number.isFinite(r.year_created)
+        ? r.year_created
+        : undefined;
+
+    return {
+      id: r.car_id,
+      name: r.car_brand ?? "ไม่ระบุ",
+      model: r.model ?? "",
+      image: r.car_image ?? "",
+      pricePerDay: price,
+      rating,
+      reviewCount: 0,
+      seats,
+      fuelType: r.oil_type ?? "",
+      transmission: r.gear_type ?? "",
+      availability: toAvailability(r.status),
+      features: [],
+      year,
+    };
+  });
 }
