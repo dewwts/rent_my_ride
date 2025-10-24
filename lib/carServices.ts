@@ -277,3 +277,11 @@ export const carAvailable = async (
   }
 };
 
+export const getCarStatus = async(supabase: SupabaseClient, car_id:string)=>{
+  const {data, error:err} = await supabase.from("car_information").select("status").eq("car_id", car_id).single()
+  if (err){
+    throw new Error("เกิดปัญหาในการเข้าถึงฐานข้อมูล")
+  }
+  return data.status
+}
+
