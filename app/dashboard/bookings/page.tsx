@@ -107,25 +107,25 @@ export default function RentingHistoryPage() {
     try{
       const isAvailable = await getCarStatus(supabase, cid)
       console.log(isAvailable);
-      // if (isAvailable === 'available'){
-      //   router.push(`/car/${cid}`)
-      // }else{
-      //   toast({
-      //     variant:"destructive",
-      //     title:"ไม่สำเร็จ",
-      //     description: "ไม่สามารถเข้าถึงข้อมูลรถได้"
-      //   })
-      // }
+      if (isAvailable === 'available'){
+        router.push(`/car/${cid}`)
+      }else{
+        toast({
+          variant:"destructive",
+          title:"ไม่สำเร็จ",
+          description: "รถนี้ไม่ได้อณุญาตให้เข้าถึงได้อีกต่อไป"
+        })
+      }
     }catch(err:unknown){
-      // let message = "Something went wrong"
-      // if (err instanceof Error){
-      //   message = err.message
-      // }
-      // toast({
-      //   variant:"destructive",
-      //   title:"ไม่สำเร็จ",
-      //   description:message
-      // })
+      let message = "Something went wrong"
+      if (err instanceof Error){
+        message = err.message
+      }
+      toast({
+        variant:"destructive",
+        title:"ไม่สำเร็จ",
+        description:message
+      })
     }
   }
   const totalPages = Math.ceil(totalCount / itemsPerPage);
