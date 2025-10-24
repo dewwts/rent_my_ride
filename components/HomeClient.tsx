@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CarCard } from "@/components/car-card";
-import { filterCars } from "@/lib/filterCars";
+import { filterCars } from "@/lib/utils";
 import { UIRangeFilter, CardForUI, DbCar } from "@/types/carInterface";
 import FilterSidebar from "@/components/FilterSidebar";
 import {

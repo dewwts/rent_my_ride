@@ -1,6 +1,4 @@
 "use client"
-// import { Header } from "@/components/header";
-// import { Footer } from "@/components/footer";
 import {CarDetailsPage} from "@/components/carDetail";
 import { createClient } from "@/lib/supabase/client";
 import { getCarById } from "@/lib/carServices";

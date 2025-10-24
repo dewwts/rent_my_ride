@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getCarById, updateCar, uploadImageCar } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";
@@ -39,26 +38,6 @@ export default function EditCarPage() {
         return;
       }
       setCar(carData);
-
-      // Mock data for development
-      // const mockCar: Car = {
-      //   id: carId,
-      //   car_brand: "Honda",
-      //   model: "Civic",
-      //   car_id: "XXXXXXXX",
-      //   year: 2018,
-      //   number_of_seats: 4,
-      //   car_type: "เก๋ง",
-      //   color: "ขาว",
-      //   mileage: 120000,
-      //   oil_type: "เบนซิน",
-      //   gear_type: "ออโต้",
-      //   daily_rental_price: 1200,
-      //   status: "available",
-      //   location: "กรุงเทพฯ",
-      //   rating: 4.5,
-      //   car_image: "https://images.unsplash.com/photo-1704340142770-b52988e5b6eb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1400"
-      // };
     } catch (error) {
       console.error("Error loading car:", error);
       toast({
