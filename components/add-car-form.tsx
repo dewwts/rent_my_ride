@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
 import { Car } from "@/types/carInterface";
 import { AddCarFormProps } from "@/types/componentProps";
+import Image from "next/image";
 
 type CarFormValues = z.infer<typeof CarSchema>;
 
@@ -26,16 +26,14 @@ export function AddCarForm({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const supabase = createClient();
   const [image, setImage] = useState<File | null>(null)
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<CarFormValues>({
-    resolver: zodResolver(CarSchema) as any,
+    resolver: zodResolver(CarSchema),
     mode: "onTouched",
     defaultValues: {
       car_brand: "",
@@ -78,7 +76,7 @@ export function AddCarForm({
     try {
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-      const carId = `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // const carId = `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       setImage(file)
       toast({
         title: "อัปโหลดสำเร็จ",
@@ -147,7 +145,7 @@ export function AddCarForm({
               {/* Image Preview or Upload Area */}
               {imagePreview ? (
                 <div className="relative">
-                  <img
+                  <Image
                     src={imagePreview}
                     alt="Car preview"
                     className="w-64 h-48 object-cover rounded-lg border-2 border-gray-200"
