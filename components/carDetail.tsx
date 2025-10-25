@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { dateRangeAvailable } from "@/lib/utils";
 import { createRenting } from "@/lib/rentingServices";
 import type { Car } from "@/types/carInterface";
+import Image from "next/image";
 
 export function CarDetailsPage({
   cid,
@@ -120,12 +121,17 @@ export function CarDetailsPage({
           <div className="w-fit px-5 py-2 mt-4 mb-8 font-semibold text-white bg-slate-900 rounded-full">
             {car?.daily_rental_price} บาท / วัน
           </div>
-
-          <img
+          {car?.car_image ? (
+            <Image
             src={car?.car_image}
             alt={`Car Image ${car?.car_id}`}
             className="w-full rounded-2xl object-cover shadow-xl"
-          />
+          />):(
+            <div className="w-full rounded-2xl object-cover shadow-xl text-center font-light tracking-wide">
+              ไม่มีรูปภาพ
+            </div>
+          )}
+          
 
           {/* เลือกวัน + ปุ่มเช่า */}
           <div className="flex items-center gap-2 mt-6">
