@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server"
-import { log } from "console"
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 

@@ -24,7 +24,7 @@ export default function Page() {
             }
         }
         getCar()
-    },[])
+    },[cid, router])
     if (typeof(cid) === 'string' && car){
         return (
             <>

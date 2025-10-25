@@ -7,7 +7,6 @@ import { rentingInfo,RentingStatus } from "@/types/rentingInterface";
 import { getMyRentingHistory,getRentingPrice } from "@/lib/rentingServices";
 import { getFirstname } from "@/lib/userServices";
 import CustomPagination from "@/components/customPagination"
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getCarStatus } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";

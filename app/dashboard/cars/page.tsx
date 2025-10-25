@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getMyCars, deleteCar } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";
 import { Car } from "@/types/carInterface";
+import Image from "next/image";
 
 export default function MyCarsPage() {
   const router = useRouter();
@@ -22,25 +23,26 @@ export default function MyCarsPage() {
 
   // Load cars on component mount
   useEffect(() => {
+    const loadCars = async () => {
+      setIsLoading(true);
+      try {
+        const myCar = await getMyCars(supabase);
+        setCars(myCar);
+      } catch (error) {
+        console.error("Error loading cars:", error);
+        toast({
+          variant: "destructive",
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถโหลดข้อมูลรถได้",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
     loadCars();
   }, []);
 
-  const loadCars = async () => {
-    setIsLoading(true);
-    try {
-      const myCar = await getMyCars(supabase);
-      setCars(myCar);
-    } catch (error) {
-      console.error("Error loading cars:", error);
-      toast({
-        variant: "destructive",
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโหลดข้อมูลรถได้",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  
 
   const handleDeleteClick = (car: Car) => {
     setDeleteDialog({ isOpen: true, car });
@@ -141,7 +143,7 @@ export default function MyCarsPage() {
                   <div className="flex gap-6">
                     {/* Car Image */}
                     <div className="w-64 h-48 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
+                      <Image
                         src={car.car_image}
                         alt={`${car.car_brand} ${car.model}`}
                         className="w-full h-full object-cover"
