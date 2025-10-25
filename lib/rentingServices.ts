@@ -9,7 +9,6 @@ export const getMyRentingHistory = async (supabase: SupabaseClient) => {
   if (userError || !user) {
     throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
   }
-
   const { data, error } = await supabase
     .from("renting")
     .select(`
@@ -24,7 +23,7 @@ export const getMyRentingHistory = async (supabase: SupabaseClient) => {
       )`)
     .eq("lessee_id",user.id)
     .order("sdate",{ascending:false}); //เรียงจากใหม่สุดไปเก่าสุด
-
+  
   if (error) throw error;
   return data;
 };

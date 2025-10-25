@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, type z } from "zod";
+import { type z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import { ProfileSchema } from "@/lib/schemas";
 import InputField from "@/components/ui/inputfield";
@@ -11,9 +11,10 @@ import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
 import { getProfile, removeAvatar, updateAvatar, updateProfile } from "@/lib/authServices";
 import { parseAddress } from "@/lib/utils";
-import {MAX_BYTES, BUCKET, ALLOWED_TYPES} from "@/types/avatarConstraint"
+import {MAX_BYTES, ALLOWED_TYPES} from "@/types/avatarConstraint"
 import { Button } from "./ui/button";
 import axios, { AxiosError } from "axios";
+import Image from "next/image";
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
 
@@ -196,9 +197,9 @@ export function ProfileForm() {
       <div className="sm:col-span-2 flex items-center gap-4">
         <div className="w-20 h-20 rounded-full overflow-hidden border border-gray-200 bg-gray-50 shrink-0">
           {avatarPreview ? (
-            <img src={avatarPreview} alt="preview" className="w-full h-full object-cover" />
+            <Image src={avatarPreview} alt="preview" className="w-full h-full object-cover" />
           ) : avatarUrl ? (
-            <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+            <Image src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">No Image</div>
           )}
