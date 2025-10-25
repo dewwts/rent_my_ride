@@ -141,9 +141,10 @@ export default function MyCarsPage() {
                 >
                   <div className="flex gap-6">
                     {/* Car Image */}
-                    <div className="w-64 h-48 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="relative w-64 h-48 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                       <Image
                         src={car.car_image}
+                        fill={true}
                         alt={`${car.car_brand} ${car.model}`}
                         className="w-full h-full object-cover"
                       />

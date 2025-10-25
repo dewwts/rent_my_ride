@@ -32,6 +32,7 @@ export default function EditCarPage() {
           router.push("/dashboard/cars");
           return;
         }
+        console.log(carData);
         setCar(carData);
       } catch (error) {
         console.error("Error loading car:", error);
@@ -48,7 +49,7 @@ export default function EditCarPage() {
     if (carId) {
       loadCar();
     }
-  }, [carId,router, supabase]);
+  }, [carId, router, supabase]);
 
   const handleCarUpdated = async (updatedCar: Car, image:File | null) => {
     setIsSaving(true);

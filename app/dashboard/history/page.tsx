@@ -248,8 +248,9 @@ export default function TransactionHistoryPage() {
                   <div className="lg:col-span-1">
                     <h4 className="font-medium text-gray-900 mb-3">ข้อมูลรถยนต์</h4>
                     <div className="flex items-center gap-4">
-                      <div className="w-32 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="relative w-32 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                         <Image
+                          fill={true}
                           src={transaction.renting?.car_information?.car_image || "https://via.placeholder.com/300x200?text=No+Image"}
                           alt={`${transaction.renting?.car_information?.car_brand} ${transaction.renting?.car_information?.model}`}
                           className="w-full h-full object-cover"

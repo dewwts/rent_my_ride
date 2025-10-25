@@ -195,11 +195,11 @@ export function ProfileForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-4 m-5" noValidate>
       {/* Avatar section */}
       <div className="sm:col-span-2 flex items-center gap-4">
-        <div className="w-20 h-20 rounded-full overflow-hidden border border-gray-200 bg-gray-50 shrink-0">
+        <div className=" relative w-20 h-20 rounded-full overflow-hidden border border-gray-200 bg-gray-50 shrink-0">
           {avatarPreview ? (
-            <Image src={avatarPreview} alt="preview" className="w-full h-full object-cover" />
+            <Image src={avatarPreview} fill={true} alt="preview" className="w-full h-full object-cover" />
           ) : avatarUrl ? (
-            <Image src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+            <Image src={avatarUrl} fill={true} alt="avatar" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">No Image</div>
           )}

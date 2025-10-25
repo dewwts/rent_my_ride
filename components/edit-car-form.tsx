@@ -40,7 +40,7 @@ export function EditCarForm({
     defaultValues: {
       car_brand: car.car_brand,
       model: car.model,
-      year: car.year_created,
+      year_created: car.year_created,
       number_of_seats: car.number_of_seats,
       car_type: car.car_type,
       mileage: car.mileage,
@@ -53,7 +53,7 @@ export function EditCarForm({
       image_url: car.car_image || "",
     },
   });
-
+  console.log(car.year_created);
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -156,7 +156,9 @@ export function EditCarForm({
                   <Image
                     src={imagePreview}
                     alt="Car preview"
-                    className="w-64 h-48 object-cover rounded-lg border-2 border-gray-200"
+                    width={64}
+                    height={48}
+                    className="object-cover rounded-lg border-2 border-gray-200"
                   />
                   <Button
                     type="button"
@@ -232,8 +234,8 @@ export function EditCarForm({
               <div className="space-y-2">
                 <Label htmlFor="year">ปีที่ผลิต *</Label>
                 <select
-                  id="year"
-                  {...register("year",{ valueAsNumber: true })}
+                  id="year_created"
+                  {...register("year_created",{ valueAsNumber: true })}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 >
                   {Array.from({ length: 35 }, (_, i) => {
@@ -245,8 +247,8 @@ export function EditCarForm({
                     );
                   })}
                 </select>
-                {errors.year && (
-                  <p className="text-sm text-red-500">{errors.year.message}</p>
+                {errors.year_created && (
+                  <p className="text-sm text-red-500">{errors.year_created.message}</p>
                 )}
               </div>
               {/* <div className="space-y-2">

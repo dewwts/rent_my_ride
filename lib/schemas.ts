@@ -44,7 +44,8 @@ export const CarSchema = z.object({
   car_brand: z.string().min(1, "กรุณากรอกยี่ห้อรถ"),
   model: z.string().min(1, "กรุณากรอกรุ่นรถ"),
   // car_id: z.string().min(1, "กรุณากรอกหมายเลขทะเบียนรถ"),
-  year: z.number().min(1990, "ปีที่ผลิตต้องไม่ต่ำกว่า 1990").max(new Date().getFullYear() + 1, "ปีที่ผลิตไม่ควรเกินปีปัจจุบัน"),
+  year_created
+: z.number().min(1990, "ปีที่ผลิตต้องไม่ต่ำกว่า 1990").max(new Date().getFullYear() + 1, "ปีที่ผลิตไม่ควรเกินปีปัจจุบัน"),
   number_of_seats: z.number().min(1, "จำนวนที่นั่งต้องมากกว่า 0").max(50, "จำนวนที่นั่งไม่ควรเกิน 50"),
   car_type: z.string().min(1, "กรุณาเลือกประเภทรถ"),
   // color: z.string().min(1, "กรุณากรอกสีรถ"),

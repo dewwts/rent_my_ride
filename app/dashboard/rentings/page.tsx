@@ -10,7 +10,6 @@ import CustomPagination from "@/components/customPagination"
 import { getCarStatus } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 
 export default function RentingHistoryPage() { 
   const [loading, setLoading] = useState(true);
@@ -173,12 +172,12 @@ return (
               <div className="flex flex-col gap-1 sm:hidden text-sm">
                 <div><span className="font-semibold">หมายเลขการเช่า:</span> {booking.renting_id.slice(0, 15)+"..."}</div>
                 <div><span className="font-semibold">ID รถ:</span>
-                  <Button
+                  <button 
                     onClick={()=>nextLink(booking.car_id)} 
                     className="text-blue-600 underline hover:text-blue-800 transition"
                   >
                     {booking.car_id.slice(0, 15) + "..."}
-                  </Button>
+                  </button>
                 </div>
                 <div><span className="font-semibold">ผู้เช่า:</span> {booking.lessee_name}</div>
                 <div><span className="font-semibold">วันที่เช่า:</span> {formatDate(booking.sdate)} - {formatDate(booking.edate)}</div>
@@ -196,12 +195,12 @@ return (
               {/* Desktop Layout */}
               <div className="hidden sm:block text-sm font-medium">{booking.renting_id.slice(0, 8)+"..."}</div>
               <div className="hidden sm:block text-sm">
-                <Button
+                <button
                     onClick={()=>nextLink(booking.car_id)} 
                     className="text-blue-600 underline hover:text-blue-800 transition"
                   >
                     {booking.car_id.slice(0, 15) + "..."}
-                  </Button>
+                  </button>
               </div>
               <div className="hidden sm:block text-sm">{booking.lessee_name}</div>
               <div className="hidden sm:block text-sm col-span-2">
