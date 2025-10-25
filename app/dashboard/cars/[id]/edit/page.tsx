@@ -19,45 +19,40 @@ export default function EditCarPage() {
   const supabase = createClient();
 
   useEffect(() => {
+    const loadCar = async () => {
+    setIsLoading(true);
+      try {
+        const carData = await getCarById(supabase, carId);
+        if (!carData) {
+          toast({
+            variant: "destructive",
+            title: "ไม่พบรถ",
+            description: "ไม่พบรถที่ต้องการแก้ไข",
+          });
+          router.push("/dashboard/cars");
+          return;
+        }
+        setCar(carData);
+      } catch (error) {
+        console.error("Error loading car:", error);
+        toast({
+          variant: "destructive",
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถโหลดข้อมูลรถได้",
+        });
+        router.push("/dashboard/cars");
+      } finally {
+        setIsLoading(false);
+      }
+    };
     if (carId) {
       loadCar();
     }
-  }, [carId]);
-
-  const loadCar = async () => {
-    setIsLoading(true);
-    try {
-      const carData = await getCarById(supabase, carId);
-      if (!carData) {
-        toast({
-          variant: "destructive",
-          title: "ไม่พบรถ",
-          description: "ไม่พบรถที่ต้องการแก้ไข",
-        });
-        router.push("/dashboard/cars");
-        return;
-      }
-      setCar(carData);
-    } catch (error) {
-      console.error("Error loading car:", error);
-      toast({
-        variant: "destructive",
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโหลดข้อมูลรถได้",
-      });
-      router.push("/dashboard/cars");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [carId,router, supabase]);
 
   const handleCarUpdated = async (updatedCar: Car, image:File | null) => {
     setIsSaving(true);
     try {
-      // Remove fields that shouldn't be updated directly
-      const {car_id, created_at, updated_at, ...carData } = updatedCar;
-
-      // Call your updateCar function, passing carId and carData (partial)
       await updateCar(supabase, carId, updatedCar);
       if (image){
         await uploadImageCar(supabase, image, updatedCar.car_id);

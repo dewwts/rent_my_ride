@@ -40,8 +40,7 @@ export default function MyCarsPage() {
       }
     };
     loadCars();
-  }, []);
-
+  }, [supabase]);
   
 
   const handleDeleteClick = (car: Car) => {
