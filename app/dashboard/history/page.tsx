@@ -9,6 +9,7 @@ import { Transaction } from "@/types/transactionInterface";
 import axios, { AxiosError } from 'axios'
 import { toast } from "@/components/ui/use-toast";
 import {formatDate, calculateDuration, formatCurrency} from '@/lib/utils'
+import Image from "next/image";
 
 export default function TransactionHistoryPage() {
   const [loading, setLoading] = useState(true);
@@ -62,7 +63,7 @@ export default function TransactionHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, filter, currentPage, itemsPerPage]);
+  }, [supabase, filter, currentPage, itemsPerPage, router]);
 
   const checkRoleAndFetchTransactions = useCallback(async () => {
     try {
@@ -250,7 +251,7 @@ export default function TransactionHistoryPage() {
                     <h4 className="font-medium text-gray-900 mb-3">ข้อมูลรถยนต์</h4>
                     <div className="flex items-center gap-4">
                       <div className="w-32 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                        <img
+                        <Image
                           src={transaction.renting?.car_information?.car_image || "https://via.placeholder.com/300x200?text=No+Image"}
                           alt={`${transaction.renting?.car_information?.car_brand} ${transaction.renting?.car_information?.model}`}
                           className="w-full h-full object-cover"
