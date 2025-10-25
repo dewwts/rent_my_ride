@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { AddCarForm } from "./add-car-form";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";

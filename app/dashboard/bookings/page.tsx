@@ -3,21 +3,24 @@ import { useState, useEffect, useCallback } from "react";
 import { Loader2, History } from "lucide-react"; // เพิ่ม ChevronLeft, ChevronRight
 import { createClient } from "@/lib/supabase/client";
 import { formatDate, formatCurrency } from '@/lib/utils' 
-import { rentingInfo,RentingStatus } from "@/types/rentingInterface";
+import { bookingHistory, rentingInfo,RentingStatus } from "@/types/rentingInterface";
 import { getMyRentingHistory,getRentingPrice } from "@/lib/rentingServices";
 import { getFirstname } from "@/lib/userServices";
 import CustomPagination from "@/components/customPagination"
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { getCarStatus } from "@/lib/carServices";
+import { toast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 export default function RentingHistoryPage() { 
   const [loading, setLoading] = useState(true);
-  const [bookings, setBookings] = useState<any[]>([]); 
+  const [bookings, setBookings] = useState<bookingHistory[]>([]); 
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 10; 
   const supabase = createClient();
-
+  const router =useRouter()
   const fetchOwnerBookings = useCallback(async () => {
     try {
       setLoading(true);
@@ -69,11 +72,11 @@ export default function RentingHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage, supabase]);
 
   useEffect(() => {
     fetchOwnerBookings(); 
-  }, [currentPage, fetchOwnerBookings]);
+  }, [currentPage, fetchOwnerBookings, supabase]);
   
   // UI Logic สำหรับ Status (คงเดิม)
   const getStatusDisplay = (status: rentingInfo['status']) => {
@@ -99,6 +102,31 @@ export default function RentingHistoryPage() {
         setCurrentPage(page);
     }
   };
+  const nextLink = async(cid:string)=>{
+    try{
+      const isAvailable = await getCarStatus(supabase, cid)
+      console.log(isAvailable);
+      if (isAvailable === 'available'){
+        router.push(`/car/${cid}`)
+      }else{
+        toast({
+          variant:"destructive",
+          title:"ไม่สำเร็จ",
+          description: "รถนี้ไม่ได้อณุญาตให้เข้าถึงได้อีกต่อไป"
+        })
+      }
+    }catch(err:unknown){
+      let message = "Something went wrong"
+      if (err instanceof Error){
+        message = err.message
+      }
+      toast({
+        variant:"destructive",
+        title:"ไม่สำเร็จ",
+        description:message
+      })
+    }
+  }
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   if (loading) {
@@ -155,12 +183,12 @@ return (
               <div className="flex flex-col gap-1 sm:hidden text-sm">
                 <div><span className="font-semibold">หมายเลขการเช่า:</span> {booking.renting_id.slice(0, 15)+"..."}</div>
                 <div><span className="font-semibold">ID รถ:</span>
-                  <Link 
-                    href={`/car/${booking.car_id}`} 
+                  <Button
+                    onClick={()=>nextLink(booking.car_id)} 
                     className="text-blue-600 underline hover:text-blue-800 transition"
                   >
                     {booking.car_id.slice(0, 15) + "..."}
-                  </Link>
+                  </Button>
                 </div>
                 <div><span className="font-semibold">ผู้ให้เช่า:</span> {booking.lessor_name}</div>
                 <div><span className="font-semibold">วันที่เช่า:</span> {formatDate(booking.sdate)} - {formatDate(booking.edate)}</div>
@@ -178,12 +206,12 @@ return (
               {/* Desktop Layout */}
               <div className="hidden sm:block text-sm font-medium">{booking.renting_id.slice(0, 8)+"..."}</div>
               <div className="hidden sm:block text-sm">
-                  <Link 
-                    href={`/car/${booking.car_id}`} 
+                  <button
+                    onClick={()=>nextLink(booking.car_id)} 
                     className="text-blue-600 underline hover:text-blue-800 transition"
                   >
-                    {booking.car_id.slice(0, 8) + "..."}
-                  </Link>
+                    {booking.car_id.slice(0, 15) + "..."}
+                  </button>
               </div>
               <div className="hidden sm:block text-sm">{booking.lessor_name}</div>
               <div className="hidden sm:block text-sm col-span-2">
