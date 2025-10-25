@@ -34,7 +34,9 @@ export const ProfileSchema = z.object({
   subdistrict: z.string().optional(),
   district: z.string().optional(),
   province: z.string().optional(),
-  postcode: z.string().optional(),
+  postcode: z.string().trim().refine((value)=>value === "" || /^[0-9]{5}$/.test(value),{
+    message:"กรุณากรอกหมายเลขไปรษณีย์ 5 หลัก (หรือปล่อยว่าง)"
+  }).optional(),
   country: z.string().optional(),
 });
 

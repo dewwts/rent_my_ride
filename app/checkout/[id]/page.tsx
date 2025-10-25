@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter} from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getRentingById } from "@/lib/rentingServices";
 import { getCarById } from "@/lib/carServices";

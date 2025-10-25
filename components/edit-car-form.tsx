@@ -11,7 +11,6 @@ import { CarSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
-import { updateCar, uploadImageCar } from "@/lib/carServices";
 import { Car } from "@/types/carInterface";
 import { EditCarFormProps } from "@/types/componentProps";
 

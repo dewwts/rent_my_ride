@@ -7,10 +7,10 @@ import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { useRouter } from "next/navigation";
 
-import { carAvailable } from "@/lib/carServices";
+import { carAvailable, getCarStatus } from "@/lib/carServices";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { dateRangeAvailable } from "@/lib/dateRangeAvailable";
+import { dateRangeAvailable } from "@/lib/utils";
 import { createRenting } from "@/lib/rentingServices";
 import type { Car } from "@/types/carInterface";
 
@@ -34,9 +34,17 @@ export function CarDetailsPage({
       });
       return;
     }
-
     const supabase = createClient();
     try {
+      const carStatus = await getCarStatus(supabase, cid)
+      if (!carStatus){
+        toast({
+          variant: "destructive",
+          title: "วันที่ไม่ครบ",
+          description: "รถคันนี้ไม่สามารถจองได้",
+        });
+        return;
+      }
       const parsed = await dateRangeAvailable.parseAsync({
         startDate,
         endDate,

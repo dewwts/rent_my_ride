@@ -8,6 +8,10 @@ import { getMyLeasingHistory,getRentingPrice } from "@/lib/rentingServices";
 import { getFirstname } from "@/lib/userServices";
 import CustomPagination from "@/components/customPagination"
 import Link from "next/link";
+import { getCarStatus } from "@/lib/carServices";
+import { toast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function RentingHistoryPage() { 
   const [loading, setLoading] = useState(true);
@@ -17,7 +21,7 @@ export default function RentingHistoryPage() {
   const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 10; 
   const supabase = createClient();
-
+  const router = useRouter()
   const fetchOwnerBookings = useCallback(async () => {
     try {
       setLoading(true);
@@ -88,6 +92,31 @@ export default function RentingHistoryPage() {
         setCurrentPage(page);
     }
   };
+  const nextLink = async(cid:string)=>{
+    try{
+      const isAvailable = await getCarStatus(supabase, cid)
+      console.log(isAvailable);
+      if (isAvailable){
+        router.push(`/car/${cid}`)
+      }else{
+        toast({
+          variant:"destructive",
+          title:"ไม่สำเร็จ",
+          description: "รถนี้ไม่ได้อณุญาตให้เข้าถึงได้อีกต่อไป"
+        })
+      }
+    }catch(err:unknown){
+      let message = "Something went wrong"
+      if (err instanceof Error){
+        message = err.message
+      }
+      toast({
+        variant:"destructive",
+        title:"ไม่สำเร็จ",
+        description:message
+      })
+    }
+  }
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   if (loading) {
@@ -144,12 +173,12 @@ return (
               <div className="flex flex-col gap-1 sm:hidden text-sm">
                 <div><span className="font-semibold">หมายเลขการเช่า:</span> {booking.renting_id.slice(0, 15)+"..."}</div>
                 <div><span className="font-semibold">ID รถ:</span>
-                  <Link 
-                    href={`/car/${booking.car_id}`} 
+                  <Button
+                    onClick={()=>nextLink(booking.car_id)} 
                     className="text-blue-600 underline hover:text-blue-800 transition"
                   >
                     {booking.car_id.slice(0, 15) + "..."}
-                  </Link>
+                  </Button>
                 </div>
                 <div><span className="font-semibold">ผู้เช่า:</span> {booking.lessee_name}</div>
                 <div><span className="font-semibold">วันที่เช่า:</span> {formatDate(booking.sdate)} - {formatDate(booking.edate)}</div>
@@ -167,12 +196,12 @@ return (
               {/* Desktop Layout */}
               <div className="hidden sm:block text-sm font-medium">{booking.renting_id.slice(0, 8)+"..."}</div>
               <div className="hidden sm:block text-sm">
-                <Link 
-                  href={`/car/${booking.car_id}`} 
-                  className="text-blue-600 underline hover:text-blue-800 transition"
-                >
-                  {booking.car_id.slice(0, 8) + "..."}
-                </Link>
+                <Button
+                    onClick={()=>nextLink(booking.car_id)} 
+                    className="text-blue-600 underline hover:text-blue-800 transition"
+                  >
+                    {booking.car_id.slice(0, 15) + "..."}
+                  </Button>
               </div>
               <div className="hidden sm:block text-sm">{booking.lessee_name}</div>
               <div className="hidden sm:block text-sm col-span-2">
