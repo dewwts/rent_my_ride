@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Check, X, Loader2, Calendar, DollarSign } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import Pagination from "@/components/ui/Pagination";
 import { Transaction } from "@/types/transactionInterface";
 import axios, { AxiosError } from 'axios'
@@ -29,7 +28,6 @@ export default function TransactionHistoryPage() {
   });
 
   const router = useRouter();
-  const supabase = createClient();
 
   const fetchAllTransactions = useCallback(async () => {
     try {
@@ -63,7 +61,7 @@ export default function TransactionHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, filter, currentPage, itemsPerPage, router]);
+  }, [ filter, currentPage, itemsPerPage, router]);
 
   const checkRoleAndFetchTransactions = useCallback(async () => {
     try {
@@ -74,7 +72,7 @@ export default function TransactionHistoryPage() {
       setError('เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์การเข้าใช้งาน');
       setLoading(false);
     }
-  }, [router, supabase, fetchAllTransactions]);
+  }, [fetchAllTransactions]);
 
   useEffect(() => {
     checkRoleAndFetchTransactions();
