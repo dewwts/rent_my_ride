@@ -95,17 +95,15 @@ export function CarDetailsPage({
           rentingId
         )}`
       );
-    } catch (error: any) {
-      const zodIssues = error?.errors ?? error?.issues;
-      const messages =
-        Array.isArray(zodIssues) && zodIssues.length
-          ? zodIssues.map((e: any) => e.message).join("\n")
-          : error?.message ?? "เกิดข้อผิดพลาด";
-
+    } catch (error: unknown) {
+      let message = "Something went wrong"
+      if (error instanceof Error){
+        message = error.message
+      }
       toast({
         variant: "destructive",
         title: "เกิดข้อผิดพลาด",
-        description: messages,
+        description: message,
       });
     }
   };
