@@ -9,6 +9,7 @@ import dayjs from "dayjs";
 import type { RentingDetail } from "@/types/rentingInterface";
 import axios, { AxiosError } from "axios";
 import { toast } from "@/components/ui/use-toast";
+import Image from "next/image";
 
 export default function OrderPage() {
   const params = useParams();
@@ -107,14 +108,19 @@ export default function OrderPage() {
             </div>
 
             <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden mb-6">
-              <img
+              <Image src={car?.car_image || "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=500&h=300&fit=crop"}
+                height={64}
+                width={64}
+                alt={`Car ${car?.model}`}
+              />
+              {/* <img
                 src={
                   car?.car_image ||
                   "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=500&h=300&fit=crop"
                 }
                 alt={`Car ${car?.model}`}
                 className="w-full h-64 object-cover"
-              />
+              /> */}
             </div>
 
             <div className="space-y-4">
@@ -190,11 +196,12 @@ export default function OrderPage() {
               <div className="space-y-3">
                 <button className="w-full flex items-center justify-center gap-4 p-5 rounded-full border-2 border-gray-300 hover:border-gray-400 bg-white transition-all"
                 onClick={handleClickPayment}>
-                  <img
+                  <Image src={"/icons/qr_payment.png"} height={8} width={8} alt="QR Payment"/>
+                  {/* <img
                     src="/icons/qr_payment.png"
                     alt="QR Payment"
                     className="w-8 h-8"
-                  />
+                  /> */}
                   <span className="font-semibold text-lg text-gray-900">
                     ชำระเงินด้วย QR Payment
                   </span>

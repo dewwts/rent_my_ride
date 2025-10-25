@@ -1,15 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useRef } from "react";
@@ -18,9 +10,9 @@ import { CarSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
-import { createCar, uploadImageCar } from "@/lib/carServices";
 import { Car } from "@/types/carInterface";
 import { AddCarFormProps } from "@/types/componentProps";
+import Image from "next/image";
 
 type CarFormValues = z.infer<typeof CarSchema>;
 
@@ -34,21 +26,19 @@ export function AddCarForm({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const supabase = createClient();
   const [image, setImage] = useState<File | null>(null)
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<CarFormValues>({
-    resolver: zodResolver(CarSchema) as any,
+    resolver: zodResolver(CarSchema),
     mode: "onTouched",
     defaultValues: {
       car_brand: "",
       model: "",
-      year: new Date().getFullYear(),
+      year_created: new Date().getFullYear(),
       number_of_seats: 4,
       car_type: "",
       mileage: 0,
@@ -86,7 +76,7 @@ export function AddCarForm({
     try {
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-      const carId = `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // const carId = `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       setImage(file)
       toast({
         title: "อัปโหลดสำเร็จ",
@@ -155,10 +145,12 @@ export function AddCarForm({
               {/* Image Preview or Upload Area */}
               {imagePreview ? (
                 <div className="relative">
-                  <img
+                  <Image
                     src={imagePreview}
                     alt="Car preview"
-                    className="w-64 h-48 object-cover rounded-lg border-2 border-gray-200"
+                    width={64}
+                    height={48}
+                    className="object-cover rounded-lg border-2 border-gray-200"
                   />
                   <Button
                     type="button"
@@ -234,8 +226,8 @@ export function AddCarForm({
                 <div className="space-y-2">
                   <Label htmlFor="year">ปีที่ผลิต *</Label>
                   <select
-                    id="year"
-                    {...register("year")}
+                    id="year_created"
+                    {...register("year_created")}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   >
                     {Array.from({ length: 35 }, (_, i) => {
@@ -247,8 +239,8 @@ export function AddCarForm({
                       );
                     })}
                   </select>
-                  {errors.year && (
-                    <p className="text-sm text-red-500">{errors.year.message}</p>
+                  {errors.year_created && (
+                    <p className="text-sm text-red-500">{errors.year_created.message}</p>
                   )}
                 </div>
                 {/* <div className="space-y-2">
@@ -266,7 +258,7 @@ export function AddCarForm({
                   <Label htmlFor="seats">จำนวนที่นั่ง *</Label>
                   <select
                     id="seats"
-                    {...register("number_of_seats")}
+                    {...register("number_of_seats", {valueAsNumber:true})}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   >
                     {Array.from({ length: 20 }, (_, i) => (
@@ -356,7 +348,7 @@ export function AddCarForm({
                     type="number"
                     min="0"
                     max="999999"
-                    {...register("mileage")}
+                    {...register("mileage", {valueAsNumber:true})}
                     placeholder="เช่น 120000"
                   />
                   {errors.mileage && (
@@ -392,7 +384,7 @@ export function AddCarForm({
                     type="number"
                     min="1"
                     max="100000"
-                    {...register("daily_rental_price")}
+                    {...register("daily_rental_price", {valueAsNumber:true})}
                     placeholder="เช่น 1200"
                   />
                   {errors.daily_rental_price && (

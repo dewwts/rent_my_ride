@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { dateRangeAvailable } from "@/lib/utils";
 import { createRenting } from "@/lib/rentingServices";
 import type { Car } from "@/types/carInterface";
+import Image from "next/image";
 
 export function CarDetailsPage({
   cid,
@@ -94,17 +95,15 @@ export function CarDetailsPage({
           rentingId
         )}`
       );
-    } catch (error: any) {
-      const zodIssues = error?.errors ?? error?.issues;
-      const messages =
-        Array.isArray(zodIssues) && zodIssues.length
-          ? zodIssues.map((e: any) => e.message).join("\n")
-          : error?.message ?? "เกิดข้อผิดพลาด";
-
+    } catch (error: unknown) {
+      let message = "Something went wrong"
+      if (error instanceof Error){
+        message = error.message
+      }
       toast({
         variant: "destructive",
         title: "เกิดข้อผิดพลาด",
-        description: messages,
+        description: message,
       });
     }
   };
@@ -120,12 +119,21 @@ export function CarDetailsPage({
           <div className="w-fit px-5 py-2 mt-4 mb-8 font-semibold text-white bg-slate-900 rounded-full">
             {car?.daily_rental_price} บาท / วัน
           </div>
-
-          <img
-            src={car?.car_image}
-            alt={`Car Image ${car?.car_id}`}
-            className="w-full rounded-2xl object-cover shadow-xl"
-          />
+          <div className="w-full aspect-video relative">
+            {car?.car_image ? (
+              <Image
+              src={car?.car_image}
+              alt={`Car Image ${car?.car_id}`}
+              fill={true}
+              className="rounded-2xl object-cover shadow-xl"
+            />):(
+              <div className="w-full rounded-2xl object-cover shadow-xl text-center font-light tracking-wide">
+                ไม่มีรูปภาพ
+              </div>
+            )}
+          </div>
+          
+          
 
           {/* เลือกวัน + ปุ่มเช่า */}
           <div className="flex items-center gap-2 mt-6">

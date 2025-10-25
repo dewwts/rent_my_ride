@@ -3,11 +3,10 @@ import { useState, useEffect, useCallback } from "react";
 import { Loader2, History } from "lucide-react"; // เพิ่ม ChevronLeft, ChevronRight
 import { createClient } from "@/lib/supabase/client";
 import { formatDate, formatCurrency } from '@/lib/utils' 
-import { rentingInfo,RentingStatus } from "@/types/rentingInterface";
+import { bookingHistory, rentingInfo,RentingStatus } from "@/types/rentingInterface";
 import { getMyRentingHistory,getRentingPrice } from "@/lib/rentingServices";
 import { getFirstname } from "@/lib/userServices";
 import CustomPagination from "@/components/customPagination"
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getCarStatus } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";
@@ -15,7 +14,7 @@ import { useRouter } from "next/navigation";
 
 export default function RentingHistoryPage() { 
   const [loading, setLoading] = useState(true);
-  const [bookings, setBookings] = useState<any[]>([]); 
+  const [bookings, setBookings] = useState<bookingHistory[]>([]); 
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -73,11 +72,11 @@ export default function RentingHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage, supabase]);
 
   useEffect(() => {
     fetchOwnerBookings(); 
-  }, [currentPage, fetchOwnerBookings]);
+  }, [currentPage, fetchOwnerBookings, supabase]);
   
   // UI Logic สำหรับ Status (คงเดิม)
   const getStatusDisplay = (status: rentingInfo['status']) => {

@@ -51,7 +51,11 @@ export default function FilterSidebar({ value, onChange }: Props) {
 
   const toggleGear = (g: string) => {
     const cur = new Set(value.gear_types ?? []);
-    cur.has(g) ? cur.delete(g) : cur.add(g);
+    if (cur.has(g)){
+      cur.delete(g)
+    }else{
+      cur.add(g)
+    }
     onChange({ ...value, gear_types: [...cur] });
   };
 

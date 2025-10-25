@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { Check, X, Loader2, Calendar, DollarSign } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import Pagination from "@/components/ui/Pagination";
 import { Transaction } from "@/types/transactionInterface";
 import axios, { AxiosError } from 'axios'
 import { toast } from "@/components/ui/use-toast";
 import {formatDate, calculateDuration, formatCurrency} from '@/lib/utils'
+import Image from "next/image";
 
 export default function TransactionHistoryPage() {
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,6 @@ export default function TransactionHistoryPage() {
   });
 
   const router = useRouter();
-  const supabase = createClient();
 
   const fetchAllTransactions = useCallback(async () => {
     try {
@@ -62,7 +61,7 @@ export default function TransactionHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, filter, currentPage, itemsPerPage]);
+  }, [ filter, currentPage, itemsPerPage, router]);
 
   const checkRoleAndFetchTransactions = useCallback(async () => {
     try {
@@ -73,7 +72,7 @@ export default function TransactionHistoryPage() {
       setError('เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์การเข้าใช้งาน');
       setLoading(false);
     }
-  }, [router, supabase, fetchAllTransactions]);
+  }, [fetchAllTransactions]);
 
   useEffect(() => {
     checkRoleAndFetchTransactions();
@@ -249,8 +248,9 @@ export default function TransactionHistoryPage() {
                   <div className="lg:col-span-1">
                     <h4 className="font-medium text-gray-900 mb-3">ข้อมูลรถยนต์</h4>
                     <div className="flex items-center gap-4">
-                      <div className="w-32 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                        <img
+                      <div className="relative w-32 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                        <Image
+                          fill={true}
                           src={transaction.renting?.car_information?.car_image || "https://via.placeholder.com/300x200?text=No+Image"}
                           alt={`${transaction.renting?.car_information?.car_brand} ${transaction.renting?.car_information?.model}`}
                           className="w-full h-full object-cover"

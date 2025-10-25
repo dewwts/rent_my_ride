@@ -70,7 +70,7 @@ export const getFirstname = async (supabase: SupabaseClient) => {
     data: { user },
   } = await supabase.auth.getUser();
   if (user) {
-    const { data: userInfo, error: err } = await supabase
+    const { data: userInfo } = await supabase
       .from("user_info")
       .select("u_firstname")
       .eq("user_id", user.id)
