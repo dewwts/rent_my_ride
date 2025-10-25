@@ -16,33 +16,13 @@ import {
 import { ArrowUpDown, ChevronDown, Check } from "lucide-react";
 import { fetchPopularityMap } from "@/lib/searchServices";
 import { createClient } from "@/lib/supabase/client";
+import { mapDbCarToCard } from "@/lib/utils";
+
 
 type Props = { initialCars: CardForUI[] };
 type SearchMeta = { location?: string; start?: string; end?: string };
 
-// ----- utils -----
-function toAvailability(status: string | null | undefined) {
-  return status === "available" || status === "พร้อมเช่า" ? "พร้อมเช่า" : "ไม่พร้อมเช่า";
-}
-function mapDbCarToCard(c: DbCar): CardForUI {
-  return {
-    id: c.car_id,
-    name: c.car_brand ?? "ไม่ระบุ",
-    model: c.model ?? "",
-    image: c.car_image ?? "",
-    pricePerDay: Number(c.daily_rental_price ?? 0),
-    rating: Number(c.car_conditionrating ?? 0),
-    reviewCount: 0,
-    seats: c.number_of_seats ?? 0,
-    fuelType: c.oil_type ?? "",
-    transmission: c.gear_type ?? "",
-    availability: toAvailability(c.status),
-    features: [],
-    year: (c as any)?.year_created ?? (c as any)?.year ?? undefined,
-  };
-}
 
-// ----- sort -----
 type SortKey = "popularity" | "price_asc" | "rating_desc" | "year_desc";
 const SORT_LABEL: Record<SortKey, string> = {
   popularity: "ความนิยม",
@@ -121,7 +101,7 @@ export default function HomeClient({ initialCars }: Props) {
         break;
 
       case "year_desc": {
-        const ya = (c: CardForUI) => (c as any)?.year ?? 0;
+        const ya = (c: CardForUI) => (c as CardForUI)?.year ?? 0;
         arr.sort((a, b) => ya(b) - ya(a));
         break;
       }

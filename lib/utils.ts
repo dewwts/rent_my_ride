@@ -4,7 +4,7 @@ import { ProfileSchema } from "./schemas";
 import z from "zod";
 import { SupabaseClient } from "@supabase/supabase-js";
 import dayjs, { Dayjs } from "dayjs";
-import { UIRangeFilter } from "@/types/carInterface";
+import { DbCar, UIRangeFilter } from "@/types/carInterface";
 import { CardForUI } from "@/types/carInterface";
 
 export function cn(...inputs: ClassValue[]) {
@@ -186,4 +186,22 @@ export function filterCars(cards: CardForUI[], f: UIRangeFilter): CardForUI[] {
     if (hasGear && !gears.includes(norm(c.transmission))) return false;
     return true;
   });
+}
+
+export function mapDbCarToCard(c: DbCar): CardForUI {
+  return {
+    id: c.car_id,
+    name: c.car_brand ?? "ไม่ระบุ",
+    model: c.model ?? "",
+    image: c.car_image ?? "",
+    pricePerDay: Number(c.daily_rental_price ?? 0),
+    rating: Number(c.car_conditionrating ?? 0),
+    reviewCount: 0,
+    seats: c.number_of_seats ?? 0,
+    fuelType: c.oil_type ?? "",
+    transmission: c.gear_type ?? "",
+    availability: toAvailability(c.status),
+    features: [],
+    year: (c as DbCar)?.year_created ??  undefined,
+  };
 }
