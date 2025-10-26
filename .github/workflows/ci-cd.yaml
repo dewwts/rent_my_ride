@@ -1,0 +1,34 @@
+name: CI-CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+jobs:
+  build-and-test:
+    name: Build and testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup node-js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 # version of node js
+          cache: "npm"  # force node_modules to be cached for faster
+
+      - name: Install library
+        run: npm install
+
+      - name: Test building project # but vercel is also provide this
+        run: npm run build 
+        
+      - name: Run all testing
+        run: npm run test
+
