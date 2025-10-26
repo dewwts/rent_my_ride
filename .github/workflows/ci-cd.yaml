@@ -27,6 +27,9 @@ jobs:
       - name: Install library
         run: npm install
 
+      - name: Test Linter
+        run: npm run lint
+        
       - name: Test building project # but vercel is also provide this
         run: npm run build 
 
