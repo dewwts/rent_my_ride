@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - feature/automate-testing
   pull_request:
     branches:
       - main
@@ -28,7 +29,7 @@ jobs:
 
       - name: Test building project # but vercel is also provide this
         run: npm run build 
-        
+
       - name: Run all testing
         run: npm run test
 
