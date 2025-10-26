@@ -1,12 +1,11 @@
 "use client"
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import {CarDetailsPage} from "@/components/carDetail";
 import { createClient } from "@/lib/supabase/client";
 import { getCarById } from "@/lib/carServices";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Car } from "@/types/carInterface";
+import { Loader2 } from "lucide-react";
 
 
 export default function Page() {
@@ -25,12 +24,24 @@ export default function Page() {
             }
         }
         getCar()
-    })
+    },[cid, router])
+    if (typeof(cid) === 'string' && car){
+        return (
+            <>
+                <CarDetailsPage car={car} cid={cid} />
+            </>
+        )
+    }
     return (
-        <>
-        {(car && typeof(cid) === 'string' ) ? <CarDetailsPage car={car} cid={cid} /> : <p>Loading...</p>}      
-        </>
-    )
+      <div className="min-h-screen flex justify-center items-center bg-white">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600">กำลังโหลดข้อมูลรถ...</p>
+        </div>
+      </div>
+    );
+    
+    
 }
 
     

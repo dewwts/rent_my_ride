@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Car } from "@/types/carInterface";
 import { DeleteCarDialogProps } from "@/types/componentProps";
 
 export function DeleteCarDialog({

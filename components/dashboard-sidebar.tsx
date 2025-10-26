@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, User, Key, CarFront, History, ChevronDown, ChevronUp, LucideIcon } from "lucide-react"; 
+import { LayoutDashboard, User, Key, CarFront, History, ChevronDown, ChevronUp } from "lucide-react"; 
 import { useEffect,useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getRole } from "@/lib/authServices";
@@ -119,8 +119,12 @@ export default function DashboardSidebar() {
         if(role){
           setRole(role as "user" | "admin")
         }
-      }catch(error){
-        console.log("โหลดroleไม่สำเร็จ");
+      }catch(error: unknown){
+        let message = "Something went wrong"
+        if (error instanceof Error){
+            message = error.message
+        }
+        console.error(message);
       } finally {
         setLoading(false);
       }

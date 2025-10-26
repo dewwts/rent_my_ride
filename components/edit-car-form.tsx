@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,9 +10,9 @@ import { CarSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
-import { updateCar, uploadImageCar } from "@/lib/carServices";
 import { Car } from "@/types/carInterface";
 import { EditCarFormProps } from "@/types/componentProps";
+import Image from "next/image";
 
 type CarFormValues = z.infer<typeof CarSchema>;
 
@@ -29,24 +28,21 @@ export function EditCarForm({
   const [imagePreview, setImagePreview] = useState<string | null>(car.car_image || null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const supabase = createClient();
   const [image, setImage] = useState<File | null>(null)
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<CarFormValues>({
-    resolver: zodResolver(CarSchema) as any,
+    resolver: zodResolver(CarSchema),
     mode: "onTouched",
     defaultValues: {
       car_brand: car.car_brand,
       model: car.model,
-      year: car.year_created,
+      year_created: car.year_created,
       number_of_seats: car.number_of_seats,
       car_type: car.car_type,
-      // color: car.color,
       mileage: car.mileage,
       oil_type: car.oil_type,
       gear_type: car.gear_type,
@@ -57,7 +53,7 @@ export function EditCarForm({
       image_url: car.car_image || "",
     },
   });
-
+  console.log(car.year_created);
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -88,13 +84,8 @@ export function EditCarForm({
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
 
-      // Generate unique car ID for upload
-      const carId = `car_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       setImage(file)
-      // Upload image
-      // const imageUrl = await uploadImageCar(supabase, file, carId);
-      // setValue("image_url", imageUrl);
-      
+   
       toast({
         title: "อัปโหลดสำเร็จ",
         description: "รูปภาพรถถูกอัปโหลดเรียบร้อยแล้ว",
@@ -121,11 +112,6 @@ export function EditCarForm({
         rating: data.rating || car.rating,
         car_image: data.image_url || car.car_image
       };
-
-      // // Simulate API call
-      // // await new Promise(resolve => setTimeout(resolve, 1000));
-      // await updateCar(supabase, car.car_id, updatedCar)
-
       onCarUpdated?.(updatedCar, image);
     } catch (error) {
       console.error("Update car error:", error);
@@ -167,10 +153,12 @@ export function EditCarForm({
               {/* Image Display/Upload Area */}
               {imagePreview ? (
                 <div className="relative">
-                  <img
+                  <Image
                     src={imagePreview}
                     alt="Car preview"
-                    className="w-64 h-48 object-cover rounded-lg border-2 border-gray-200"
+                    width={64}
+                    height={48}
+                    className="object-cover rounded-lg border-2 border-gray-200"
                   />
                   <Button
                     type="button"
@@ -246,8 +234,8 @@ export function EditCarForm({
               <div className="space-y-2">
                 <Label htmlFor="year">ปีที่ผลิต *</Label>
                 <select
-                  id="year"
-                  {...register("year")}
+                  id="year_created"
+                  {...register("year_created",{ valueAsNumber: true })}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 >
                   {Array.from({ length: 35 }, (_, i) => {
@@ -259,8 +247,8 @@ export function EditCarForm({
                     );
                   })}
                 </select>
-                {errors.year && (
-                  <p className="text-sm text-red-500">{errors.year.message}</p>
+                {errors.year_created && (
+                  <p className="text-sm text-red-500">{errors.year_created.message}</p>
                 )}
               </div>
               {/* <div className="space-y-2">
@@ -278,7 +266,7 @@ export function EditCarForm({
                 <Label htmlFor="seats">จำนวนที่นั่ง *</Label>
                 <select
                   id="seats"
-                  {...register("number_of_seats")}
+                  {...register("number_of_seats",{ valueAsNumber: true })}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 >
                   {Array.from({ length: 50 }, (_, i) => (
@@ -313,17 +301,6 @@ export function EditCarForm({
                   <p className="text-sm text-red-500">{errors.car_type.message}</p>
                 )}
               </div>
-              {/* <div className="space-y-2">
-                <Label htmlFor="color">สี *</Label>
-                <Input
-                  id="color"
-                  {...register("color")}
-                  placeholder="เช่น ขาว, ดำ, แดง"
-                />
-                {errors.color && (
-                  <p className="text-sm text-red-500">{errors.color.message}</p>
-                )}
-              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="oil_type">ประเภทเชื้อเพลิง *</Label>
                 <select
@@ -404,7 +381,7 @@ export function EditCarForm({
                   type="number"
                   min="1"
                   max="100000"
-                  {...register("daily_rental_price")}
+                  {...register("daily_rental_price",{valueAsNumber:true})}
                   placeholder="เช่น 1200"
                 />
                 {errors.daily_rental_price && (

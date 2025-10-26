@@ -147,11 +147,15 @@ export function Hero() {
           detail: { cars, meta: { location, start, end } },
         })
       );
-    } catch (e: any) {
+    } catch (e: unknown) {
+      let message = "Something went wrong"
+      if (e instanceof Error){ 
+        message = e.message
+      }
       console.error(e);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: e?.message ?? "เกิดข้อผิดพลาดขณะค้นหา",
+        description: message ?? "เกิดข้อผิดพลาดขณะค้นหา",
         variant: "destructive",
       });
     } finally {
