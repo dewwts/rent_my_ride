@@ -78,7 +78,7 @@ export interface CarCardProps {
   year_created?: number;
   fuelType: string;
   transmission: string;
-  availability: string;         // "พร้อมเช่า" | "จองล่วงหน้า" | ...
+  availability: string | null;         // "พร้อมเช่า" | "จองล่วงหน้า" | ...
   features?: string[];          // optional
 }
 export type DbCar = {
