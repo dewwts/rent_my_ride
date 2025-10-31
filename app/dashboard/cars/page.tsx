@@ -79,12 +79,12 @@ export default function MyCarsPage() {
   };
 
 
-  const getStatusColor = (status: string) => {
-    return status === "available" ? "border-green-400" : "border-red-400";
+  const getStatusColor = (status: boolean) => {
+    return status === true ? "border-green-400" : "border-red-400";
   };
 
-  const getStatusText = (status: string) => {
-    return status === "available" ? "ว่าง" : "ไม่ว่าง";
+  const getStatusText = (status: boolean) => {
+    return status === true ? "ว่าง" : "ไม่ว่าง";
   };
 
   if (isLoading) {
@@ -137,7 +137,7 @@ export default function MyCarsPage() {
               cars.map((car) => (
                 <div
                   key={car.car_id}
-                  className={`bg-white rounded-xl p-6 shadow-sm border-2 ${getStatusColor(car.status)} hover:shadow-md transition-shadow`}
+                  className={`bg-white rounded-xl p-6 shadow-sm border-2 ${getStatusColor(car.is_verified)} hover:shadow-md transition-shadow`}
                 >
                   <div className="flex gap-6">
                     {/* Car Image */}
@@ -190,11 +190,11 @@ export default function MyCarsPage() {
                       <div className="space-y-2">
                         <p className="text-lg font-semibold text-gray-900">สถานะ</p>
                         <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                          car.status === "available" 
+                          car.is_verified === true 
                             ? "bg-green-100 text-green-800" 
                             : "bg-red-100 text-red-800"
                         }`}>
-                          {getStatusText(car.status)}
+                          {getStatusText(car.is_verified)}
                         </span>
                         <p className="text-sm text-gray-500">
                           ที่จอด: {car.location}
