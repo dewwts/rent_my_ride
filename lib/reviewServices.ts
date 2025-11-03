@@ -16,7 +16,7 @@ import { SupabaseClient } from "@supabase/supabase-js"
         rating: 5,
         message: "test",
         reviewer_id: "user-123",
-        target_id: "user-456",
+        target_id: "car_id-123",
         renting_id: "renting-789"
     }
 **/
