@@ -292,3 +292,49 @@ export const getCarReview = async(supabase:SupabaseClient, car_id:string)=>{
   return data;
 }
 
+export type CarUpdate = Partial<{
+  daily_rental_price: number;
+  car_image: string;
+  car_brand: string;
+  year_created: number;
+  model: string;
+  has_camera: boolean;
+  number_of_seats: number;
+  mileage: number;
+  gear_type: string;
+  oil_type: string;
+  location: string;
+  status: string;
+}>;
+function sanitize<T extends object>(obj: T) {
+  const out = Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== null && v !== undefined)
+  ) as Partial<T>;
+  if (Object.values(obj).some(v => v === null))
+    throw new Error("Null is not allowed");
+  return out;
+}
+
+export const UpdateCar = async (
+  supabase: SupabaseClient,
+  car_id: string,
+  payload: CarUpdate
+) => {
+  const { data: sessionData } = await supabase.auth.getUser();
+    if (!sessionData.user) {
+      throw new Error("User not authenticated");
+    }
+  if (!car_id) throw new Error("car_id is required");
+  if (!payload || Object.keys(payload).length === 0)
+    throw new Error("No fields to update");
+
+  const { data, error } = await supabase
+    .from("car_information")
+    .update(payload)             // ส่งเฉพาะฟิลด์ที่อยากแก้
+    .eq("car_id", car_id)
+    .select()                    // ให้คืนค่าที่อัปเดตกลับมา
+    .single();                   // มี 1 แถวต่อ car_id
+
+  if (error) throw error;
+  return data;                   // แถวที่ถูกอัปเดต
+};
