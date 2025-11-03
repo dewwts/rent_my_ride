@@ -33,21 +33,21 @@ Before begin the project, ensure you have installed these before on your machine
 Following these instruction
 
 1. Use `git clone` Clone the project to your local machine 
-  ```bash
-  git clone https://github.com/dewwts/rent_my_ride.git
-  ```
+ ```bash
+ git clone https://github.com/dewwts/rent_my_ride.git
+ ```
 
 2. Use `cd` to change into the app's directory
 
-   ```bash
-   cd rent_my_ride
-   ```
+ ```bash
+ cd rent_my_ride
+ ```
 
 3. **Install the dependencies:**
     (This command reads the `package.json` file and installs all the required libraries)
-    ```bash
-    npm install
-    ```
+ ```bash
+ npm install
+ ```
 
 ## Run Development Server
 To start the development server, use the following command:
