@@ -285,7 +285,7 @@ export const getCarStatus = async(supabase: SupabaseClient, car_id:string)=>{
 }
 
 export const getCarReview = async(supabase:SupabaseClient, car_id:string)=>{
-  const{data,error:err} = await supabase.from("reviews").select("review_id, rating,comment").eq("target_id",car_id).order("created_at", { ascending: false })
+  const{data,error:err} = await supabase.from("reviews").select("review_id, rating,comment,created_at,reviewer_id").eq("target_id",car_id).order("created_at", { ascending: false })
   if(err){
     throw new Error("Error")
   }
