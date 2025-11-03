@@ -1,0 +1,48 @@
+name: CI-CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+jobs:
+  build-and-test:
+    name: Build and testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup node-js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 # version of node js
+          cache: "npm"  # force node_modules to be cached for faster
+
+      - name: Install library
+        run: npm install
+
+      - name: Test Linter
+        run: npm run lint
+        
+      - name: Test building project # but vercel is also provide this
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        env: 
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          NEXT_PUBLIC_STRIPE_PUBLISH_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISH_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SERVER_URL: ${{ secrets.NEXT_PUBLIC_SERVER_URL }}
+        run: npm run build 
+
+      - name: Run all testing
+        run: npm run test
+
