@@ -107,10 +107,9 @@ export default function OrderPage() {
               <div className="text-gray-600">ระยะเวลา {days} วัน</div>
             </div>
 
-            <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden mb-6">
+            <div className="relative true h-64 object-cover bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden mb-6">
               <Image src={car?.car_image || "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=500&h=300&fit=crop"}
-                height={64}
-                width={64}
+                fill={true}
                 alt={`Car ${car?.model}`}
               />
               {/* <img
