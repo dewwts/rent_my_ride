@@ -24,7 +24,15 @@ export const submitReview = async(supabase: SupabaseClient, payload:Review)=>{
     const {error: insertError} = await supabase.from("reviews").insert(payload)
     if (insertError){
         console.error("Error submitting review:", insertError);
-        throw insertError
+        throw new Error("มีปัญหาในการส่งรีวิว")
+    }
+    return true
+}
+export const deleteReview = async(supabase: SupabaseClient, reviewID:string)=>{
+    const {error: deleteError} = await supabase.from("reviews").delete().eq("reviews_id",reviewID).single()
+    if (deleteError){
+        console.error("Error deleting review:", deleteError);
+        throw new Error("มีปัญหาในการลบรีวิว")
     }
     return true
 }
