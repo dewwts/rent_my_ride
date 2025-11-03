@@ -49,6 +49,27 @@ Following these instruction
     npm install
     ```
 
+## Run Development Server
+To start the development server, use the following command:
+```bash
+npm run dev
+```
+The app will be available at http://localhost:3000
+
+## Run E2E Test (Playwright)
+Before running Playwright tests, make sure the development server is running.
+To execute all end-to-end tests:
+```bash
+npx playwright test
+```
+If you want to run tests in headed mode (see the browser window while testing):
+```bash
+npx playwright test --headed
+```
+Or to run a specific test file, use:
+```bash
+npx playwright test tests/example.spec.ts
+```
 
 ## Demo
 
