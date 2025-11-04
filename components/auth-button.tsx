@@ -6,11 +6,9 @@ import { getFirstname, SignOut } from "@/lib/authServices";
 import { Button } from "./ui/button";
 import { toast } from "./ui/use-toast";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 export function AuthButton() {
   const [displayName, setDisplayName] = useState<string | null>(null);
-  const router = useRouter()
   useEffect(()=>{
     async function fetchName(){
       const supabase = createClient();
@@ -36,8 +34,7 @@ export function AuthButton() {
           description: "คุณได้ออกจากระบบเรียบร้อยแล้ว",
           variant: "default",
         })
-      router.refresh()
-      router.push("/auth/login")
+      window.location.href = "/auth/login";
     }catch(err: unknown){
       console.error(err);
     }
