@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { Star, Users, Fuel, Settings, Calendar } from "lucide-react";
 import type { CarCardProps } from "@/types/carInterface";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export function CarCard({
   id,
@@ -10,8 +14,8 @@ export function CarCard({
   model,
   image,
   pricePerDay,
-  rating,
-  reviewCount,
+  rating: initialRating,
+  reviewCount: initialReviewCount,
   seats,
   fuelType,
   transmission,
@@ -19,6 +23,49 @@ export function CarCard({
   features = [],
   year_created,
 }: CarCardProps) {
+  const [rating, setRating] = useState<number>(initialRating ?? 0);
+  const [reviewCount, setReviewCount] = useState<number>(initialReviewCount ?? 0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCarRating = async () => {
+      try {
+        const supabase = createClient();
+        
+        // Fetch all reviews for this specific car
+        const { data: reviews, error } = await supabase
+          .from('reviews')
+          .select('rating')
+          .eq('target_id', id); // target_id is the car_id
+
+        if (error) {
+          console.error('Error fetching reviews for car:', id, error);
+          setLoading(false);
+          return;
+        }
+
+        if (reviews && reviews.length > 0) {
+          // Calculate average rating
+          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+          const avgRating = totalRating / reviews.length;
+          
+          setRating(avgRating);
+          setReviewCount(reviews.length);
+        } else {
+          // No reviews yet
+          setRating(0);
+          setReviewCount(0);
+        }
+      } catch (error) {
+        console.error('Error in fetchCarRating:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCarRating();
+  }, [id]);
+
   const isAvailable = availability === "พร้อมเช่า";
   const badgeClass = isAvailable
     ? "bg-emerald-50 text-emerald-700"
@@ -63,15 +110,21 @@ export function CarCard({
           ) : null}
         </div>
 
-        {/* Rating */}
+        {/* Rating - Now fetched dynamically */}
         <div className="flex items-center gap-1" aria-label="rating">
           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-          <span className="text-sm font-medium">
-            {Number(rating ?? 0).toFixed(1)}
-          </span>
-          <span className="text-sm text-gray-500">
-            ({(reviewCount ?? 0).toLocaleString()} รีวิว)
-          </span>
+          {loading ? (
+            <span className="text-sm text-gray-400">กำลังโหลด...</span>
+          ) : (
+            <>
+              <span className="text-sm font-medium">
+                {rating.toFixed(1)}
+              </span>
+              <span className="text-sm text-gray-500">
+                ({reviewCount.toLocaleString()} รีวิว)
+              </span>
+            </>
+          )}
         </div>
 
         {/* Icons Row */}
