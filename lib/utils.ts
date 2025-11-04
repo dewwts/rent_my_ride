@@ -117,8 +117,8 @@ export const uploadImage = async (
   return publicUrl;
 };
 
-export function toAvailability(status: boolean | null | undefined) {
-  return status === true
+export function toAvailability(status: string | null | undefined) {
+  return status === "available" || status === "พร้อมเช่า"
     ? "พร้อมเช่า"
     : "ไม่พร้อมเช่า";
 }
@@ -200,7 +200,7 @@ export function mapDbCarToCard(c: DbCar): CardForUI {
     seats: c.number_of_seats ?? 0,
     fuelType: c.oil_type ?? "",
     transmission: c.gear_type ?? "",
-    availability: toAvailability(c.is_verified),
+    availability: toAvailability(c.status),
     features: [],
     year: (c as DbCar)?.year_created ??  undefined,
   };
