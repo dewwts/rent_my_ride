@@ -17,7 +17,7 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         "number_of_seats",
         "oil_type",
         "gear_type",
-        "is_verified",
+        "status",
         "car_conditionrating",
         "year_created",
       ].join(",")
@@ -51,7 +51,7 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
       seats,
       fuelType: r.oil_type ?? "",
       transmission: r.gear_type ?? "",
-      availability: toAvailability(r.is_verified),
+      availability: toAvailability(r.status),
       features: [],
       year,
     };

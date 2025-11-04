@@ -47,12 +47,13 @@ export function EditCarForm({
       oil_type: car.oil_type,
       gear_type: car.gear_type,
       daily_rental_price: car.daily_rental_price ,
-      // status: car.status,
+      status: car.status,
       location: car.location,
       rating: car.rating || 0,
       image_url: car.car_image || "",
     },
   });
+  console.log(car.year_created);
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -359,7 +360,7 @@ export function EditCarForm({
             <h3 className="text-lg font-semibold text-gray-900">ข้อมูลเพิ่มเติม</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* <div className="space-y-2">
+              <div className="space-y-2">
                 <Label htmlFor="status">สถานะ *</Label>
                 <select
                   id="status"
@@ -372,7 +373,7 @@ export function EditCarForm({
                 {errors.status && (
                   <p className="text-sm text-red-500">{errors.status.message}</p>
                 )}
-              </div> */}
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="price_per_day">ราคาเช่าต่อวัน (บาท) *</Label>
                 <Input
