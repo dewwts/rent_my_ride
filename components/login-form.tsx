@@ -7,7 +7,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 import { LoginSchema } from "@/lib/schemas";
@@ -26,7 +25,6 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
-  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -49,8 +47,7 @@ export function LoginForm({
         description:"เข้าสู่ระบบสำเร็จ"
       })
       console.log("is pass login");
-      router.refresh()
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
       console.log("after push to dashboard");
     }catch(error: unknown){
       let message = "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้ง";
