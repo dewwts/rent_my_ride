@@ -36,6 +36,7 @@ export function AuthButton() {
           description: "คุณได้ออกจากระบบเรียบร้อยแล้ว",
           variant: "default",
         })
+      router.refresh()
       router.push("/auth/login")
     }catch(err: unknown){
       console.error(err);
