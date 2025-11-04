@@ -43,3 +43,21 @@ export const getCarReview = async(supabase:SupabaseClient, car_id:string)=>{
   }
   return data;
 }
+
+export async function checkReviewExists(
+  supabase: any,
+  rentingId: string
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('review_id')
+    .eq('renting_id', rentingId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+    console.error('Error checking review:', error);
+    return false;
+  }
+
+  return !!data;
+}
