@@ -123,6 +123,7 @@ export function LoginForm({
               <div className="relative">
                 <Input
                   id="password"
+                  placeholder="รหัสผ่าน"
                   type={showPw ? "text" : "password"}
                   autoComplete="current-password"
                   {...register("password")}
