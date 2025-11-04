@@ -49,6 +49,7 @@ export function LoginForm({
         title:"สำเร็จ",
         description:"เข้าสู่ระบบสำเร็จ"
       })
+      router.refresh()
       router.push("/dashboard");
     }catch(error: unknown){
       let message = "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้ง";

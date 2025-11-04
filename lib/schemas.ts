@@ -53,9 +53,9 @@ export const CarSchema = z.object({
   oil_type: z.string().min(1, "กรุณาเลือกประเภทเชื้อเพลิง"),
   gear_type: z.string().min(1, "กรุณาเลือกประเภทเกียร์"),
   daily_rental_price: z.number().min(1, "ราคาต่อวันต้องมากกว่า 0").max(100000, "ราคาต่อวันไม่ควรเกิน 100,000 บาท"),
-  // status: z.enum(["available", "unavailable"], {
-  //   message: "กรุณาเลือกสถานะรถ",
-  // }),
+  status: z.enum(["available", "unavailable"], {
+    message: "กรุณาเลือกสถานะรถ",
+  }),
   location: z.string().min(1, "กรุณาเลือกสถานที่"),
   rating: z.number().min(0).max(5).optional(),
   image_url: z.string().optional(),
