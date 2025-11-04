@@ -33,14 +33,21 @@ describe('Upload Image function testing', ()=>{
             },
             from: jest.fn().mockReturnThis(), // mockReturnThis เพื่อให้ return ตัวเองกลับไปทำให้
             //  method upsert สามารถเรียกใช้ supabaseClient ต่อได้เพราะ upsert ใช้ supabaseClient ทำงาน
-            upsert:jest.fn().mockResolvedValue({error:null,car_id:'car-123',other:'bra bra bra'}) // assume ว่า upsert สำเร็จ
+            update:jest.fn().mockReturnThis(),// assume ว่า upsert สำเร็จ
+            eq:jest.fn().mockResolvedValue({
+                error: null,
+                data: [{ car_id: 'car-123', car_image: 'http://example.com/image.png' }]
+            })
         }
         const publicURL = await uploadImageCar(mockSupabase,mockFile,carid)
         expect(publicURL).toBe(fakeURL)
         expect(mockSupabase.auth.getUser).toHaveBeenCalledTimes(1) // ตรวจสอบว่าถูกเรียก getUser 1 ครั้ง
         expect(uploadImage).toHaveBeenCalledWith('car',mockUser.id,mockFile,mockSupabase)
         expect(mockSupabase.from).toHaveBeenCalledWith('car_information') 
-        expect(mockSupabase.upsert).toHaveBeenCalledWith({car_id:carid,car_image:fakeURL})
+        expect(mockSupabase.update).toHaveBeenCalledWith({
+          car_image: fakeURL
+        });
+        expect(mockSupabase.eq).toHaveBeenCalledWith("car_id", carid);
     })
     test("Upload image car without authentication", async()=>{
         const mockFile = new File(['fakebinary'], 'test.png', {type:'image/png'})

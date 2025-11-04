@@ -34,7 +34,7 @@ export function CarCard({
           <Image
             src={image as string}
             alt={`${name} ${model}`}
-            fill
+            fill={true}
             className="object-cover"
           />
         ) : (

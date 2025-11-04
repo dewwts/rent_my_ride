@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getMyCars, deleteCar } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";
 import { Car } from "@/types/carInterface";
+import Image from "next/image";
 
 export default function MyCarsPage() {
   const router = useRouter();
@@ -22,25 +23,25 @@ export default function MyCarsPage() {
 
   // Load cars on component mount
   useEffect(() => {
+    const loadCars = async () => {
+      setIsLoading(true);
+      try {
+        const myCar = await getMyCars(supabase);
+        setCars(myCar);
+      } catch (error) {
+        console.error("Error loading cars:", error);
+        toast({
+          variant: "destructive",
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถโหลดข้อมูลรถได้",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
     loadCars();
-  }, []);
-
-  const loadCars = async () => {
-    setIsLoading(true);
-    try {
-      const myCar = await getMyCars(supabase);
-      setCars(myCar);
-    } catch (error) {
-      console.error("Error loading cars:", error);
-      toast({
-        variant: "destructive",
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโหลดข้อมูลรถได้",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [supabase]);
+  
 
   const handleDeleteClick = (car: Car) => {
     setDeleteDialog({ isOpen: true, car });
@@ -78,12 +79,12 @@ export default function MyCarsPage() {
   };
 
 
-  const getStatusColor = (status: string) => {
-    return status === "available" ? "border-green-400" : "border-red-400";
+  const getStatusColor = (status: boolean) => {
+    return status === true ? "border-green-400" : "border-red-400";
   };
 
-  const getStatusText = (status: string) => {
-    return status === "available" ? "ว่าง" : "ไม่ว่าง";
+  const getStatusText = (status: boolean) => {
+    return status === true ? "ว่าง" : "ไม่ว่าง";
   };
 
   if (isLoading) {
@@ -136,13 +137,14 @@ export default function MyCarsPage() {
               cars.map((car) => (
                 <div
                   key={car.car_id}
-                  className={`bg-white rounded-xl p-6 shadow-sm border-2 ${getStatusColor(car.status)} hover:shadow-md transition-shadow`}
+                  className={`bg-white rounded-xl p-6 shadow-sm border-2 ${getStatusColor(car.is_verified)} hover:shadow-md transition-shadow`}
                 >
                   <div className="flex gap-6">
                     {/* Car Image */}
-                    <div className="w-64 h-48 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
+                    <div className="relative w-64 h-48 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                      <Image
                         src={car.car_image}
+                        fill={true}
                         alt={`${car.car_brand} ${car.model}`}
                         className="w-full h-full object-cover"
                       />
@@ -188,11 +190,11 @@ export default function MyCarsPage() {
                       <div className="space-y-2">
                         <p className="text-lg font-semibold text-gray-900">สถานะ</p>
                         <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                          car.status === "available" 
+                          car.is_verified === true 
                             ? "bg-green-100 text-green-800" 
                             : "bg-red-100 text-red-800"
                         }`}>
-                          {getStatusText(car.status)}
+                          {getStatusText(car.is_verified)}
                         </span>
                         <p className="text-sm text-gray-500">
                           ที่จอด: {car.location}

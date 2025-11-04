@@ -1,12 +1,7 @@
-// lib/carsRepo.ts
-// import "server-only";
+"server only"
 import type { CardForUI, DbCar } from "@/types/carInterface";
 import { createClient } from "@/lib/supabase/server";
-
-function toAvailability(status: string | null | undefined) {
-  return status === "available" || status === "พร้อมเช่า" ? "พร้อมเช่า" : "ไม่พร้อมเช่า";
-}
-
+import { toAvailability } from "./utils";
 export async function fetchAllCars(): Promise<CardForUI[]> {
   const supabase = await createClient();
 
@@ -22,9 +17,9 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         "number_of_seats",
         "oil_type",
         "gear_type",
-        "status",
+        "is_verified",
         "car_conditionrating",
-        "year_created", 
+        "year_created",
       ].join(",")
     );
 
@@ -35,7 +30,8 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
   return rows.map((r): CardForUI => {
     const price = Number(r.daily_rental_price ?? 0);
     const rating =
-      typeof r.car_conditionrating === "number" && Number.isFinite(r.car_conditionrating)
+      typeof r.car_conditionrating === "number" &&
+      Number.isFinite(r.car_conditionrating)
         ? r.car_conditionrating
         : 0;
     const seats = Number(r.number_of_seats ?? 0);
@@ -55,9 +51,9 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
       seats,
       fuelType: r.oil_type ?? "",
       transmission: r.gear_type ?? "",
-      availability: toAvailability(r.status),
+      availability: toAvailability(r.is_verified),
       features: [],
-      year, 
+      year,
     };
   });
 }

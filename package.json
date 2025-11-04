@@ -25,7 +25,7 @@
     "axios": "^1.12.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dayjs": "^1.11.18",
+    "dayjs": "^1.11.19",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.511.0",
     "next": "latest",
@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.56.1",
     "@types/jest": "^30.0.0",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",

@@ -3,8 +3,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import z from "zod";
 import { ProfileSchema } from "./schemas";
 import { buildAddress, uploadImage } from "./utils";
-import { MAX_BYTES, BUCKET, ALLOWED_TYPES } from "@/types/avatarConstraint";
-import { createClient } from "./supabase/server";
+import { BUCKET } from "@/types/avatarConstraint";
+
 export const SignUp = async (data: userInfo, supabase: SupabaseClient) => {
   const { data: user } = await supabase
     .from("user_info")
@@ -70,7 +70,7 @@ export const getFirstname = async (supabase: SupabaseClient) => {
     data: { user },
   } = await supabase.auth.getUser();
   if (user) {
-    const { data: userInfo, error: err } = await supabase
+    const { data: userInfo } = await supabase
       .from("user_info")
       .select("u_firstname")
       .eq("user_id", user.id)
