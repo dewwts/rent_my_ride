@@ -17,6 +17,7 @@ export default function DashboardPage() {
     let mounted = true;
     (async () => {
       setLoading(true);
+      console.log("Is inside dashboard");
       const { data, error } = await supabase.auth.getUser();
       if (!mounted) return;
 
