@@ -46,9 +46,9 @@ export function LoginForm({
         title:"สำเร็จ",
         description:"เข้าสู่ระบบสำเร็จ"
       })
-      console.log("is pass login");
+      // console.log("is pass login");
       window.location.href = "/dashboard";
-      console.log("after push to dashboard");
+      // console.log("after push to dashboard");
     }catch(error: unknown){
       let message = "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้ง";
       if (error instanceof AuthApiError) {
