@@ -18,17 +18,17 @@ test.describe("Sign up Test", () => {
         });
     })
 
-    // test('TC1-1 Correct Format', async ({page}) => {
-    //     const email = generateValidEmail();
-    //     await page.getByRole('textbox', { name: 'ชื่อจริง' }).fill('Love');
-    //     await page.getByRole('textbox', { name: 'นามสกุล' }).fill('Se');
-    //     await page.getByRole('textbox', { name: 'อีเมล' }).fill(email);
-    //     await page.getByRole('textbox', { name: 'รหัสผ่าน', exact: true }).fill('123456');
-    //     await page.getByRole('textbox', { name: 'ยืนยันรหัสผ่าน' }).fill('123456');
-    //     await page.getByRole('button', { name: 'ลงทะเบียน' }).click();
-    //     await page.waitForURL('**/auth/sign-up-success');
-    //     expect(page.url()).toBe('https://rentmyride-mu.vercel.app/auth/sign-up-success');
-    // });
+    test('TC1-1 Correct Format', async ({page}) => {
+        const email = generateValidEmail();
+        await page.getByRole('textbox', { name: 'ชื่อจริง' }).fill('Love');
+        await page.getByRole('textbox', { name: 'นามสกุล' }).fill('Se');
+        await page.getByRole('textbox', { name: 'อีเมล' }).fill(email);
+        await page.getByRole('textbox', { name: 'รหัสผ่าน', exact: true }).fill('123456');
+        await page.getByRole('textbox', { name: 'ยืนยันรหัสผ่าน' }).fill('123456');
+        await page.getByRole('button', { name: 'ลงทะเบียน' }).click();
+        await page.waitForURL('**/auth/sign-up-success');
+        expect(page.url()).toBe('https://rentmyride-mu.vercel.app/auth/sign-up-success');
+    });
     test('TC1-2 Data is empty', async ({page}) => {
         await page.getByRole('button', { name: 'ลงทะเบียน' }).click();
         await expect(page.locator('form')).toContainText('Firstname is required');
