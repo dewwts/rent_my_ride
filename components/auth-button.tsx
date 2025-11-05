@@ -1,24 +1,48 @@
+"use client"
 import Link from "next/link";
 import { LogInButton } from "./ui/login-button";
-import { createClient } from "@/lib/supabase/server";
-import { LogoutButton } from "./logout-button";
-import { getFirstname } from "@/lib/authServices";
+import { createClient } from "@/lib/supabase/client";
+import { getFirstname, SignOut } from "@/lib/authServices";
+import { Button } from "./ui/button";
+import { toast } from "./ui/use-toast";
+import { useEffect, useState } from "react";
 
-export async function AuthButton() {
-  const supabase = await createClient();
-  await supabase.auth.refreshSession();
-  let displayName = null
-  try{
-    const name = await getFirstname(supabase)
-    displayName = name;
-  }catch(err: unknown){
-    console.error(err)
+export function AuthButton() {
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  useEffect(()=>{
+    async function fetchName(){
+      const supabase = createClient();
+      const name = await getFirstname(supabase)
+      setDisplayName(name);
+    }
+    fetchName();
+  },[])
+  const handleLogout = async()=>{
+    try{
+      const supabase = createClient()
+      const check = await SignOut(supabase)
+      if (!check){
+        toast({
+          title: "ออกจากระบบไม่สำเร็จ",
+          description: "โปรดลองอีกครั้งภายหลัง",
+          variant: "destructive",
+        })
+        return
+      }
+      toast({
+          title: "ออกจากระบบสำเร็จ",
+          description: "คุณได้ออกจากระบบเรียบร้อยแล้ว",
+          variant: "default",
+        })
+      window.location.href = "/auth/login";
+    }catch(err: unknown){
+      console.error(err);
+    }
   }
-  
   return displayName ? (
     <div className="flex items-center gap-3">
       <Link href="/dashboard"><span className="text-sm text-gray-600 font-medium">สวัสดี, {displayName}!</span></Link>
-      <LogoutButton />
+      <Button variant="link" size="sm" onClick={handleLogout}>ออกจากระบบ</Button>
     </div>
   ) : (
     <div className="flex gap-2">
