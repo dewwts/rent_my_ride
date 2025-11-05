@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { submitReview, checkReviewExists } from "@/lib/reviewServices";
-import { getCarById } from "@/lib/carServices"; // Changed from getCar to getCarById
+import { getCarById } from "@/lib/carServices";
 import type { Car } from "@/types/carInterface";
 import Image from "next/image";
 
-export default function ReviewPage() {
+// Separate the component that uses searchParams
+function ReviewPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -34,7 +35,7 @@ export default function ReviewPage() {
           title: "ข้อมูลไม่ครบถ้วน",
           description: "ไม่พบข้อมูลการเช่า",
         });
-        router.push('/booking');
+        router.push('/dashboard/bookings');
         return;
       }
 
@@ -42,17 +43,17 @@ export default function ReviewPage() {
       
       try {
         // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          toast({
-            variant: "destructive",
-            title: "กรุณาเข้าสู่ระบบ",
-            description: "คุณต้องเข้าสู่ระบบก่อนเพื่อส่งรีวิว",
-          });
-          router.push('/login');
-          return;
-        }
-        setUserId(user.id);
+        //const { data: { user } } = await supabase.auth.getUser();
+        //if (!user) {
+          //toast({
+            //variant: "destructive",
+            //title: "กรุณาเข้าสู่ระบบ",
+            //description: "คุณต้องเข้าสู่ระบบก่อนเพื่อส่งรีวิว",
+          //});
+          //router.push('/login');
+          //return;
+        //}
+        //setUserId(user.id);
 
         // Check if already reviewed
         const reviewExists = await checkReviewExists(supabase, rentingId);
@@ -73,7 +74,7 @@ export default function ReviewPage() {
             title: "ไม่พบข้อมูลรถ",
             description: "ไม่สามารถโหลดข้อมูลรถได้",
           });
-          router.push('/booking');
+          router.push('/dashboard/bookings');
           return;
         }
         setCar(carData);
@@ -156,7 +157,7 @@ export default function ReviewPage() {
       });
 
       // Redirect back to booking page
-      router.push('/booking');
+      router.push('/dashboard/bookings');
     } catch (error: unknown) {
       let message = "Something went wrong";
       if (error instanceof Error) {
@@ -171,7 +172,7 @@ export default function ReviewPage() {
   };
 
   const handleBack = () => {
-    router.push('/booking');
+    router.push('/dashboard/bookings');
   };
 
   if (loading) {
@@ -228,103 +229,66 @@ export default function ReviewPage() {
           <span className="text-lg">ย้อนกลับ</span>
         </button>
 
-        <h1 className="text-3xl font-bold text-slate-900 mb-6">รีวิวการเช่ารถ</h1>
-
-        {/* Car Information Card */}
-        {car && (
-          <div className="bg-white rounded-2xl p-6 shadow-md mb-6">
-            <div className="flex gap-6 items-start">
-              <div className="w-48 h-32 relative flex-shrink-0">
-                {car.car_image ? (
-                  <Image
-                    src={car.car_image}
-                    alt={`${car.car_brand} ${car.model}`}
-                    fill={true}
-                    className="rounded-lg object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
-                    ไม่มีรูปภาพ
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                  {car.car_brand} {car.model}
-                </h2>
-                <div className="text-slate-600 space-y-1">
-                  <p>ปี: {car.year_created ?? "ไม่ระบุ"}</p>
-                  <p>ที่นั่ง: {car.number_of_seats} ที่นั่ง</p>
-                  <p>ประเภทเชื้อเพลิง: {car.oil_type}</p>
-                  <p>ประเภทเกียร์: {car.gear_type}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <h1 className="text-3xl font-bold text-slate-900 mb-6">รีวิวการเช่ารถของคุณ</h1>
 
         {/* Review Input Section */}
-        <div className="bg-white rounded-2xl p-8 shadow-md">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-6">แบ่งปันประสบการณ์ของคุณ</h2>
-          
-          {/* Rating Stars */}
-          <div className="mb-6">
-            <label className="block text-slate-700 font-medium mb-3">
-              ให้คะแนน
-            </label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <svg
-                  key={star}
-                  onMouseEnter={() => setHover(star)}
-                  onMouseLeave={() => setHover(0)}
-                  onClick={() => setRating(star)}
-                  className={`w-12 h-12 cursor-pointer transition-colors ${
-                    star <= (hover || rating) ? "fill-yellow-400" : "fill-gray-300"
-                  }`}
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-              ))}
-            </div>
-            {rating > 0 && (
-              <p className="text-sm text-slate-500 mt-2">
-                คุณให้ {rating} ดาว
-              </p>
-            )}
-          </div>
-
+        <div className="bg-white rounded-2xl p-8 shadow-md border-2 border-black max-w-4xl">
           {/* Review Text */}
           <div className="mb-6">
-            <label className="block text-slate-700 font-medium mb-3">
-              ความคิดเห็น
-            </label>
             <textarea 
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}
-              placeholder="บอกเล่าประสบการณ์การเช่ารถของคุณ..."
-              className="w-full h-40 p-4 border-2 border-gray-300 rounded-xl resize-none focus:outline-none focus:border-blue-500 text-slate-600"
+              placeholder="เพิ่มความคิดเห็นของคุณ...."
+              className="w-full h-32 p-4 rounded-lg resize-none focus:outline-none text-slate-600 text-lg"
             />
           </div>
 
-          {/* Submit Button */}
-          <div className="flex gap-4">
+            {/* Rating Stars and Submit Button (inline) */}
+            <div className="flex items-center justify-end gap-4">
+            {/* Stars */}
+            <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                <svg
+                    key={star}
+                    onMouseEnter={() => setHover(star)}
+                    onMouseLeave={() => setHover(0)}
+                    onClick={() => setRating(star)}
+                    className={`w-8 h-8 cursor-pointer transition-colors ${
+                    star <= (hover || rating) ? "fill-yellow-400" : "fill-gray-300"
+                    }`}
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                </svg>
+                ))}
+            </div>
+
+            {/* Submit Button */}
             <button 
-              onClick={handleSubmitReview}
-              className="flex-1 px-6 py-3 bg-slate-900 text-white rounded-full hover:bg-slate-800 transition-colors font-medium text-lg"
+                onClick={handleSubmitReview}
+                className="px-8 py-2 bg-slate-500 text-white rounded-full hover:bg-slate-800 transition-colors font-medium"
             >
-              ส่งรีวิว
+                ส่ง
             </button>
-            <button
-              onClick={handleBack}
-              className="px-6 py-3 bg-gray-200 text-slate-700 rounded-full hover:bg-gray-300 transition-colors font-medium"
-            >
-              ยกเลิก
-            </button>
-          </div>
+            </div>
         </div>
       </div>
     </main>
+  );
+}
+
+// Wrap the content in Suspense boundary
+export default function ReviewPage() {
+  return (
+    <Suspense fallback={
+      <main className="bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto mb-4"></div>
+          <p className="text-slate-600">กำลังโหลด...</p>
+        </div>
+      </main>
+    }>
+      <ReviewPageContent />
+    </Suspense>
   );
 }

@@ -33,34 +33,42 @@ export function CarDetailsPage({
   const [reviews, setReviews] = useState<ReviewWithName[]>([]);
   const [displayedReviewsCount, setDisplayedReviewsCount] = useState(3);
 
-  // Fetch reviews on component mount
   useEffect(() => {
     const fetchReviews = async () => {
       const supabase = createClient();
 
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const currentUserId = user?.id ?? null;
+
         const reviewsData = await getCarReview(supabase, cid);
-        
-        // Fetch firstname for each reviewer
+
         const reviewsWithNames = await Promise.all(
           (reviewsData || []).map(async (review) => {
             try {
               const firstname = await getFirstname(supabase, review.reviewer_id);
               return {
                 ...review,
-                reviewer_name: firstname || "anonymous"
+                reviewer_name: firstname || "anonymous",
               };
             } catch (error) {
-              console.error("Error fetching firstname for reviewer:", review.reviewer_id, error);
               return {
                 ...review,
-                reviewer_name: "anonymous"
+                reviewer_name: "anonymous",
               };
             }
           })
         );
-        
-        setReviews(reviewsWithNames);
+
+        const sortedReviews = reviewsWithNames.sort((a, b) => {
+          if (currentUserId) {
+            if (a.reviewer_id === currentUserId && b.reviewer_id !== currentUserId) return -1;
+            if (b.reviewer_id === currentUserId && a.reviewer_id !== currentUserId) return 1;
+          }
+          return dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf();
+        });
+
+        setReviews(sortedReviews);
       } catch (error) {
         console.error("Error fetching reviews:", error);
       }
@@ -80,8 +88,8 @@ export function CarDetailsPage({
     }
     const supabase = createClient();
     try {
-      const carStatus = await getCarStatus(supabase, cid)
-      if (!carStatus){
+      const carStatus = await getCarStatus(supabase, cid);
+      if (!carStatus) {
         toast({
           variant: "destructive",
           title: "วันที่ไม่ครบ",
@@ -132,9 +140,9 @@ export function CarDetailsPage({
 
       router.push(`/checkout/${encodeURIComponent(rentingId)}`);
     } catch (error: unknown) {
-      let message = "Something went wrong"
-      if (error instanceof Error){
-        message = error.message
+      let message = "Something went wrong";
+      if (error instanceof Error) {
+        message = error.message;
       }
       toast({
         variant: "destructive",
@@ -144,22 +152,17 @@ export function CarDetailsPage({
     }
   };
 
-  // Handle show more reviews
   const handleShowMoreReviews = () => {
-    setDisplayedReviewsCount(prev => prev + 3);
+    setDisplayedReviewsCount((prev) => prev + 3);
   };
 
-  // Calculate average rating using utility function
   const averageRating = calculateAverageRating(reviews).toFixed(1);
-
-  // Get displayed reviews
   const displayedReviews = reviews.slice(0, displayedReviewsCount);
   const hasMoreReviews = displayedReviewsCount < reviews.length;
 
   return (
     <main className="bg-gray-50 flex flex-col items-center min-h-screen p-10 font-mitr text-slate-800">
       <div className="flex w-full max-w-6xl gap-16">
-        {/* === ซ้าย: รูป/ราคา/เลือกวัน === */}
         <div className="flex flex-col w-7/12">
           <h1 className="text-4xl font-bold text-slate-900">
             {car?.car_brand} {car?.model}
@@ -171,18 +174,18 @@ export function CarDetailsPage({
           <div className="w-full aspect-video relative">
             {car?.car_image ? (
               <Image
-              src={car?.car_image}
-              alt={`Car Image ${car?.car_id}`}
-              fill={true}
-              className="rounded-2xl object-cover shadow-xl"
-            />):(
+                src={car?.car_image}
+                alt={`Car Image ${car?.car_id}`}
+                fill={true}
+                className="rounded-2xl object-cover shadow-xl"
+              />
+            ) : (
               <div className="w-full rounded-2xl object-cover shadow-xl text-center font-light tracking-wide">
                 ไม่มีรูปภาพ
               </div>
             )}
           </div>
 
-          {/* เลือกวัน + ปุ่มเช่า */}
           <div className="flex items-center gap-2 mt-6">
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
@@ -212,7 +215,6 @@ export function CarDetailsPage({
           </div>
         </div>
 
-        {/* === ขวา: รายละเอียดรถ === */}
         <div className="w-5/12 pt-16 ">
           <div className="text-base leading-loose text-slate-600 break-words">
             <h2 className=" mb-6 text-3xl font-semibold text-slate-900 pt-16">
@@ -231,9 +233,8 @@ export function CarDetailsPage({
           </div>
         </div>
       </div>
-      
+
       <div className="w-full max-w-6xl mt-6 space-y-3">
-        {/* Reviews Display Section */}
         <div className=" rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-6">
             <h2 className="text-2xl font-semibold text-slate-900">คะแนนการรีวิว</h2>
@@ -255,9 +256,9 @@ export function CarDetailsPage({
                       </span>
                       <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((star) => (
-                          <svg 
-                            key={star} 
-                            className={`w-5 h-5 ${star <= review.rating ? "fill-yellow-400" : "fill-gray-300"}`} 
+                          <svg
+                            key={star}
+                            className={`w-5 h-5 ${star <= review.rating ? "fill-yellow-400" : "fill-gray-300"}`}
                             viewBox="0 0 24 24"
                           >
                             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
@@ -269,7 +270,7 @@ export function CarDetailsPage({
                       สร้างเมื่อ {dayjs(review.created_at).format("DD/MM/YYYY")}
                     </span>
                   </div>
-                  
+
                   <p className="text-sm text-slate-600 leading-relaxed">
                     {review.comment}
                   </p>
@@ -282,10 +283,9 @@ export function CarDetailsPage({
             )}
           </div>
 
-          {/* Show more button */}
           {hasMoreReviews && (
             <div className="text-center mt-6">
-              <button 
+              <button
                 onClick={handleShowMoreReviews}
                 className="text-slate-400 hover:text-black text-sm font-medium underline"
               >
