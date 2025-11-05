@@ -1,35 +1,34 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter} from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { submitReview, checkReviewExists } from "@/lib/reviewServices";
-import { getCarById } from "@/lib/carServices";
-import type { Car } from "@/types/carInterface";
-import Image from "next/image";
+import { getCarIDByRentingID } from "@/lib/rentingServices";
+// import type { Car } from "@/types/carInterface";
+// import Image from "next/image";
 
 // Separate the component that uses searchParams
 function ReviewPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const params = useParams()
   const { toast } = useToast();
   
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [reviewText, setReviewText] = useState("");
+  const [carId , setCarId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null);
-  const [car, setCar] = useState<Car | null>(null);
+  // const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasReviewed, setHasReviewed] = useState(false);
-
-  const carId = searchParams.get('car_id');
-  const rentingId = searchParams.get('renting_id');
+  const rentingId = params.rid as string
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!carId || !rentingId) {
+      if (!rentingId) {
         toast({
           variant: "destructive",
           title: "ข้อมูลไม่ครบถ้วน",
@@ -43,19 +42,20 @@ function ReviewPageContent() {
       
       try {
         // Get current user
-        //const { data: { user } } = await supabase.auth.getUser();
-        //if (!user) {
-          //toast({
-            //variant: "destructive",
-            //title: "กรุณาเข้าสู่ระบบ",
-            //description: "คุณต้องเข้าสู่ระบบก่อนเพื่อส่งรีวิว",
-          //});
-          //router.push('/login');
-          //return;
-        //}
-        //setUserId(user.id);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          toast({
+            variant: "destructive",
+            title: "กรุณาเข้าสู่ระบบ",
+            description: "คุณต้องเข้าสู่ระบบก่อนเพื่อส่งรีวิว",
+          });
+          router.push('/login');
+          return;
+        }
+        setUserId(user.id);
 
         // Check if already reviewed
+        
         const reviewExists = await checkReviewExists(supabase, rentingId);
         if (reviewExists) {
           setHasReviewed(true);
@@ -65,10 +65,10 @@ function ReviewPageContent() {
             description: "คุณได้รีวิวการเช่านี้ไปแล้ว",
           });
         }
-
         // Fetch car details using getCarById
-        const carData = await getCarById(supabase, carId);
-        if (!carData) {
+        const carId = await getCarIDByRentingID(supabase, rentingId);
+        setCarId(carId);
+        if (!carId) {
           toast({
             variant: "destructive",
             title: "ไม่พบข้อมูลรถ",
@@ -77,7 +77,7 @@ function ReviewPageContent() {
           router.push('/dashboard/bookings');
           return;
         }
-        setCar(carData);
+        // setCar(carData);
         
       } catch (error) {
         console.error("Error fetching data:", error);

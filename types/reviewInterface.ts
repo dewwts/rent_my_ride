@@ -1,6 +1,6 @@
 export interface Review{
     rating: number
-    message: string
+    comment: string
     reviewer_id: string
     target_id: string
     renting_id: string
