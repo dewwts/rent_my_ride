@@ -44,3 +44,7 @@ export interface RentingDetail {
     location?: string;
   };
 }
+
+export interface BookingWithReview extends bookingHistory {
+  hasReviewed?: boolean;
+}
