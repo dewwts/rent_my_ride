@@ -3,11 +3,10 @@ import { useState, useEffect, useCallback } from "react";
 import { Loader2, History } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatDate, formatCurrency } from '@/lib/utils' 
-import { bookingHistory, rentingInfo, RentingStatus } from "@/types/rentingInterface";
+import { rentingInfo, RentingStatus } from "@/types/rentingInterface";
 import { getMyRentingHistory, getRentingPrice } from "@/lib/rentingServices";
 import { getFirstname } from "@/lib/userServices";
 import CustomPagination from "@/components/customPagination"
-import { Button } from "@/components/ui/button";
 import { getCarStatus } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
@@ -251,7 +250,7 @@ export default function RentingHistoryPage() {
                 {/* Green Review Button - Only show if confirmed AND not reviewed yet */}
                 {booking.status === RentingStatus.CONFIRMED && !booking.hasReviewed && (
                   <button
-                    onClick={() => router.push(`/review?car_id=${booking.car_id}&renting_id=${booking.renting_id}`)}
+                    onClick={() => router.push(`/review/${booking.renting_id}`)}
                     className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center hidden sm:flex"
                   >
                     <span>รีวิวการเช่า</span>

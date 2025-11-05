@@ -156,3 +156,10 @@ export const getMyLeasingHistory = async (supabase : SupabaseClient) => {
 
   return rentings;
 }
+export const getCarIDByRentingID = async (supabase: SupabaseClient, rid: string) => {
+  const {data:car, error: carError} = await supabase.from("renting").select('car_id').eq('renting_id', rid).single();
+  if (carError){
+    throw new Error("ไม่พบข้อมูลการเช่านี้")
+  }
+  return car.car_id;
+}

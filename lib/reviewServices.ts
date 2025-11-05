@@ -22,6 +22,7 @@ import { calculateAverageRating } from "./utils"
     }
 **/
 export const submitReview = async(supabase: SupabaseClient, payload:Review)=>{
+    console.log(payload);
     const {error: insertError} = await supabase.from("reviews").insert(payload)
     if (insertError){
         console.error("Error submitting review:", insertError);
