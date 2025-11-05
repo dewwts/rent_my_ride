@@ -7,6 +7,7 @@ import { Star, Users, Fuel, Settings, Calendar } from "lucide-react";
 import type { CarCardProps } from "@/types/carInterface";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getCarRating } from "@/lib/reviewServices"; // Updated import
 
 export function CarCard({
   id,
@@ -31,40 +32,22 @@ export function CarCard({
     const fetchCarRating = async () => {
       try {
         const supabase = createClient();
+        const { rating: avgRating, reviewCount: count } = await getCarRating(supabase, id);
         
-        // Fetch all reviews for this specific car
-        const { data: reviews, error } = await supabase
-          .from('reviews')
-          .select('rating')
-          .eq('target_id', id); // target_id is the car_id
-
-        if (error) {
-          console.error('Error fetching reviews for car:', id, error);
-          setLoading(false);
-          return;
-        }
-
-        if (reviews && reviews.length > 0) {
-          // Calculate average rating
-          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-          const avgRating = totalRating / reviews.length;
-          
-          setRating(avgRating);
-          setReviewCount(reviews.length);
-        } else {
-          // No reviews yet
-          setRating(0);
-          setReviewCount(0);
-        }
+        setRating(avgRating);
+        setReviewCount(count);
       } catch (error) {
         console.error('Error in fetchCarRating:', error);
+        // Keep initial values on error
+        setRating(initialRating ?? 0);
+        setReviewCount(initialReviewCount ?? 0);
       } finally {
         setLoading(false);
       }
     };
 
     fetchCarRating();
-  }, [id]);
+  }, [id, initialRating, initialReviewCount]);
 
   const isAvailable = availability === "พร้อมเช่า";
   const badgeClass = isAvailable
@@ -110,7 +93,7 @@ export function CarCard({
           ) : null}
         </div>
 
-        {/* Rating - Now fetched dynamically */}
+        {/* Rating - Fetched from service */}
         <div className="flex items-center gap-1" aria-label="rating">
           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
           {loading ? (

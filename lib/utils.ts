@@ -205,3 +205,14 @@ export function mapDbCarToCard(c: DbCar): CardForUI {
     year: (c as DbCar)?.year_created ??  undefined,
   };
 }
+
+export const calculateAverageRating = (reviews: { rating: number }[]): number => {
+  if (!reviews || reviews.length === 0) {
+    return 0;
+  }
+
+  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+  const avgRating = totalRating / reviews.length;
+  
+  return Math.round(avgRating * 100) / 100; // Round to 2 decimal places
+};
