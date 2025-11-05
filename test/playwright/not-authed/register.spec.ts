@@ -26,7 +26,7 @@ test.describe("Sign up Test", () => {
         await page.getByRole('textbox', { name: 'รหัสผ่าน', exact: true }).fill('123456');
         await page.getByRole('textbox', { name: 'ยืนยันรหัสผ่าน' }).fill('123456');
         await page.getByRole('button', { name: 'ลงทะเบียน' }).click();
-        await page.waitForURL('https://rentmyride-mu.vercel.app/auth/sign-up-success', { timeout: 10000 }); // ปรับ URL ให้ตรงกับจริง เช่น /auth/success
+        await page.waitForURL('https://rentmyride-mu.vercel.app/auth/sign-up-success', { timeout: 10000 }); 
         await expect(page).toHaveURL('https://rentmyride-mu.vercel.app/auth/sign-up-success');
     });
     test('TC1-2 Data is empty', async ({page}) => {
