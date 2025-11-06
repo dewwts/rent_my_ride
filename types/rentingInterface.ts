@@ -20,7 +20,7 @@ export interface bookingHistory extends rentingBase {
   },
 }
 export interface rentingHistory extends rentingBase {
-  lessee_name: string;
+  lessee_name:string;
 }
 export interface rentingInfo {
     renting_id : string,

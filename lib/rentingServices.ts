@@ -131,33 +131,38 @@ export const generateUUID = async(supabase: SupabaseClient)=>{
   return uuid as string
 }
 
-export const getMyLeasingHistory = async (supabase : SupabaseClient) => {
+export const getMyLeasingHistory = async (supabase : SupabaseClient, page: number, limit: number) => {
   const {data: { user }} = await supabase.auth.getUser();
   if (!user) throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
-  const {data,error} = await supabase
-    .from("car_information")
+  const {data,error, count} = await supabase
+    .from("renting")
     .select(`
+      renting_id,
+      sdate,
+      edate,
+      status,
       car_id,
-      renting(
-        renting_id,
-        lessee_id,
-        sdate,
-        edate,
-        status
+      lessee_name:lessee_id(
+        u_firstname
+      ),
+      car_information!inner(
+        owner_id
       )
-    `)
-    .eq("owner_id",user.id);
+    `, {count: 'exact'})
+    .eq("car_information.owner_id",user.id)
+    .order("created_at",{ascending:false})
+    .range((page - 1) * limit, page * limit - 1)
     
     if(error) throw error;
 
-    const rentings = data.flatMap(car =>
-    car.renting.map(r => ({
-        ...r,
-        car_id: car.car_id 
-      }))
-    );
-
-  return rentings;
+    // const rentings = data.flatMap(car =>
+    // car.renting.map(r => ({
+    //     ...r,
+    //     car_id: car.car_id 
+    //   }))
+    // );
+    // rentings.sort((a, b) => (a.sdate < b.sdate ? 1 : -1));
+  return {data, count};
 }
 export const getCarIDByRentingID = async (supabase: SupabaseClient, rid: string) => {
   const {data:car, error: carError} = await supabase.from("renting").select('car_id').eq('renting_id', rid).single();

@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/client";
 import { formatDate, formatCurrency } from '@/lib/utils' 
 import { rentingHistory, rentingInfo,RentingStatus } from "@/types/rentingInterface";
 import { getMyLeasingHistory,getRentingPrice } from "@/lib/rentingServices";
-import { getFirstname } from "@/lib/userServices";
 import CustomPagination from "@/components/customPagination"
 import { getCarStatus } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";
@@ -25,36 +24,32 @@ export default function RentingHistoryPage() {
       setLoading(true);
       setError(null);
       
-      const data = await getMyLeasingHistory(supabase);
-
-      const LeasingWithPriceandName = await Promise.all(
+      const {data, count} = await getMyLeasingHistory(supabase, currentPage, itemsPerPage);
+      // console.log(rentings);
+      const LeasingWithRenintPrice = await Promise.all(
         data.map(async (leasing) => {
-          const lessee_name = await getFirstname(supabase,leasing.lessee_id)
+          const lesseeName = Array.isArray(leasing.lessee_name)
+            ? leasing.lessee_name[0]
+            : leasing.lessee_name;
+          let price = 0
           try {
-            const price = await getRentingPrice(supabase, leasing.renting_id);
-            if (price == null) {
-              return null;
-            }
-            return { ...leasing, total_price: price ?? 0 ,lessee_name}; //add total price field and lessee_name
-          } catch (err) {
-            console.error("Error fetching price for", leasing.renting_id);
-            console.error(err);
-            return { ...leasing, total_price: 0 ,lessee_name}; // fallback
+            price = await getRentingPrice(supabase, leasing.renting_id);
+          }catch(err){
+            console.error("Failed to get Renting Price", price);
+          }
+          return {
+            renting_id: leasing.renting_id,
+            car_id: leasing.car_id,
+            sdate: leasing.sdate,
+            edate: leasing.edate,
+            status: leasing.status,
+            total_price: price, 
+            lessee_name:lesseeName.u_firstname
           }
         })
-      );
-
-      const filterNullPrice = LeasingWithPriceandName.filter(
-        (item): item is NonNullable<typeof item> => item !== null
-      );
-
-      setTotalCount(filterNullPrice.length);
-      const start = (currentPage - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      const pageData = filterNullPrice.slice(start, end);
-
-      setBookings(pageData);
-      
+      )
+      setTotalCount(count ? count : 0);
+      setBookings(LeasingWithRenintPrice);
     } catch (err) {
       console.log(err)
       setError('เกิดข้อผิดพลาดในการโหลดประวัติการให้เช่า');
