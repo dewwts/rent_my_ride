@@ -35,7 +35,7 @@ export default function RentingHistoryPage() {
           try {
             price = await getRentingPrice(supabase, leasing.renting_id);
           }catch(err){
-            console.error("Failed to get Renting Price", price);
+            console.error("Failed to get Renting Price", price, err);
           }
           return {
             renting_id: leasing.renting_id,
