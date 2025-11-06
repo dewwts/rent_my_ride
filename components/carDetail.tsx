@@ -52,6 +52,7 @@ export function CarDetailsPage({
                 reviewer_name: firstname || "anonymous",
               };
             } catch (error) {
+              console.error("error occured: ",error);
               return {
                 ...review,
                 reviewer_name: "anonymous",
