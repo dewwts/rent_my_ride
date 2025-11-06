@@ -117,12 +117,9 @@ export const uploadImage = async (
   return publicUrl;
 };
 
-export function toAvailability(status: string | null | undefined) {
-  return status === "available" || status === "พร้อมเช่า"
-    ? "พร้อมเช่า"
-    : "ไม่พร้อมเช่า";
+export function toAvailability(status: boolean | null | undefined) {
+  return status === true ? "พร้อมเช่า" : "ไม่พร้อมเช่า";
 }
-
 const dayjsToDate = (v: unknown) => {
   if (v == null || v === "") return undefined;
   if (dayjs.isDayjs(v)) return (v as Dayjs).toDate();
@@ -200,7 +197,7 @@ export function mapDbCarToCard(c: DbCar): CardForUI {
     seats: c.number_of_seats ?? 0,
     fuelType: c.oil_type ?? "",
     transmission: c.gear_type ?? "",
-    availability: toAvailability(c.status),
+    availability: toAvailability(c.is_verified),
     features: [],
     year: (c as DbCar)?.year_created ??  undefined,
   };
@@ -213,3 +210,14 @@ export function pickDefined<T extends Record<string, any>>(src: T, keys: readonl
   }
   return out
 }
+
+export const calculateAverageRating = (reviews: { rating: number }[]): number => {
+  if (!reviews || reviews.length === 0) {
+    return 0;
+  }
+
+  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+  const avgRating = totalRating / reviews.length;
+  
+  return Math.round(avgRating * 100) / 100; // Round to 2 decimal places
+};

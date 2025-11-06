@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { Star, Users, Fuel, Settings, Calendar } from "lucide-react";
 import type { CarCardProps } from "@/types/carInterface";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { getCarRating } from "@/lib/reviewServices"; // Updated import
 
 export function CarCard({
   id,
@@ -10,8 +15,8 @@ export function CarCard({
   model,
   image,
   pricePerDay,
-  rating,
-  reviewCount,
+  rating: initialRating,
+  reviewCount: initialReviewCount,
   seats,
   fuelType,
   transmission,
@@ -19,6 +24,31 @@ export function CarCard({
   features = [],
   year_created,
 }: CarCardProps) {
+  const [rating, setRating] = useState<number>(initialRating ?? 0);
+  const [reviewCount, setReviewCount] = useState<number>(initialReviewCount ?? 0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCarRating = async () => {
+      try {
+        const supabase = createClient();
+        const { rating: avgRating, reviewCount: count } = await getCarRating(supabase, id);
+        
+        setRating(avgRating);
+        setReviewCount(count);
+      } catch (error) {
+        console.error('Error in fetchCarRating:', error);
+        // Keep initial values on error
+        setRating(initialRating ?? 0);
+        setReviewCount(initialReviewCount ?? 0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCarRating();
+  }, [id, initialRating, initialReviewCount]);
+
   const isAvailable = availability === "พร้อมเช่า";
   const badgeClass = isAvailable
     ? "bg-emerald-50 text-emerald-700"
@@ -63,15 +93,21 @@ export function CarCard({
           ) : null}
         </div>
 
-        {/* Rating */}
+        {/* Rating - Fetched from service */}
         <div className="flex items-center gap-1" aria-label="rating">
           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-          <span className="text-sm font-medium">
-            {Number(rating ?? 0).toFixed(1)}
-          </span>
-          <span className="text-sm text-gray-500">
-            ({(reviewCount ?? 0).toLocaleString()} รีวิว)
-          </span>
+          {loading ? (
+            <span className="text-sm text-gray-400">กำลังโหลด...</span>
+          ) : (
+            <>
+              <span className="text-sm font-medium">
+                {rating.toFixed(1)}
+              </span>
+              <span className="text-sm text-gray-500">
+                ({reviewCount.toLocaleString()} รีวิว)
+              </span>
+            </>
+          )}
         </div>
 
         {/* Icons Row */}
