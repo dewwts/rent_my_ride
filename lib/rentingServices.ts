@@ -3,13 +3,13 @@ import { rentingInfo, RentingStatus } from "@/types/rentingInterface";
 import { isAdmin } from "./authServices";
 
 // Get all renting
-export const getMyRentingHistory = async (supabase: SupabaseClient) => {
+export const getMyRentingHistory = async (supabase: SupabaseClient, page: number, limit: number) => {
   //Check login
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     throw new Error("ไม่พบสถานะการเข้าสู่ระบบ");
   }
-  const { data, error } = await supabase
+  const { data, error, count} = await supabase
     .from("renting")
     .select(`
       renting_id,
@@ -19,13 +19,16 @@ export const getMyRentingHistory = async (supabase: SupabaseClient) => {
       status,
       car_information:car_id(
         car_id,
-        owner_id
-      )`)
+        owner:owner_id(
+          u_firstname
+        )
+      )`, { count: 'exact' })
     .eq("lessee_id",user.id)
+    .range((page - 1) * limit, page * limit - 1)
     .order("sdate",{ascending:false}); //เรียงจากใหม่สุดไปเก่าสุด
   
   if (error) throw error;
-  return data;
+  return {data, count};
 };
 
 //Get renting with id
