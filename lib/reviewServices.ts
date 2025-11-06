@@ -1,7 +1,7 @@
 import { Review } from "@/types/reviewInterface"
 import { SupabaseClient } from "@supabase/supabase-js"
 import { calculateAverageRating } from "./utils"
-
+// any
 /** 
  * Submit a review for a renting
  * How to use:
