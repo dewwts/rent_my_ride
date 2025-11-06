@@ -205,3 +205,11 @@ export function mapDbCarToCard(c: DbCar): CardForUI {
     year: (c as DbCar)?.year_created ??  undefined,
   };
 }
+
+export function pickDefined<T extends Record<string, any>>(src: T, keys: readonly string[]) {
+  const out: Record<string, any> = {}
+  for (const k of keys) {
+    if (src[k] !== undefined && src[k] !== null) out[k] = src[k]
+  }
+  return out
+}

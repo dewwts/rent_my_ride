@@ -201,12 +201,13 @@ export const updateCar = async (
 };
 
 //Parital UpdateCar
-import { createClient } from "./supabase/server";
-import { createAdminClient } from "./supabase/server";
+
+/*import { createClient,createAdminClient } from "./supabase/server";
 import { NextRequest,NextResponse } from "next/server";
 import { isAdmin } from "./authServices";
+import { pickDefined } from "./utils";
 const ALLOWED_KEYS = [
-    'car_brand',
+  'car_brand',
   'model',
   'mileage',
   'year_created',
@@ -222,13 +223,7 @@ const ALLOWED_KEYS = [
 type AllowedKey = (typeof ALLOWED_KEYS)[number]
 
 // เลือกเฉพาะคีย์ที่ไม่เป็น undefined กับ null
-function pickDefined<T extends Record<string, any>>(src: T, keys: readonly string[]) {
-  const out: Record<string, any> = {}
-  for (const k of keys) {
-    if (src[k] !== undefined && src[k] !== null) out[k] = src[k]
-  }
-  return out
-}
+
 
 export async function PATCH(req:NextRequest,{params}:{params:{carID:string}}){
   try{
@@ -257,7 +252,7 @@ export async function PATCH(req:NextRequest,{params}:{params:{carID:string}}){
     console.error('update car error:', err)
   }
 }
-
+*/
 
 
 
