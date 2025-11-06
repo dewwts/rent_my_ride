@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/client";
 import { formatDate, formatCurrency } from '@/lib/utils' 
 import { rentingInfo, RentingStatus } from "@/types/rentingInterface";
 import { getMyRentingHistory, getRentingPrice } from "@/lib/rentingServices";
-import { getFirstname } from "@/lib/userServices";
 import CustomPagination from "@/components/customPagination"
 import { getCarStatus } from "@/lib/carServices";
 import { toast } from "@/components/ui/use-toast";
@@ -28,63 +27,45 @@ export default function RentingHistoryPage() {
       setLoading(true);
       setError(null);
       
-      const data = await getMyRentingHistory(supabase);
-
-      const bookingsWithPriceandLessorName = await Promise.all(
+      const {data, count} = await getMyRentingHistory(supabase, currentPage, itemsPerPage);
+      if (!data){
+        return;
+      }
+      const bookingsWithHasReviewed:BookingWithReview[] = await Promise.all(
         data.map(async (booking) => {
           const carInfo = Array.isArray(booking.car_information) 
-              ? booking.car_information[0]
-              : booking.car_information; 
-
-          if (!carInfo || !carInfo.owner_id) {
-               console.error("ไม่พบ owner_id ใน car_information:", booking.renting_id);
-               return { ...booking, total_price: 0, lessor_name: "ไม่พบเจ้าของ", hasReviewed: false }; 
-          }
-
-          const ownerId = carInfo.owner_id;
-          const lessor_name = await getFirstname(supabase, ownerId);
-          
-          // Check if review exists for this renting
+             ? booking.car_information[0]
+             : booking.car_information;
+          const owner = Array.isArray(carInfo.owner)
+             ? carInfo.owner[0]
+             : carInfo.owner;
           let hasReviewed = false;
+          let price = 0;
           try {
             hasReviewed = await checkReviewExists(supabase, booking.renting_id);
+            price = await getRentingPrice(supabase, booking.renting_id) ?? 0;
           } catch (err) {
-            console.error("Error checking review for", booking.renting_id, err);
+            console.error("Error fetching details for", booking.renting_id, err);
           }
-
-          try {
-            const price = await getRentingPrice(supabase, booking.renting_id);
-            if (price == null) {
-              return null;
-            }
-            return { 
-              ...booking, 
-              total_price: price ?? 0, 
-              lessor_name,
-              hasReviewed 
-            };
-          } catch (err) {
-            console.error("Error fetching price for", booking.renting_id, err);
-            return { 
-              ...booking, 
-              total_price: 0, 
-              lessor_name,
-              hasReviewed 
-            };
+          return {
+            renting_id: booking.renting_id,
+            car_id: booking.car_id,
+            sdate: booking.sdate,
+            edate: booking.edate,
+            status: booking.status,
+            car_information: {
+              car_id: carInfo.car_id,
+              owner: {
+                u_firstname: owner.u_firstname
+              }
+            },
+            total_price: price, 
+            hasReviewed: hasReviewed
           }
         })
       );
-
-      const filterNullPrice = bookingsWithPriceandLessorName.filter(
-        (item): item is NonNullable<typeof item> => item !== null
-      );
-
-      setTotalCount(filterNullPrice.length);
-      const start = (currentPage - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      const pageData = filterNullPrice.slice(start, end);
-
-      setBookings(pageData);
+      setTotalCount(count ? count : 0);
+      setBookings(bookingsWithHasReviewed ? bookingsWithHasReviewed : []);
       
     } catch (err) {
       console.error('Error fetching mock bookings:', err);
@@ -208,7 +189,7 @@ export default function RentingHistoryPage() {
                         {booking.car_id.slice(0, 15) + "..."}
                       </button>
                     </div>
-                    <div><span className="font-semibold">ผู้ให้เช่า:</span> {booking.lessor_name}</div>
+                    <div><span className="font-semibold">ผู้ให้เช่า:</span> {booking.car_information.owner.u_firstname}</div>
                     <div><span className="font-semibold">วันที่เช่า:</span> {formatDate(booking.sdate)} - {formatDate(booking.edate)}</div>
                     <div>
                       <span className="font-semibold">สถานะ:</span>{" "}
@@ -232,7 +213,7 @@ export default function RentingHistoryPage() {
                         {booking.car_id.slice(0, 15) + "..."}
                       </button>
                     </div>
-                    <div className="text-sm">{booking.lessor_name}</div>
+                    <div className="text-sm">{booking.car_information.owner.u_firstname}</div>
                     <div className="text-sm">
                       {formatDate(booking.sdate)} - {formatDate(booking.edate)}
                     </div>
@@ -251,7 +232,7 @@ export default function RentingHistoryPage() {
                 {booking.status === RentingStatus.CONFIRMED && !booking.hasReviewed && (
                   <button
                     onClick={() => router.push(`/review/${booking.renting_id}`)}
-                    className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center hidden sm:flex"
+                    className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center sm:flex"
                   >
                     <span>รีวิวการเช่า</span>
                   </button>
@@ -269,7 +250,7 @@ export default function RentingHistoryPage() {
                 
                 {/* Show "รีวิวแล้ว" badge if already reviewed */}
                 {booking.status === RentingStatus.CONFIRMED && booking.hasReviewed && (
-                  <div className="bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center hidden sm:flex">
+                  <div className="bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center sm:flex">
                     <span>รีวิวแล้ว</span>
                   </div>
                 )}

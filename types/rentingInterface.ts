@@ -12,11 +12,12 @@ export interface rentingBase {
   total_price:number,
 }
 export interface bookingHistory extends rentingBase {
-  lessor_name: string,
   car_information:{
     car_id:string,
-    owner_id:string
-  }[],
+    owner:{
+      u_firstname:string
+    },
+  },
 }
 export interface rentingHistory extends rentingBase {
   lessee_name: string;
