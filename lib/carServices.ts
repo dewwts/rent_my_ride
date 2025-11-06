@@ -206,7 +206,7 @@ import { createAdminClient } from "./supabase/server";
 import { NextRequest,NextResponse } from "next/server";
 import { isAdmin } from "./authServices";
 const ALLOWED_KEYS = [
-  'car_brand',
+    'car_brand',
   'model',
   'mileage',
   'year_created',
