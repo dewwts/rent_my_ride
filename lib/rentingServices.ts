@@ -25,7 +25,7 @@ export const getMyRentingHistory = async (supabase: SupabaseClient, page: number
       )`, { count: 'exact' })
     .eq("lessee_id",user.id)
     .range((page - 1) * limit, page * limit - 1)
-    .order("sdate",{ascending:false}); //เรียงจากใหม่สุดไปเก่าสุด
+    .order("sdate",{ascending:false});
   
   if (error) throw error;
   return {data, count};
