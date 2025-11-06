@@ -49,7 +49,7 @@ export const getCarReview = async(supabase:SupabaseClient, car_id:string)=>{
 }
 
 export async function checkReviewExists(
-  supabase: any,
+  supabase: SupabaseClient,
   rentingId: string
 ): Promise<boolean> {
   const { data, error } = await supabase
