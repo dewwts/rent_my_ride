@@ -160,7 +160,8 @@ export default function DashboardSidebar() {
   const adminMenu: StandardMenuItem[] = [ 
     { href: "/dashboard", label: "แดชบอร์ด", icon: <LayoutDashboard size={18} /> },
     { href: "/dashboard/profile", label: "โปรไฟล์ของฉัน", icon: <User size={18} /> },
-    { href: "/dashboard/history", label: "ดูคำสั่งซื้อทั้งหมด", icon: <History size={18} /> }
+    { href: "/dashboard/history", label: "ดูคำสั่งซื้อทั้งหมด", icon: <History size={18} /> },
+    { href: "/dashboard/allcars", label: "ดูรถทั้งหมด", icon: <CarFront size={18} />}
   ];
 
   const menuItems: MenuItem[] = role === "admin" ? adminMenu : userMenu;

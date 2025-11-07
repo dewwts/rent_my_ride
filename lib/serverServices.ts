@@ -2,6 +2,7 @@
 import type { CardForUI, DbCar } from "@/types/carInterface";
 import { createClient } from "@/lib/supabase/server";
 import { toAvailability } from "./utils";
+
 export async function fetchAllCars(): Promise<CardForUI[]> {
   const supabase = await createClient();
 
@@ -17,7 +18,7 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         "number_of_seats",
         "oil_type",
         "gear_type",
-        "is_verified",
+        "is_verified", // This is correct
         "car_conditionrating",
         "year_created",
       ].join(",")
@@ -25,6 +26,7 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
 
   if (error) throw error;
 
+  // Assuming DbCar type includes 'is_verified: boolean | null'
   const rows = (data ?? []) as unknown as DbCar[];
 
   return rows.map((r): CardForUI => {
@@ -40,6 +42,9 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         ? r.year_created
         : undefined;
 
+    // Create a clean boolean value (handles null/undefined)
+    const isVerified = r.is_verified === true;
+
     return {
       id: r.car_id,
       name: r.car_brand ?? "ไม่ระบุ",
@@ -51,7 +56,11 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
       seats,
       fuelType: r.oil_type ?? "",
       transmission: r.gear_type ?? "",
-      availability: toAvailability(r.is_verified),
+
+      // Use the clean boolean for both properties
+      availability: toAvailability(isVerified),
+      is_verified: isVerified, // <-- **THIS IS THE FIX**
+
       features: [],
       year,
     };
