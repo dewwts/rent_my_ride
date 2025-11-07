@@ -28,6 +28,11 @@ describe('Test function isAdmin ', () => {
         const result = await isAdmin(mockSupabase);
         expect(result).toBe(true);
 
+        //check ว่า เรียกถูก
+        expect(mockSupabase.from).toHaveBeenCalledWith('user_info');
+        expect(mockSupabase.select).toHaveBeenCalledWith('role');
+        expect(mockSupabase.eq).toHaveBeenCalledWith('user_id', '123');
+
     });
 
     it('should return false if user does not exist', async () => {
@@ -90,5 +95,9 @@ describe('Test function isAdmin ', () => {
 
         const result = await isAdmin(mockSupabase);
         expect(result).toBe(false);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
     });
 });
