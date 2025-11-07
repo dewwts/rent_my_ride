@@ -65,6 +65,7 @@ export type CardForUI = {
   availability: string | null; // "พร้อมเช่า" | "จองล่วงหน้า"
   features: string[];
   year?: number;
+  is_verified: boolean;
 };
 export interface CarCardProps {
   id: string;

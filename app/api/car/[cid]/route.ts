@@ -11,21 +11,27 @@ const ALLOWED_KEYS = [
   'car_brand','model','mileage','year_created','number_of_seats',
   'gear_type','oil_type','daily_rental_price','status','location',
   'car_conditionrating','car_image',
+  'is_verified', // <-- **FIX 1: ADD THIS KEY HERE**
 ] as const
 type AllowedKey = (typeof ALLOWED_KEYS)[number]
-type CarUpdatable = { [K in AllowedKey]: string | number | null }
 
-export async function PATCH(req: Request, ctx: unknown) {
-  const { cid } = (ctx as { params: { cid: string } }).params
+// **FIX 2: UPDATE THIS TYPE TO INCLUDE BOOLEAN**
+type CarUpdatable = { [K in AllowedKey]: string | number | boolean | null }
 
+export async function PATCH(
+  req: Request,
+  { params }: { params: { cid: string } }
+) {
   try {
-    const supabase = await createClient()
-    if (!(await isAdmin(supabase))) {
-      return NextResponse.json({ success: false, error: 'ผู้ใช้ไม่ได้รับอนุญาตให้เข้าถึง' }, { status: 401 })
-    }
+    const { cid } = params
 
     if (!cid) {
       return NextResponse.json({ success: false, error: 'cid ไม่ถูกต้อง' }, { status: 400 })
+    }
+    
+    const supabase = await createClient()
+    if (!(await isAdmin(supabase))) {
+      return NextResponse.json({ success: false, error: 'ผู้ใช้ไม่ได้รับอนุญาตให้เข้าถึง' }, { status: 401 })
     }
 
     const body = (await req.json()) as Partial<CarUpdatable>
@@ -38,7 +44,7 @@ export async function PATCH(req: Request, ctx: unknown) {
     const admin = createAdminClient()
     const { data, error } = await admin
       .from('car_information')
-      .update(patch)
+      .update(patch) // 'patch' will now correctly include { is_verified: true }
       .eq('car_id', cid)
       .select()
       .single()
@@ -51,6 +57,7 @@ export async function PATCH(req: Request, ctx: unknown) {
     return NextResponse.json({ success: true, data }, { status: 200 })
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Server error'
+    console.error("API Route Error:", msg)
     return NextResponse.json({ success: false, error: msg }, { status: 500 })
   }
 }
