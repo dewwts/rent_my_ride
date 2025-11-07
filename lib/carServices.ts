@@ -127,7 +127,8 @@ export const createCar = async (
         gear_type: carData.gear_type,
         oil_type: carData.oil_type,
         daily_rental_price: carData.daily_rental_price,
-        status: carData.status,
+        // status: carData.status,
+        is_verified: false,
         location: carData.location,
         car_conditionrating: carData.rating || 1,
         car_image: carData.car_image || null,
@@ -175,7 +176,7 @@ export const updateCar = async (
         gear_type: carData.gear_type,
         oil_type: carData.oil_type,
         daily_rental_price: carData.daily_rental_price,
-        status: carData.status,
+        // status: carData.status,
         location: carData.location,
         car_conditionrating: carData.rating || 1,
         car_image: carData.car_image || null,
@@ -199,6 +200,62 @@ export const updateCar = async (
     throw new Error(message);
   }
 };
+
+//Parital UpdateCar
+
+/*import { createClient,createAdminClient } from "./supabase/server";
+import { NextRequest,NextResponse } from "next/server";
+import { isAdmin } from "./authServices";
+import { pickDefined } from "./utils";
+const ALLOWED_KEYS = [
+  'car_brand',
+  'model',
+  'mileage',
+  'year_created',
+  'number_of_seats',
+  'gear_type',
+  'oil_type',
+  'daily_rental_price',
+  'status',
+  'location',
+  'car_conditionrating',
+  'car_image',
+] as const
+type AllowedKey = (typeof ALLOWED_KEYS)[number]
+
+// เลือกเฉพาะคีย์ที่ไม่เป็น undefined กับ null
+
+
+export async function PATCH(req:NextRequest,{params}:{params:{carID:string}}){
+  try{
+    const supabase =await createClient();
+    const is_admin = await isAdmin(supabase);
+    const admin = createAdminClient()
+    if (!is_admin){
+            return NextResponse.json({success: false, error: "ผู้ใช้ไม่ได้รับอนุญาตให้เข้าถึง"},{status:401})
+    }
+    const carID = params.carID;
+    const body = await req.json();
+    const patch = pickDefined(body, ALLOWED_KEYS as unknown as string[]) as Partial<Record<AllowedKey, any>>
+    const{data,error} = await admin
+    .from('car_information')
+    .update(patch)
+    .eq('car_id', carID)
+    .select()
+    .single();
+
+    if(error){
+      console.error("Update error : ", error);
+    }
+
+    return NextResponse.json({ success: true, data }, { status: 200 })
+  }catch(err){
+    console.error('update car error:', err)
+  }
+}
+*/
+
+
 
 // Delete car
 export const deleteCar = async (
