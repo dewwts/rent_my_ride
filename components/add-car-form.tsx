@@ -45,7 +45,7 @@ export function AddCarForm({
       oil_type: "",
       gear_type: "",
       daily_rental_price: 0,
-      status: "available",
+      // status: "available",
       location: "",
       rating: 0,
       image_url: "",
@@ -103,6 +103,7 @@ export function AddCarForm({
         ...data,
         rating: data.rating || 1,
         car_image: data.image_url || "",
+        is_verified: false
       };
       onCarAdded?.(newCar,image);
     } catch (error) {
@@ -363,7 +364,7 @@ export function AddCarForm({
               <h3 className="text-lg font-semibold text-gray-900">ข้อมูลเพิ่มเติม</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="status">สถานะ *</Label>
                   <select
                     id="status"
@@ -376,7 +377,7 @@ export function AddCarForm({
                   {errors.status && (
                     <p className="text-sm text-red-500">{errors.status.message}</p>
                   )}
-                </div>
+                </div> */}
                 <div className="space-y-2">
                   <Label htmlFor="price_per_day">ราคาเช่าต่อวัน (บาท) *</Label>
                   <Input
