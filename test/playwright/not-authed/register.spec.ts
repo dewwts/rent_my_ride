@@ -112,9 +112,9 @@ test.describe("Sign up Test", () => {
         await page.getByRole('textbox', { name: 'อีเมล' }).fill(email);
         await page.getByRole('textbox', { name: 'รหัสผ่าน', exact: true }).fill('123456');
         await page.getByRole('textbox', { name: 'ยืนยันรหัสผ่าน' }).fill('123456');
-        await page.getByRole('link', { name: 'ลงทะเบียน' }).click();
+        await page.getByRole('button', { name: 'ลงทะเบียน' }).click();
 
-        await expect(page.getByText('Email already exists')).toBeVisible();
+        await expect(page.getByRole('main').getByText('Email already exists')).toBeVisible();
         //toast
         await expect(page.locator('div').filter({ hasText: 'Sign up ไม่สำเร็จEmail' }).nth(1)).toBeVisible();
         const currentUrl = await page.url();
