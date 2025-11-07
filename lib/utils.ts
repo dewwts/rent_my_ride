@@ -233,3 +233,11 @@ export const calculateAverageRating = (reviews: { rating: number }[]): number =>
   
   return Math.round(avgRating * 100) / 100; // Round to 2 decimal places
 };
+
+export function generateValidEmail() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const randomString = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const domains = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com'];
+  const randomDomain = domains[Math.floor(Math.random() * domains.length)];
+  return `test${randomString}@${randomDomain}`;
+}
