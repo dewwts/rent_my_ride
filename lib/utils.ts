@@ -206,10 +206,16 @@ export function mapDbCarToCard(c: DbCar): CardForUI {
   };
 }
 
-export function pickDefined<T extends Record<string, any>>(src: T, keys: readonly string[]) {
-  const out: Record<string, any> = {}
+export function pickDefined<T extends object, K extends readonly (keyof T)[]>(
+  src: Partial<T>,
+  keys: K
+): Partial<Pick<T, K[number]>> {
+  const out = {} as Partial<Pick<T, K[number]>>
   for (const k of keys) {
-    if (src[k] !== undefined && src[k] !== null) out[k] = src[k]
+    const v = src[k]
+    if (v !== undefined) {
+      ;(out as Record<keyof T, unknown>)[k] = v as unknown
+    }
   }
   return out
 }

@@ -20,7 +20,7 @@ const ALLOWED_KEYS = [
   'car_image',
 ] as const
 type AllowedKey = (typeof ALLOWED_KEYS)[number]
-
+type CarPatch = Partial<Record<AllowedKey, string | number >>
 // PATCH /api/car/:car_id  → partial update
 export async function PATCH(
   req: NextRequest,
@@ -46,10 +46,12 @@ export async function PATCH(
     }
 
     const body = await req.json()
-    // เลือกเฉพาะ key ที่ส่งมาและไม่ใช่ undefined (null = ตั้งให้เป็น null จริง ๆ)
-    const patch = pickDefined(body, ALLOWED_KEYS as unknown as string[]) as Partial<
+
+    const patch = pickDefined<CarPatch, typeof ALLOWED_KEYS>(body, ALLOWED_KEYS)
+
+    /*const patch = pickDefined(body, ALLOWED_KEYS as unknown as string[]) as Partial<
       Record<AllowedKey, any>
-    >
+    >*/
 
     if (Object.keys(patch).length === 0) {
       return NextResponse.json(
@@ -76,10 +78,10 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: true, data }, { status: 200 })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('update car error:', err)
     return NextResponse.json(
-      { success: false, error: err?.message ?? 'Server error' },
+      { success: false, error:'Server error' },
       { status: 500 }
     )
   }
