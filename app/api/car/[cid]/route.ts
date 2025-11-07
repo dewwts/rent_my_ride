@@ -1,4 +1,3 @@
-// app/api/car/[cid]/route.ts
 import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/authServices'
@@ -11,20 +10,18 @@ const ALLOWED_KEYS = [
   'car_brand','model','mileage','year_created','number_of_seats',
   'gear_type','oil_type','daily_rental_price','status','location',
   'car_conditionrating','car_image',
-  'is_verified', // <-- **FIX: ADD 'is_verified'**
+  'is_verified',
 ] as const
 type AllowedKey = (typeof ALLOWED_KEYS)[number]
 
-// **FIX: INCLUDE 'boolean' IN THE TYPE**
 type CarUpdatable = { [K in AllowedKey]: string | number | boolean | null }
 
-// **FIX: USE THE CORRECT NEXT.JS 13+ SIGNATURE**
 export async function PATCH(
   req: Request,
-  { params }: { params: { cid: string } }
+  { params }: { params: { cid: string } } 
 ) {
   try {
-    const { cid } = params // Get 'cid' from the correct 'params' object
+    const { cid } = params
 
     if (!cid) {
       return NextResponse.json({ success: false, error: 'cid ไม่ถูกต้อง' }, { status: 400 })
@@ -45,7 +42,7 @@ export async function PATCH(
     const admin = createAdminClient()
     const { data, error } = await admin
       .from('car_information')
-      .update(patch) // This will now correctly update { is_verified: true/false }
+      .update(patch)
       .eq('car_id', cid)
       .select()
       .single()
