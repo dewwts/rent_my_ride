@@ -5,8 +5,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest",
-    "test-coverage" : "jest --watchAll --coverage"
+    "test": "jest"
   },
   "dependencies": {
     "@date-io/dayjs": "^3.2.0",
