@@ -17,7 +17,7 @@ type CarUpdatable = { [K in AllowedKey]: string | number | null }
 
 export async function PATCH(
   req: Request,
-  context: { params: { cid: string } }   // ✅ ใช้ object literal type
+  context: { params: { cid: string } }  
 ) {
   try {
     const supabase = await createClient()
