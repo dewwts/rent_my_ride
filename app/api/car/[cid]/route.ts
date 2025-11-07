@@ -21,7 +21,6 @@ const ALLOWED_KEYS = [
   ] as const
 type AllowedKey = (typeof ALLOWED_KEYS)[number]
 type CarUpdatable = { [K in AllowedKey]: string | number | null }
-type CarPatch = Partial<CarUpdatable>
 // PATCH /api/car/[cid]  → partial update
 export async function PATCH(
   req: NextRequest,
