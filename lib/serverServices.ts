@@ -41,7 +41,6 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         ? r.year_created
         : undefined;
 
-    // Create a clean boolean value
     const isVerified = r.is_verified === true;
 
     return {
@@ -56,7 +55,6 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
       fuelType: r.oil_type ?? "",
       transmission: r.gear_type ?? "",
 
-      // **FIX: ADD BOTH REQUIRED PROPERTIES**
       availability: toAvailability(isVerified),
       is_verified: isVerified, 
 
