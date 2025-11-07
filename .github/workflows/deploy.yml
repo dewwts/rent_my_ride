@@ -1,14 +1,7 @@
-name: Standard Code and Deployment Checks
+name: Deploy on vercel
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-  pull_request:
-    branches:
-      - main
-      - develop
+  workflow_dispatch:
 jobs:
   build-and-test:
     name: Build and testing
@@ -24,13 +17,9 @@ jobs:
           cache: "npm"  # force node_modules to be cached for faster
 
       - name: Install library
-        run: npm install
-
-      - name: Test Linter
-        run: npm run lint
+        run: npm ci
         
-      - name: Test building project # but vercel is also provide this
-        if: github.event_name == 'push' || github.event_name == 'pull_request'
+      - name: Run deploy vercel # but vercel is also provide this
         env: 
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
@@ -41,11 +30,12 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           NEXT_PUBLIC_SERVER_URL: ${{ secrets.NEXT_PUBLIC_SERVER_URL }}
-        run: npm run build 
-
-      # - name: Run all unit testing
-      #   run: npm run test unit_test/
-      # - name: Run all E2E testing
-      #   run: npx playwright test
-      # - name: Upload playwright report
+          VERCEL_TOKEN: ${{secrets.VERCEL_TOKEN}}
+          VERCEL_ORG_ID: ${{secrets.VERCEL_ORG_ID}}
+          VERCEL_PROJECT_ID: ${{secrets.VERCEL_PROJECT_ID}}
+        run: |
+          npm install -g vercel
+          vercel-pull --yes --environment=production --token=$VERCEL_TOKEN
+          vercel-build --token=$VERCEL_TOKEN
+          vercel --prod --token=$VERCEL_TOKEN
 
