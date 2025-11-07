@@ -15,18 +15,16 @@ const ALLOWED_KEYS = [
 type AllowedKey = (typeof ALLOWED_KEYS)[number]
 type CarUpdatable = { [K in AllowedKey]: string | number | null }
 
-export async function PATCH(
-  req: Request,
-  context: { params: { cid: string } }  
-) {
+export async function PATCH(req: Request, ctx: unknown) {
+  const { cid } = (ctx as { params: { cid: string } }).params
+
   try {
     const supabase = await createClient()
     if (!(await isAdmin(supabase))) {
       return NextResponse.json({ success: false, error: 'ผู้ใช้ไม่ได้รับอนุญาตให้เข้าถึง' }, { status: 401 })
     }
 
-    const carId = context.params.cid
-    if (!carId) {
+    if (!cid) {
       return NextResponse.json({ success: false, error: 'cid ไม่ถูกต้อง' }, { status: 400 })
     }
 
@@ -41,7 +39,7 @@ export async function PATCH(
     const { data, error } = await admin
       .from('car_information')
       .update(patch)
-      .eq('car_id', carId)
+      .eq('car_id', cid)
       .select()
       .single()
 
