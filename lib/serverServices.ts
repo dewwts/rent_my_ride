@@ -18,7 +18,7 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         "number_of_seats",
         "oil_type",
         "gear_type",
-        "is_verified", // This is correct
+        "is_verified",
         "car_conditionrating",
         "year_created",
       ].join(",")
