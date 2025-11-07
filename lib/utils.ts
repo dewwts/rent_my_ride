@@ -203,7 +203,11 @@ export function mapDbCarToCard(c: DbCar): CardForUI {
   };
 }
 
-export function pickDefined<T extends object, K extends readonly (keyof T)[]>(
+// lib/utils.ts
+export function pickDefined<
+  T extends object,
+  const K extends readonly (keyof T)[]
+>(
   src: Partial<T>,
   keys: K
 ): Partial<Pick<T, K[number]>> {
@@ -216,6 +220,8 @@ export function pickDefined<T extends object, K extends readonly (keyof T)[]>(
   }
   return out
 }
+
+
 
 export const calculateAverageRating = (reviews: { rating: number }[]): number => {
   if (!reviews || reviews.length === 0) {
