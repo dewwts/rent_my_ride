@@ -22,10 +22,8 @@ const ALLOWED_KEYS = [
 type AllowedKey = (typeof ALLOWED_KEYS)[number]
 type CarUpdatable = { [K in AllowedKey]: string | number | null }
 // PATCH /api/car/[cid]  → partial update
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { cid: string } }
-) {
+type RouteContext = { params: { cid: string } }
+export async function PATCH(req: Request, { params }: RouteContext) {
   try {
     // 1) ตรวจสิทธิ์แอดมิน (ใช้ client ปกติ)
     const supabase = await createClient()
