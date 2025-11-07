@@ -38,8 +38,6 @@ describe('Test function isAdmin ', () => {
 
         const result = await isAdmin(mockSupabase);
         expect(result).toBe(false);
-
-
     });
 
     it('should return false if getUser have error', async () => {
