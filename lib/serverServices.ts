@@ -26,7 +26,6 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
 
   if (error) throw error;
 
-  // Assuming DbCar type includes 'is_verified: boolean | null'
   const rows = (data ?? []) as unknown as DbCar[];
 
   return rows.map((r): CardForUI => {
@@ -42,7 +41,7 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         ? r.year_created
         : undefined;
 
-    // Create a clean boolean value (handles null/undefined)
+    // Create a clean boolean value
     const isVerified = r.is_verified === true;
 
     return {
@@ -57,9 +56,9 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
       fuelType: r.oil_type ?? "",
       transmission: r.gear_type ?? "",
 
-      // Use the clean boolean for both properties
+      // **FIX: ADD BOTH REQUIRED PROPERTIES**
       availability: toAvailability(isVerified),
-      is_verified: isVerified, // <-- **THIS IS THE FIX**
+      is_verified: isVerified, 
 
       features: [],
       year,
