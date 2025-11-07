@@ -18,10 +18,10 @@ const ALLOWED_KEYS = [
   'location',
   'car_conditionrating',
   'car_image',
-] as const
+  ] as const
 type AllowedKey = (typeof ALLOWED_KEYS)[number]
-type CarPatch = Partial<Record<AllowedKey, string | number >>
-// PATCH /api/car/:car_id  → partial update
+type CarPatch = Partial<Record<AllowedKey, string | number|null >>
+// PATCH /api/car/[cid]  → partial update
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { cid: string } }
@@ -46,7 +46,6 @@ export async function PATCH(
     }
 
     const body = await req.json()
-
     const patch = pickDefined<CarPatch, typeof ALLOWED_KEYS>(body, ALLOWED_KEYS)
 
     /*const patch = pickDefined(body, ALLOWED_KEYS as unknown as string[]) as Partial<
