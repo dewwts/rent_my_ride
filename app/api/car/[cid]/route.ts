@@ -1,4 +1,4 @@
-// app/api/car/[car_id]/route.ts
+// app/api/car/[cid]/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/authServices'
