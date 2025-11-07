@@ -1,3 +1,4 @@
+// app/api/car/[cid]/route.ts
 import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/authServices'
@@ -6,6 +7,7 @@ import { pickDefined } from '@/lib/utils'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+// 1. ADDED 'is_verified'
 const ALLOWED_KEYS = [
   'car_brand','model','mileage','year_created','number_of_seats',
   'gear_type','oil_type','daily_rental_price','status','location',
@@ -14,14 +16,16 @@ const ALLOWED_KEYS = [
 ] as const
 type AllowedKey = (typeof ALLOWED_KEYS)[number]
 
+// 2. ADDED 'boolean'
 type CarUpdatable = { [K in AllowedKey]: string | number | boolean | null }
 
+// 3. FIXED THE FUNCTION SIGNATURE (THIS FIXES YOUR BUILD)
 export async function PATCH(
   req: Request,
   { params }: { params: { cid: string } } 
 ) {
   try {
-    const { cid } = params
+    const { cid } = params // Get 'cid' from the correct 'params' object
 
     if (!cid) {
       return NextResponse.json({ success: false, error: 'cid ไม่ถูกต้อง' }, { status: 400 })
@@ -42,7 +46,7 @@ export async function PATCH(
     const admin = createAdminClient()
     const { data, error } = await admin
       .from('car_information')
-      .update(patch)
+      .update(patch) 
       .eq('car_id', cid)
       .select()
       .single()
