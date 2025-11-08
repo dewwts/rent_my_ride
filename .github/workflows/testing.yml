@@ -18,4 +18,4 @@ jobs:
         run: npm run test unit_test/
       - name: Run E2E Tests
         run: npx playwright test
-  
+      
