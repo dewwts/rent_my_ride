@@ -4,6 +4,7 @@ import "./globals.css";
 
 // ✅ เพิ่ม Toaster เข้ามา
 import { Toaster } from "@/components/ui/toaster";
+import { CookieConsent } from "@/components/cookie-consent";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -38,6 +39,8 @@ export default function RootLayout({
         {children}
         {/* ✅ Toaster ตำแหน่ง global แสดง toast ทุกหน้าของแอป */}
         <Toaster />
+        {/* ✅ Cookie Consent Modal */}
+        <CookieConsent />
       </body>
     </html>
   );
