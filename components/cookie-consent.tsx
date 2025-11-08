@@ -1,16 +1,28 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 
 export function CookieConsent() {
+  const [showConsent, setShowConsent] = useState(false);
+
+  useEffect(() => {
+    // Show consent dialog after component mounts
+    setShowConsent(true);
+  }, []);
+
   const handleAccept = () => {
-    // TODO: Implement accept logicช
+    setShowConsent(false);
   };
 
   const handleDecline = () => {
-    // TODO: Implement decline logic
+    setShowConsent(false);
   };
+
+  if (!showConsent) {
+    return null;
+  }
 
   return (
     <>
