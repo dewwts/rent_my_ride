@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { CardForUI } from "@/types/carInterface";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import axios from "axios";
+import Image from "next/image";
 
 interface AllCarsClientProps {
   initialCars: CardForUI[];
@@ -11,9 +13,7 @@ interface AllCarsClientProps {
 
 export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
   const [cars, setCars] = useState<CardForUI[]>(initialCars);
-  // const router = useRouter();
 
-  // --- PAGINATION LOGIC ---
   const [currentPage, setCurrentPage] = useState(1);
   const carsPerPage = 3;
   const pageCount = Math.ceil(cars.length / carsPerPage);
@@ -24,75 +24,43 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
   const handlePageClick = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
-  // --- END OF PAGINATION LOGIC ---
 
-  // --- STATUS DROPDOWN LOGIC ---
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  // NEW: State to track which car is currently being updated
   const [isUpdatingId, setIsUpdatingId] = useState<string | null>(null);
 
   const handleStatusChange = async (carId: string, newStatus: boolean) => {
-    // Store the original state in case we need to revert on failure
     const originalCars = [...cars];
 
-    // 1. Optimistic update: Update the UI immediately
-    // This updates the client state which uses 'is_verified'
     setCars((prevCars) =>
       prevCars.map((car) =>
         car.id === carId ? { ...car, is_verified: newStatus } : car
       )
     );
 
-    // 2. Set loading state and close dropdown
     setIsUpdatingId(carId);
     setOpenDropdownId(null);
 
     try {
-      // 3. --- API CALL TO UPDATE DATABASE ---
-
-      const response = await fetch(`/api/car/${carId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // **THIS IS THE FIX:**
-        // Send the boolean 'is_verified' key, not the string 'status'.
-        body: JSON.stringify({
-          is_verified: newStatus,
-        }),
+      await axios.patch(`/api/car/${carId}`, {
+        is_verified: newStatus,
       });
-
-      if (!response.ok) {
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-          const errorData = await response.json();
-          throw new Error(
-            // Use 'errorData.error' to match your API's error response
-            errorData.error ||
-              errorData.message ||
-              "Failed to update status on server"
-          );
-        } else {
-          throw new Error(
-            `Server returned ${response.status}: ${response.statusText}. Check your API route.`
-          );
-        }
-      }
 
       console.log("Status updated successfully for car:", carId);
     } catch (error) {
-      // 4. --- REVERT ON FAILURE ---
       console.error("Failed to update status:", error);
-      // Revert the state back to the original
+
+      if (axios.isAxiosError(error) && error.response) {
+        console.error(
+          "API Error:",
+          error.response.data.error || error.response.data.message
+        );
+      }
+
       setCars(originalCars);
-      // Here you could show an error toast to the user
     } finally {
-      // --- CLEANUP ---
-      // Remove loading state regardless of success or failure
       setIsUpdatingId(null);
     }
   };
-  // --- END OF STATUS LOGIC ---
 
   if (cars.length === 0) {
     return (
@@ -104,7 +72,6 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-black">รถทั้งหมด</h1>
 
-      {/* Car List */}
       <div className="flex flex-col space-y-6">
         {currentCars.map((car) => {
           if (!car.id) return null;
@@ -121,16 +88,15 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
                 isVerified ? "border-green-400" : "border-red-400"
               )}
             >
-              {/* Block 1: Car Image */}
-              <div className="w-64 flex-shrink-0">
-                <img
+              <div className="w-64 flex-shrink-0 relative h-40">
+                <Image
                   src={car.image || "/placeholder-car.jpg"}
                   alt={car.name}
-                  className="w-full h-40 object-cover rounded-lg"
+                  fill
+                  className="object-cover rounded-lg"
                 />
               </div>
 
-              {/* Block 2: Car Info (Name, Specs) */}
               <div className="flex-1 pt-1">
                 <h3 className="text-lg font-semibold text-black">{car.name}</h3>
                 <p className="text-sm text-gray-500">
@@ -143,7 +109,6 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
                 </div>
               </div>
 
-              {/* Block 3: Price */}
               <div className="text-center w-28 flex-1 pt-1 flex flex-col">
                 <p className="font-semibold text-black">ราคา</p>
                 <div className="flex-1 flex items-center justify-center">
@@ -151,15 +116,12 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
                 </div>
               </div>
 
-              {/* Block 4: Status (UPDATED) */}
               <div className="text-center w-32 flex-1 pt-1 flex flex-col">
                 <p className="font-semibold text-black mb-1">สถานะ</p>
                 <div className="flex-1 flex items-center justify-center">
                   <div className="relative">
-                    {/* This span is the dropdown trigger */}
                     <span
                       onClick={() =>
-                        // Disable opening dropdown if already updating
                         !isUpdating &&
                         setOpenDropdownId(isDropdownOpen ? null : car.id)
                       }
@@ -173,10 +135,8 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
                           ? "border-green-400 text-green-700 bg-green-50"
                           : "border-orange-400 text-orange-700 bg-orange-50"
                       )}
-                      // Disable click if updating
                       aria-disabled={isUpdating}
                     >
-                      {/* Show loading spinner or content */}
                       {isUpdating ? (
                         <svg
                           className="animate-spin h-4 w-4 text-gray-500"
@@ -217,7 +177,6 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
                       )}
                     </span>
 
-                    {/* The actual dropdown menu */}
                     {isDropdownOpen && (
                       <div
                         className={cn(
@@ -234,7 +193,6 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
                               ? "font-medium text-green-700"
                               : "text-gray-700 hover:bg-gray-100"
                           )}
-                          // Disable if already verified or if any update is in progress
                           disabled={isVerified || !!isUpdatingId}
                         >
                           Verified
@@ -248,7 +206,6 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
                               ? "font-medium text-orange-700"
                               : "text-gray-700 hover:bg-gray-100"
                           )}
-                          // Disable if already unverified or if any update is in progress
                           disabled={!isVerified || !!isUpdatingId}
                         >
                           Unverified
@@ -259,7 +216,6 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
                 </div>
               </div>
 
-              {/* Block 5: Rating */}
               <div className="text-center w-24 flex-1 pt-1 flex flex-col">
                 <p className="font-semibold text-black">คะแนน</p>
                 <div className="flex-1 flex items-center justify-center">
@@ -273,7 +229,6 @@ export default function AllCarsClient({ initialCars }: AllCarsClientProps) {
         })}
       </div>
 
-      {/* Dynamic Pagination */}
       <div className="flex justify-center space-x-2 mt-8">
         {Array.from({ length: pageCount }, (_, i) => i + 1).map((page) => (
           <Button
