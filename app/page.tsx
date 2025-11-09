@@ -4,6 +4,7 @@ import { Footer } from "@/components/footer";
 import { Hero } from "@/components/hero";
 import HomeClient from "@/components/HomeClient";
 import { fetchAllCars } from "@/lib/serverServices";
+import HomeConsentWrapper from "@/components/HomeConsentWrapper";
 
 export const revalidate = 0; // helpful while testing so results update immediately
 
@@ -22,6 +23,7 @@ export default async function Home() {
           {/* รายการรถ (initialCars) */}
           <HomeClient initialCars={cars} />
         </div>
+        <HomeConsentWrapper />
       </main>
 
       <Footer />
