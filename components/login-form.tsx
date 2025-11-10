@@ -36,22 +36,29 @@ export function LoginForm({
   });
 
   const onSubmit = async (data: LoginFormValues) => {
+    // Check consent status before login
+    const consent = localStorage.getItem("cookie-consent");
+    if (consent === "declined") {
+      toast({
+        variant:'destructive',
+        title:"ไม่อนุญาตให้เข้าสู่ระบบ",
+        description:"คุณได้ปฏิเสธการใช้คุกกี้ กรุณายอมรับเพื่อเข้าสู่ระบบ"
+      })
+      return;
+    }
+
     const supabase = createClient();
     const object: loginInfo = data
     setIsLoading(true);
     try{
       await SignIn(object, supabase)
       
-      // Check consent status and store token if accepted
-      const consent = localStorage.getItem("cookie-consent");
+      // Store token if consent is accepted
       if (consent === "accepted") {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.access_token) {
           localStorage.setItem("supabase-token", session.access_token);
         }
-      } else if (consent === "declined") {
-        // Remove token if consent was declined
-        localStorage.removeItem("supabase-token");
       }
       
       toast({
