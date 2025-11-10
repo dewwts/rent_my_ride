@@ -143,12 +143,17 @@ export function Hero() {
       );
       const availSet = new Set(rawAvail.map((c) => c.car_id));
       const allInScope: DbCar[] = await searchCarsByLocation(supabase, location);
-      const carsLabeled = allInScope.map((c) => {
-        const verified = (c as any).is_verified === true;
-        const isFree = availSet.has(c.car_id);
-        const availability = verified && isFree ? "พร้อมเช่า" : "ไม่พร้อมเช่า";
-      return { ...c, availability } as DbCar & { availability: string };
-      });
+      type DbCarWithVerify = DbCar & { is_verified?: boolean | null };
+      type WithAvail = DbCar & { availability: "พร้อมเช่า" | "ไม่พร้อมเช่า" };
+
+      const carsLabeled: WithAvail[] = (allInScope as DbCarWithVerify[]).map((c) => {
+      const verified = Boolean(c.is_verified);      
+      const isFree = availSet.has(c.car_id);
+      const availability: WithAvail["availability"] =
+      verified && isFree ? "พร้อมเช่า" : "ไม่พร้อมเช่า";
+
+  return { ...c, availability };
+});
       window.dispatchEvent(
         new CustomEvent("cars:search-results", {
           detail: { cars: carsLabeled, meta: { location, start, end } },
