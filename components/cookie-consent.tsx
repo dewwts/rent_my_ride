@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 
 const CONSENT_KEY = "cookie-consent";
-const TOKEN_KEY = "supabase-token";
 
 export function CookieConsent() {
   const [showConsent, setShowConsent] = useState(false);
@@ -20,32 +18,13 @@ export function CookieConsent() {
     }
   }, []);
 
-  const handleAccept = async () => {
-    // Store consent status
+  const handleAccept = () => {
     localStorage.setItem(CONSENT_KEY, "accepted");
-    
-    // If user is logged in, store token in localStorage
-    try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.access_token) {
-        localStorage.setItem(TOKEN_KEY, session.access_token);
-      }
-    } catch (error) {
-      console.error("Error storing token:", error);
-    }
-    
     setShowConsent(false);
   };
 
   const handleDecline = () => {
-    // Store consent status
     localStorage.setItem(CONSENT_KEY, "declined");
-    
-    // Remove token from localStorage if exists
-    localStorage.removeItem(TOKEN_KEY);
-    
     setShowConsent(false);
   };
 
