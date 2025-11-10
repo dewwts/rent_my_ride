@@ -4,6 +4,7 @@ import "./globals.css";
 
 // ✅ เพิ่ม Toaster เข้ามา
 import { Toaster } from "@/components/ui/toaster";
+import { CookieConsent } from "@/components/cookie-consent";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -14,7 +15,6 @@ export const metadata: Metadata = {
   title: "RentMyRide - Car Rental Platform",
   description: "Find and rent the perfect car for your next adventure",
 };
-
 const mitr = Mitr({
   variable: "--font-mitr",
   display: "swap",
@@ -39,6 +39,8 @@ export default function RootLayout({
         {children}
         {/* ✅ Toaster ตำแหน่ง global แสดง toast ทุกหน้าของแอป */}
         <Toaster />
+        {}
+        <CookieConsent />
       </body>
     </html>
   );

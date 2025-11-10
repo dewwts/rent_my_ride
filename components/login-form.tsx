@@ -41,6 +41,19 @@ export function LoginForm({
     setIsLoading(true);
     try{
       await SignIn(object, supabase)
+      
+      // Check consent status and store token if accepted
+      const consent = localStorage.getItem("cookie-consent");
+      if (consent === "accepted") {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          localStorage.setItem("supabase-token", session.access_token);
+        }
+      } else if (consent === "declined") {
+        // Remove token if consent was declined
+        localStorage.removeItem("supabase-token");
+      }
+      
       toast({
         variant:'success',
         title:"สำเร็จ",
