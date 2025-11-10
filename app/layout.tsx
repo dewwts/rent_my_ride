@@ -39,7 +39,7 @@ export default function RootLayout({
         {children}
         {/* ✅ Toaster ตำแหน่ง global แสดง toast ทุกหน้าของแอป */}
         <Toaster />
-        {/* ✅ Cookie Consent Modal */}
+        {}
         <CookieConsent />
       </body>
     </html>
