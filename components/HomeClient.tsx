@@ -47,16 +47,15 @@ export default function HomeClient({ initialCars }: Props) {
   // ฟังผลลัพธ์จาก Hero + ฟังสัญญาณรีเซ็ต
   useEffect(() => {
     type WithAvail = DbCar & { availability?: string };
+    type Payload = { cars: WithAvail[]; meta: SearchMeta };
 
     const handleResults = (e: Event) => {
-      const { cars, meta } = (e as CustomEvent<{ cars: WithAvail[]; meta: SearchMeta }>).detail;
-
+      const { cars, meta } = (e as CustomEvent<Payload>).detail;
       const mapped: CardForUI[] = (cars ?? []).map((c) => {
-        const base = mapDbCarToCard(c as DbCar);
-        const availability =
-          (c as WithAvail).availability ?? (base as any).availability ?? "ไม่พร้อมเช่า";
+        const base = mapDbCarToCard(c); 
+        const availability = c.availability ?? base.availability ?? "ไม่พร้อมเช่า";
         return { ...base, availability };
-      });
+    });
 
       setDynamicCars(mapped);
       setMeta(meta ?? null);
