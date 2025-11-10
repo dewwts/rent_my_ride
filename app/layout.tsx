@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   title: "RentMyRide - Car Rental Platform",
   description: "Find and rent the perfect car for your next adventure",
 };
+
 const mitr = Mitr({
   variable: "--font-mitr",
   display: "swap",
