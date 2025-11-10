@@ -13,7 +13,7 @@ import {
   searchAvailableCars,
   searchCarsByLocation,
 } from "@/lib/searchServices";
-import { useToast } from "@/components/ui/use-toast"; 
+import { useToast } from "@/components/ui/use-toast";
 
 export function Hero() {
   // state
@@ -29,7 +29,7 @@ export function Hero() {
   const boxRef = useRef<HTMLDivElement>(null);
 
   const supabase = useMemo(() => createClient(), []);
-  const { toast } = useToast(); 
+  const { toast } = useToast();
 
   // load locations once (เรียกผ่าน lib)
   useEffect(() => {
@@ -136,21 +136,28 @@ export function Hero() {
         return;
       }
 
-      const cars: DbCar[] = await searchAvailableCars(
+      const rawAvail: DbCar[] = await searchAvailableCars(
         supabase,
         { location, startAt, endAt },
         { verifyPendingConfirmed: true }
       );
-
+      const availSet = new Set(rawAvail.map((c) => c.car_id));
+      const allInScope: DbCar[] = await searchCarsByLocation(supabase, location);
+      const carsLabeled = allInScope.map((c) => {
+        const verified = (c as any).is_verified === true;
+        const isFree = availSet.has(c.car_id);
+        const availability = verified && isFree ? "พร้อมเช่า" : "ไม่พร้อมเช่า";
+      return { ...c, availability } as DbCar & { availability: string };
+      });
       window.dispatchEvent(
         new CustomEvent("cars:search-results", {
-          detail: { cars, meta: { location, start, end } },
+          detail: { cars: carsLabeled, meta: { location, start, end } },
         })
       );
     } catch (e: unknown) {
-      let message = "Something went wrong"
-      if (e instanceof Error){ 
-        message = e.message
+      let message = "Something went wrong";
+      if (e instanceof Error) {
+        message = e.message;
       }
       console.error(e);
       toast({
@@ -195,9 +202,7 @@ export function Hero() {
                   {suggestions.map((s, i) => (
                     <li
                       key={s + i}
-                      className={`px-3 py-2 text-left cursor-pointer ${
-                        i === activeIndex ? "bg-gray-100" : "hover:bg-gray-50"
-                      }`}
+                      className={`px-3 py-2 text-left cursor-pointer ${i === activeIndex ? "bg-gray-100" : "hover:bg-gray-50"}`}
                       onMouseDown={(e) => {
                         e.preventDefault();
                         setLocation(s);

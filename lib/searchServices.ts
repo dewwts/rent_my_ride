@@ -23,6 +23,7 @@ export async function searchCarsByLocation(
       "status",
       "location",
       "year_created",
+      "is_verified",  
     ].join(","));
 
   if (location?.trim()) {
