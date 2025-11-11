@@ -13,7 +13,7 @@ import { getProfile, removeAvatar, updateAvatar, updateProfile } from "@/lib/aut
 import { parseAddress } from "@/lib/utils";
 import {MAX_BYTES, ALLOWED_TYPES} from "@/types/avatarConstraint"
 // import { Button } from "./ui/button";
-import axios, { AxiosError } from "axios";
+// import axios, { AxiosError } from "axios";
 import Image from "next/image";
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
