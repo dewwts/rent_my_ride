@@ -33,22 +33,43 @@ Before begin the project, ensure you have installed these before on your machine
 Following these instruction
 
 1. Use `git clone` Clone the project to your local machine 
-  ```bash
-  git clone https://github.com/dewwts/rent_my_ride.git
-  ```
+ ```bash
+ git clone https://github.com/dewwts/rent_my_ride.git
+ ```
 
 2. Use `cd` to change into the app's directory
 
-   ```bash
-   cd rent_my_ride
-   ```
+ ```bash
+ cd rent_my_ride
+ ```
 
 3. **Install the dependencies:**
     (This command reads the `package.json` file and installs all the required libraries)
-    ```bash
-    npm install
-    ```
+ ```bash
+ npm install
+ ```
 
+## Run Development Server
+To start the development server, use the following command:
+```bash
+npm run dev
+```
+The app will be available at http://localhost:3000
+
+## Run E2E Test (Playwright)
+Before running Playwright tests, make sure the development server is running.
+To execute all end-to-end tests:
+```bash
+npx playwright test
+```
+If you want to run tests in headed mode (see the browser window while testing):
+```bash
+npx playwright test --headed
+```
+Or to run a specific test file, use:
+```bash
+npx playwright test tests/example.spec.ts
+```
 
 ## Demo
 
