@@ -89,10 +89,10 @@ export default function OrderPage() {
     <main className="flex-1 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h1 className="text-4xl font-semibold text-gray-900 mb-2">
+          <h1 className="text-4xl font-semibold text-[#023047] mb-2">
             การจองรถยนต์ของคุณ
           </h1>
-          <p className="text-2xl font-light text-gray-700">
+          <p className="text-2xl font-light text-[#023047]">
             หมายเลขการจอง: {renting.renting_id}
           </p>
         </div>
@@ -100,11 +100,8 @@ export default function OrderPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-black text-white px-4 py-2 rounded-full text-sm font-medium">
-                {sdate.format("DD/MM/YYYY")} – {edate.format("DD/MM/YYYY")}
-              </div>
-              <div className="text-gray-600">ระยะเวลา {days} วัน</div>
+            <div className="flex items-center gap-3 mb-6 text-2xl font-bold text-gray-900">
+              {car?.car_brand} {car?.model}
             </div>
 
             <div className="relative true h-64 object-cover bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden mb-6">
@@ -162,13 +159,13 @@ export default function OrderPage() {
           {/* Right Column */}
           <div>
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                ยอดชำระรวม {total} บาท
+              <h2 className="text-2xl font-bold text-[#023047] mb-4">
+                ยอดชำระรวม
               </h2>
               <div className="space-y-3 mb-4 border-t border-gray-200 pt-4">
                 <div className="flex justify-between text-gray-600">
                   <span>
-                    {car?.car_brand} {car?.model}
+                    ราคา
                   </span>
                   <span>
                     {car?.daily_rental_price?.toLocaleString()} บาท/วัน
@@ -181,7 +178,8 @@ export default function OrderPage() {
               </div>
               <div>
                 <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-black">
+                  <span className="text-xl font-bold text-black">รวมเป็นเงินทั้งสิ้น</span>
+                  <span className="text-xl font-bold text-black">
                     {total.toLocaleString()} บาท
                   </span>
                 </div>
@@ -189,7 +187,7 @@ export default function OrderPage() {
             </div>
 
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <h2 className="text-2xl font-bold text-[#023047] mb-4">
                 เลือกวิธีการชำระเงิน
               </h2>
               <div className="space-y-3">
