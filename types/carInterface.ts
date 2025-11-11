@@ -17,6 +17,7 @@ export interface Car {
   created_at?: string;
   updated_at?: string;
   daily_rental_price?: number;
+  reviewCount?: number;
 }
 export interface CarCheckout {
   rid: string;
