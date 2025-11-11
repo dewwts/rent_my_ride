@@ -18,8 +18,7 @@ jobs:
 
       - name: Install library
         run: npm ci
-      - name: Install vercel library
-        run: npm install -g vercel
+
       - name: Run deploy vercel # but vercel is also provide this
         env: 
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
@@ -36,7 +35,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{secrets.VERCEL_PROJECT_ID}}
         run: |
           npm install -g vercel
-          vercel-pull --yes --environment=production --token=$VERCEL_TOKEN
-          vercel-build --token=$VERCEL_TOKEN
+          vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          vercel build --token=$VERCEL_TOKEN
           vercel --prod --token=$VERCEL_TOKEN
 
