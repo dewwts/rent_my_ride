@@ -111,7 +111,7 @@ export default function RentingHistoryPage() {
         toast({
           variant: "destructive",
           title: "ไม่สำเร็จ",
-          description: "รถนี้ไม่ได้อณุญาตให้เข้าถึงได้อีกต่อไป"
+          description: "รถนี้ไม่ได้อนุญาตให้เข้าถึงได้อีกต่อไป"
         })
       }
     } catch (err: unknown) {
