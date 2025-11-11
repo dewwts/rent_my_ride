@@ -117,9 +117,8 @@ export const getRentingPrice = async (supabase : SupabaseClient, renting_id:stri
     .select("amount")
     .eq("renting_id",renting_id)
     .maybeSingle(); //if cannot find return null
-    
-    if(error) throw error;
     if(!data) return null;
+    if(error) throw error;
     return data.amount;
 }
 

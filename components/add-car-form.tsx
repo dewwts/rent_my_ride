@@ -100,7 +100,7 @@ export function AddCarForm({
       const newCar: Car = {
         car_id:"",  // id will be ignore on create
         ...data,
-        rating: data.rating || 1,
+        rating: data.rating || 0,
         car_image: data.image_url || "",
         is_verified: false
       };

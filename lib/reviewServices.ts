@@ -22,14 +22,19 @@ import { calculateAverageRating } from "./utils"
     }
 **/
 export const submitReview = async(supabase: SupabaseClient, payload:Review)=>{
-    console.log(payload);
-    const {error: insertError} = await supabase.from("reviews").insert(payload)
-    if (insertError){
-        console.error("Error submitting review:", insertError);
-        throw new Error("มีปัญหาในการส่งรีวิว")
+    const {error} = await supabase.rpc("submit_review_and_update_rating",{
+      p_user_id: payload.reviewer_id,
+      p_target_id: payload.target_id,
+      p_rating: payload.rating,
+      p_comment: payload.comment,
+      p_renting_id: payload.renting_id
+    })
+    if (error){
+      console.error("Error submitting review:", error);
+      throw new Error("มีปัญหาในการส่งรีวิว")
     }
     return true
-}
+}   
 
 export const deleteReview = async(supabase: SupabaseClient, reviewID:string)=>{
     const {error: deleteError} = await supabase.from("reviews").delete().eq("reviews_id",reviewID).single()
@@ -52,17 +57,20 @@ export async function checkReviewExists(
   supabase: SupabaseClient,
   rentingId: string
 ): Promise<boolean> {
+  console.log(rentingId);
   const { data, error } = await supabase
     .from('reviews')
     .select('review_id')
     .eq('renting_id', rentingId)
     .single();
-
-  if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-    console.error('Error checking review:', error);
+  if (error && error.code === 'PGRST116') { // PGRST116 is "no rows returned"
+    // console.error('Error checking review:', error);
     return false;
+  }else if (error){
+    console.log(error.code);
+    console.error('Error checking review:', error);
+    return false
   }
-
   return !!data;
 }
 
@@ -94,4 +102,12 @@ export const getCarRating = async(
     console.error('Error fetching car rating:', error);
     throw new Error("มีปัญหาในการดึงข้อมูลรีวิว");
   }
+}
+
+export const getCountReview = async(supabase: SupabaseClient, car_id:string)=>{
+  const {count, error} = await supabase.from("reviews").select("*",{count:"exact"}).eq("target_id",car_id)
+  if (error){
+    throw new Error("เกิดปัญหาในการหาจำนวนการรีวิว")
+  }
+  return count
 }
