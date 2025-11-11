@@ -40,7 +40,6 @@ export function AddCarForm({
       model: "",
       year_created: new Date().getFullYear(),
       number_of_seats: 4,
-      car_type: "",
       mileage: 0,
       oil_type: "",
       gear_type: "",
