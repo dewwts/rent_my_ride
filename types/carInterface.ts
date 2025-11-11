@@ -5,7 +5,7 @@ export interface Car {
   car_id: string;
   year_created?: number;
   number_of_seats: number;
-  car_type: string;
+  // car_type: string;
   // color: string;
   mileage: number;
   oil_type: string;

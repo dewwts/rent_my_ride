@@ -42,12 +42,10 @@ export function EditCarForm({
       model: car.model,
       year_created: car.year_created,
       number_of_seats: car.number_of_seats,
-      car_type: car.car_type,
       mileage: car.mileage,
       oil_type: car.oil_type,
       gear_type: car.gear_type,
       daily_rental_price: car.daily_rental_price ,
-      // status: car.status,
       location: car.location,
       rating: car.rating || 0,
       image_url: car.car_image || "",
@@ -104,6 +102,7 @@ export function EditCarForm({
   };
 
   const handleUpdateCar = async (data: CarFormValues) => {
+    console.log(data);
     setIsSubmitting(true);
     try {
       const updatedCar: Car = {
@@ -344,7 +343,7 @@ export function EditCarForm({
                   type="number"
                   min="0"
                   max="999999"
-                  {...register("mileage")}
+                  {...register("mileage",{valueAsNumber: true})}
                   placeholder="เช่น 120000"
                 />
                 {errors.mileage && (
