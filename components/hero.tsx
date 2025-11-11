@@ -151,7 +151,6 @@ export function Hero() {
       const isFree = availSet.has(c.car_id);
       const availability: WithAvail["availability"] =
       verified && isFree ? "พร้อมเช่า" : "ไม่พร้อมเช่า";
-      console.log({...c, availability});
   return { ...c, availability };
 });
       window.dispatchEvent(
