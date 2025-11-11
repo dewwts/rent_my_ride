@@ -181,7 +181,7 @@ export default function RentingHistoryPage() {
                 {/* Grey booking info card */}
                 <div className="flex-1 rounded-lg bg-[#F0F0F0] text-gray-800 transition hover:bg-[#E5E7F9] border border-gray-300 p- sm:p-3">
                   {/* Mobile Layout */}
-                  <div className="flex flex-col gap-1 sm:hidden text-sm">
+                  <div className="flex flex-col gap-1 p-3 sm:hidden text-sm">
                     <div><span className="font-semibold">หมายเลขการเช่า:</span> {booking.renting_id.slice(0, 15)+"..."}</div>
                     <div><span className="font-semibold">ID รถ:</span>
                       <button
@@ -202,6 +202,33 @@ export default function RentingHistoryPage() {
                     <div className="font-bold text-right mt-1">
                       {formatCurrency(booking.total_price ?? 0)}
                     </div>
+                    
+                    {/* if status pending show payment button*/}
+                    {booking.status === RentingStatus.PENDING && (
+                      <button
+                        onClick={() => router.push(`/checkout/${booking.renting_id}`)}
+                        className="bg-orange-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex sm:hidden items-center justify-center"
+                      >
+                        <span>ชำระเงิน</span>
+                      </button>
+                    )}
+
+                    {/* Mobile Review Button */}
+                    {booking.status === RentingStatus.CONFIRMED && !booking.hasReviewed && (
+                      <button
+                        onClick={() => router.push(`/review?car_id=${booking.car_id}&renting_id=${booking.renting_id}`)}
+                        className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex sm:hidden items-center justify-center"
+                      >
+                        <span>รีวิวการเช่า</span>
+                      </button>
+                    )}
+
+                    {/* Mobile "รีวิวแล้ว" badge */}
+                    {booking.status === RentingStatus.CONFIRMED && booking.hasReviewed && (
+                      <div className="bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded-lg flex sm:hidden items-center justify-center">
+                        <span>รีวิวแล้ว</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Desktop Layout - Proper grid alignment */}
@@ -250,24 +277,7 @@ export default function RentingHistoryPage() {
 
                     {/* Show "รีวิวแล้ว" badge if already reviewed */}
                     {booking.status === RentingStatus.CONFIRMED && booking.hasReviewed && (
-                      <div className="hidden bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center sm:flex">
-                        <span>รีวิวแล้ว</span>
-                      </div>
-                    )}
-
-                    {/* Mobile Review Button */}
-                    {booking.status === RentingStatus.CONFIRMED && !booking.hasReviewed && (
-                      <button
-                        onClick={() => router.push(`/review?car_id=${booking.car_id}&renting_id=${booking.renting_id}`)}
-                        className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex sm:hidden items-center justify-center"
-                      >
-                        <span>รีวิวการเช่า</span>
-                      </button>
-                    )}
-
-                    {/* Mobile "รีวิวแล้ว" badge */}
-                    {booking.status === RentingStatus.CONFIRMED && booking.hasReviewed && (
-                      <div className="bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded-lg flex sm:hidden items-center justify-center">
+                      <div className=" bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center sm:flex">
                         <span>รีวิวแล้ว</span>
                       </div>
                     )}
