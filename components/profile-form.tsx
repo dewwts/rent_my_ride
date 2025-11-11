@@ -248,9 +248,9 @@ export function ProfileForm() {
       <InputField label="จังหวัด" placeholder="กรุงเทพมหานคร" disabled={busy} {...register("province")} error={errors.province?.message} />
       <InputField label="รหัสไปรษณีย์" placeholder="10500" disabled={busy} {...register("postcode")} error={errors.postcode?.message} />
       <InputField label="ประเทศ" placeholder="ไทย" disabled={busy} {...register("country")} error={errors.country?.message} />
-      <Button size='sm' variant={stripeID ? "secondary":"destructive"} disabled={stripeID ? true:false} onClick={handleConnectBank} type="button">
+      {/* <Button size='sm' variant={stripeID ? "secondary":"destructive"} disabled={stripeID ? true:false} onClick={handleConnectBank} type="button">
         {stripeID ? "เชื่อมต่อบัญชีธนาคารแล้ว":"เชื่อมต่อบัญชีธนาคาร"}
-      </Button>
+      </Button> */}
       {/* <div className="sm:col-span-2 mt-1">
         {formError && <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">{formError}</div>}
         {formSuccess && <div className="p-3 bg-green-50 border border-green-200 rounded-md text-sm text-green-600">{formSuccess}</div>}
