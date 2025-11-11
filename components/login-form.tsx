@@ -36,13 +36,14 @@ export function LoginForm({
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    // Check consent status before login
     const consent = localStorage.getItem("cookie-consent");
-    if (consent === "declined") {
+    if (consent !== "accepted") {
+      const message = (consent === "declined") ? "คุณได้ปฏิเสธการใช้คุกกี้ กรุณายอมรับเพื่อเข้าสู่ระบบ" : "กรุณายอมรับการใช้คุกกี้ก่อนเข้าสู่ระบบ";
+      
       toast({
         variant:'destructive',
         title:"ไม่อนุญาตให้เข้าสู่ระบบ",
-        description:"คุณได้ปฏิเสธการใช้คุกกี้ กรุณายอมรับเพื่อเข้าสู่ระบบ"
+        description: message
       })
       return;
     }
