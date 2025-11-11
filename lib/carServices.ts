@@ -57,11 +57,11 @@ export const getMyCars = async (supabase: SupabaseClient): Promise<Car[]> => {
       throw new Error("เกิดข้อผิดพลาดในการดึงข้อมูลรถ");
     }
     const carsWithCount = data.map(car => {
-      const reviewsArray = car.reviews as { count: number }[];
+      const { reviews, car_conditionrating, ...restOfCar } = car; 
+      const reviewsArray = reviews as { count: number }[];
       const count = (reviewsArray && reviewsArray.length > 0)
         ? reviewsArray[0].count
         : 0;
-      const { reviews, car_conditionrating, ...restOfCar } = car; 
       return {
         ...restOfCar,
         reviewCount: count,
