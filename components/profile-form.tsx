@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { getProfile, removeAvatar, updateAvatar, updateProfile } from "@/lib/authServices";
 import { parseAddress } from "@/lib/utils";
 import {MAX_BYTES, ALLOWED_TYPES} from "@/types/avatarConstraint"
-import { Button } from "./ui/button";
+// import { Button } from "./ui/button";
 import axios, { AxiosError } from "axios";
 import Image from "next/image";
 
@@ -22,7 +22,7 @@ export function ProfileForm() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [stripeID, setStripeID] = useState<string | null>(null);
+  // const [stripeID, setStripeID] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
