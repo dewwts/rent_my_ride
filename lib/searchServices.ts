@@ -2,7 +2,6 @@
 import dayjs from "dayjs";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { DbCar } from "@/types/carInterface";
-import { verify } from "crypto";
 
 
 export async function searchCarsByLocation(
@@ -132,7 +131,6 @@ export async function searchAvailableCars(
       )
     );
     availableCars = availableCars.filter((_, i) => verifyFlags[i] === false);
-    console.log(verifyFlags);
   }
   return availableCars;
 }
