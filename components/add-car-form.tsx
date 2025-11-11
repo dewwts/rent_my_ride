@@ -144,12 +144,11 @@ export function AddCarForm({
               
               {/* Image Preview or Upload Area */}
               {imagePreview ? (
-                <div className="relative">
+                <div className="relative w-full h-48">
                   <Image
                     src={imagePreview}
                     alt="Car preview"
-                    width={64}
-                    height={48}
+                    fill={true}
                     className="object-cover rounded-lg border-2 border-gray-200"
                   />
                   <Button
@@ -222,7 +221,7 @@ export function AddCarForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="year">ปีที่ผลิต *</Label>
                   <select
@@ -362,7 +361,7 @@ export function AddCarForm({
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">ข้อมูลเพิ่มเติม</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* <div className="space-y-2">
                   <Label htmlFor="status">สถานะ *</Label>
                   <select
