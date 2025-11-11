@@ -303,14 +303,14 @@ export const carAvailable = async (
     }
     const startISO = startAt.toISOString();
     const endISO = endAt.toISOString();
-    console.log(
-      "Checking availability for car:",
-      carid,
-      "from",
-      startISO,
-      "to",
-      endISO
-    );
+    // console.log(
+    //   "Checking availability for car:",
+    //   carid,
+    //   "from",
+    //   startISO,
+    //   "to",
+    //   endISO
+    // );
     const { data, error } = await supabase.rpc(
       "check_car_availability",
       {
