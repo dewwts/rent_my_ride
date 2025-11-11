@@ -281,7 +281,7 @@ export function EditCarForm({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="car_type">ประเภทรถ *</Label>
                 <select
                   id="car_type"
@@ -299,7 +299,7 @@ export function EditCarForm({
                 {errors.car_type && (
                   <p className="text-sm text-red-500">{errors.car_type.message}</p>
                 )}
-              </div>
+              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="oil_type">ประเภทเชื้อเพลิง *</Label>
                 <select
