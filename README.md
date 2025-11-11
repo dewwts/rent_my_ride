@@ -50,12 +50,36 @@ Following these instruction
  ```
 
 ## Run Development Server
-To start the development server, use the following command:
+### To start the development server on client, use the following command:
+1. 
 ```bash
 npm run dev
 ```
 The app will be available at http://localhost:3000
 
+### To start the development server on docker, use the following command
+1. 
+```bash
+npx supabase login
+```
+2. 
+```bash
+npx supabase link --project-ref <project-id>
+# get project-id on supabase 
+```
+3. 
+```bash
+npx supabase db pull
+```
+4. 
+```bash
+npx supabase start
+```
+5. 
+```bash
+docker-compose up
+```
+Important Note: Any changes made to the database while running via `npx supabase start` are stored exclusively in the Local Docker Database, ensuring your development work is isolated from production data.
 ## Run E2E Test (Playwright)
 Before running Playwright tests, make sure the development server is running.
 To execute all end-to-end tests:
