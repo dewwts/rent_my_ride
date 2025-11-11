@@ -227,7 +227,7 @@ export function AddCarForm({
                   <Label htmlFor="year">ปีที่ผลิต *</Label>
                   <select
                     id="year_created"
-                    {...register("year_created")}
+                    {...register("year_created",{valueAsNumber:true})}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   >
                     {Array.from({ length: 35 }, (_, i) => {
