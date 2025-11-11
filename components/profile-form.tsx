@@ -75,7 +75,7 @@ export function ProfileForm() {
         }
 
         setAvatarUrl(row?.url ?? null); 
-        setStripeID(row?.stripe_account_id ?? null)
+        // setStripeID(row?.stripe_account_id ?? null)
       } catch (e: unknown) {
         let error = "โหลดข้อมูลไม่สำเร็จ"
         if (e instanceof Error){
@@ -174,7 +174,7 @@ export function ProfileForm() {
   const handleConnectBank = async()=>{
     try{
       const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/stripe/create-connect-account`)
-      setStripeID(response.data.data.aid)
+      // setStripeID(response.data.data.aid)
       window.location.href = response.data.data.url
     }catch(err: unknown){
       let msg = "เกิดปัญหา"
