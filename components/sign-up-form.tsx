@@ -36,6 +36,20 @@ export function SignUpForm({
     resolver: zodResolver(RegisterSchema)
   })
   const handleSignUp = async (data: RegisterFormValues) => {
+    const consent = localStorage.getItem("cookie-consent");
+    if (consent !== "accepted") {
+      const message = consent === "declined" 
+        ? "คุณได้ปฏิเสธการใช้คุกกี้ กรุณายอมรับเพื่อสร้างบัญชี"
+        : "กรุณายอมรับการใช้คุกกี้ก่อนสร้างบัญชี";
+      
+      toast({
+        variant:"destructive",
+        title:"ไม่อนุญาตให้สร้างบัญชี",
+        description: message
+      })
+      return;
+    }
+
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
