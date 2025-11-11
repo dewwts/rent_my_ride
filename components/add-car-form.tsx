@@ -149,7 +149,7 @@ export function AddCarForm({
                     src={imagePreview}
                     alt="Car preview"
                     fill={true}
-                    className="object-cover rounded-lg border-2 border-gray-200"
+                    className="rounded-lg border-2 border-gray-200"
                   />
                   <Button
                     type="button"
