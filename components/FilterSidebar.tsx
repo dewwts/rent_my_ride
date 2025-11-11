@@ -18,7 +18,7 @@ const SEATS = [
   { id: "s7", label: "7 ที่นั่ง", min: 7, max: 7 },
 ];
 
-const GEARS = ["ออโต้", "ธรรมดา"];
+const GEARS = ["ออโต้", "กระปุก","กึ่งออโต้"];
 
 export default function FilterSidebar({ value, onChange }: Props) {
   // === NEW: เช็คว่ามีตัวกรองอยู่ไหม
