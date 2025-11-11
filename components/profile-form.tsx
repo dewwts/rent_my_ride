@@ -114,8 +114,7 @@ export function ProfileForm() {
       })
     } finally {
       setSaving(false);
-    }
-  };
+    }  };
 
   async function handleFileSelected(file: File) {
     if (!ALLOWED_TYPES.includes(file.type)) {

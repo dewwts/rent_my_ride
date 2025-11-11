@@ -2,6 +2,7 @@
 import type { CardForUI, DbCar } from "@/types/carInterface";
 import { createClient } from "@/lib/supabase/server";
 import { toAvailability } from "./utils";
+
 export async function fetchAllCars(): Promise<CardForUI[]> {
   const supabase = await createClient();
 
@@ -17,7 +18,7 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         "number_of_seats",
         "oil_type",
         "gear_type",
-        "status",
+        "is_verified",
         "car_conditionrating",
         "year_created",
       ].join(",")
@@ -40,6 +41,8 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
         ? r.year_created
         : undefined;
 
+    const isVerified = r.is_verified === true;
+
     return {
       id: r.car_id,
       name: r.car_brand ?? "ไม่ระบุ",
@@ -51,7 +54,10 @@ export async function fetchAllCars(): Promise<CardForUI[]> {
       seats,
       fuelType: r.oil_type ?? "",
       transmission: r.gear_type ?? "",
-      availability: toAvailability(r.status),
+
+      availability: toAvailability(isVerified),
+      is_verified: isVerified, 
+
       features: [],
       year,
     };

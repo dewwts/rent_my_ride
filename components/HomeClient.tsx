@@ -18,10 +18,8 @@ import { fetchPopularityMap } from "@/lib/searchServices";
 import { createClient } from "@/lib/supabase/client";
 import { mapDbCarToCard } from "@/lib/utils";
 
-
 type Props = { initialCars: CardForUI[] };
 type SearchMeta = { location?: string; start?: string; end?: string };
-
 
 type SortKey = "popularity" | "price_asc" | "rating_desc" | "year_desc";
 const SORT_LABEL: Record<SortKey, string> = {
@@ -44,11 +42,21 @@ export default function HomeClient({ initialCars }: Props) {
   const [popularityMap, setPopularityMap] = useState<Record<string, number>>({});
   const supabase = useMemo(() => createClient(), []);
 
+
+  
   // ฟังผลลัพธ์จาก Hero + ฟังสัญญาณรีเซ็ต
   useEffect(() => {
+    type WithAvail = DbCar & { availability?: string };
+    type Payload = { cars: WithAvail[]; meta: SearchMeta };
+
     const handleResults = (e: Event) => {
-      const { cars, meta } = (e as CustomEvent<{ cars: DbCar[]; meta: SearchMeta }>).detail;
-      const mapped = (cars ?? []).map(mapDbCarToCard);
+      const { cars, meta } = (e as CustomEvent<Payload>).detail;
+      const mapped: CardForUI[] = (cars ?? []).map((c) => {
+        const base = mapDbCarToCard(c); 
+        const availability = c.availability ?? base.availability ?? "ไม่พร้อมเช่า";
+        return { ...base, availability };
+    });
+
       setDynamicCars(mapped);
       setMeta(meta ?? null);
     };
@@ -76,8 +84,6 @@ export default function HomeClient({ initialCars }: Props) {
       const map = await fetchPopularityMap(supabase, ids, {
         days: 180,
         countStatuses: ["Confirmed", "Completed"],
-        // weightRecentDays: 30,
-        // weightRecentBonus: 0.5,
       });
       setPopularityMap(map);
     };
@@ -180,3 +186,4 @@ export default function HomeClient({ initialCars }: Props) {
     </section>
   );
 }
+               

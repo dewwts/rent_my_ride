@@ -44,3 +44,9 @@ next-env.d.ts
 # remove pnpm
 pnpm-lock.yaml
 
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

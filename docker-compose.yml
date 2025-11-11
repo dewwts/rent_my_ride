@@ -1,0 +1,17 @@
+version: '3.8'
+
+# list of all container
+services:
+  # name of service
+  app: 
+    build: . # build from Dockerfile in current directory
+    ports:
+      - "3000:3000" # map port 3000 of host to port 3000 of container
+    env_file:
+      - .env.local
+    networks:
+      - supabase_connection # nickname of network
+networks:
+  supabase_connection:
+    name: 'supabase_network_rent_my_ride'
+    external: true # use existing network created outside of this docker-compose file   

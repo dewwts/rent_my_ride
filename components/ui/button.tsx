@@ -19,6 +19,8 @@ const buttonVariants = cva(
           "bg-gray-100 text-black rounded-xl hover:bg-gray-200 shadow-sm",
         ghost: 
           "text-gray-600 hover:text-black hover:bg-gray-50 rounded-lg",
+        black: 
+          "bg-gray-800 text-white hover:bg-gray-700 rounded-lg",
         link: 
           "text-black underline-offset-4 hover:underline p-0 h-auto",
         nav:

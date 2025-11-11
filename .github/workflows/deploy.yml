@@ -1,0 +1,41 @@
+name: Deploy on vercel
+
+on:
+  workflow_dispatch:
+jobs:
+  build-and-test:
+    name: Build and testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup node-js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 # version of node js
+          cache: "npm"  # force node_modules to be cached for faster
+
+      - name: Install library
+        run: npm ci
+        
+      - name: Run deploy vercel # but vercel is also provide this
+        env: 
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          NEXT_PUBLIC_STRIPE_PUBLISH_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISH_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SERVER_URL: ${{ secrets.NEXT_PUBLIC_SERVER_URL }}
+          VERCEL_TOKEN: ${{secrets.VERCEL_TOKEN}}
+          VERCEL_ORG_ID: ${{secrets.VERCEL_ORG_ID}}
+          VERCEL_PROJECT_ID: ${{secrets.VERCEL_PROJECT_ID}}
+        run: |
+          npm install -g vercel
+          vercel-pull --yes --environment=production --token=$VERCEL_TOKEN
+          vercel-build --token=$VERCEL_TOKEN
+          vercel --prod --token=$VERCEL_TOKEN
+

@@ -10,7 +10,7 @@ export interface Car {
   mileage: number;
   oil_type: string;
   gear_type: string;
-  status: "available" | "unavailable";
+  is_verified: boolean;
   location: string;
   rating: number;
   car_image: string;
@@ -49,7 +49,7 @@ export type CarRow = {
   number_of_seats: number | null;
   oil_type: string | null;
   gear_type: string | null;
-  status: string | null;
+  is_verified: boolean | null
 };
 export type CardForUI = {
   id: string;
@@ -62,9 +62,10 @@ export type CardForUI = {
   seats: number;
   fuelType: string;
   transmission: string;
-  availability: string; // "พร้อมเช่า" | "จองล่วงหน้า"
+  availability: string | null; // "พร้อมเช่า" | "จองล่วงหน้า"
   features: string[];
   year?: number;
+  is_verified: boolean;
 };
 export interface CarCardProps {
   id: string;
@@ -78,7 +79,7 @@ export interface CarCardProps {
   year_created?: number;
   fuelType: string;
   transmission: string;
-  availability: string;         // "พร้อมเช่า" | "จองล่วงหน้า" | ...
+  availability: string | null;         // "พร้อมเช่า" | "จองล่วงหน้า" | ...
   features?: string[];          // optional
 }
 export type DbCar = {
@@ -91,7 +92,7 @@ export type DbCar = {
   number_of_seats: number | null;
   oil_type: string | null;
   gear_type: string | null;
-  status: string | null;
+  is_verified: boolean | null;
   location: string | null;
   year_created?: number | null;
 };

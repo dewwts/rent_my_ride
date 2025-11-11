@@ -36,19 +36,40 @@ export function LoginForm({
   });
 
   const onSubmit = async (data: LoginFormValues) => {
+    const consent = localStorage.getItem("cookie-consent");
+    if (consent !== "accepted") {
+      const message = (consent === "declined") ? "คุณได้ปฏิเสธการใช้คุกกี้ กรุณายอมรับเพื่อเข้าสู่ระบบ" : "กรุณายอมรับการใช้คุกกี้ก่อนเข้าสู่ระบบ";
+      
+      toast({
+        variant:'destructive',
+        title:"ไม่อนุญาตให้เข้าสู่ระบบ",
+        description: message
+      })
+      return;
+    }
+
     const supabase = createClient();
     const object: loginInfo = data
     setIsLoading(true);
     try{
       await SignIn(object, supabase)
+      
+      // Store token if consent is accepted
+      if (consent === "accepted") {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          localStorage.setItem("supabase-token", session.access_token);
+        }
+      }
+      
       toast({
         variant:'success',
         title:"สำเร็จ",
         description:"เข้าสู่ระบบสำเร็จ"
       })
-      console.log("is pass login");
+      // console.log("is pass login");
       window.location.href = "/dashboard";
-      console.log("after push to dashboard");
+      // console.log("after push to dashboard");
     }catch(error: unknown){
       let message = "ไม่สามารถเข้าสู่ระบบได้ โปรดลองอีกครั้ง";
       if (error instanceof AuthApiError) {
@@ -123,6 +144,7 @@ export function LoginForm({
               <div className="relative">
                 <Input
                   id="password"
+                  placeholder="รหัสผ่าน"
                   type={showPw ? "text" : "password"}
                   autoComplete="current-password"
                   {...register("password")}
