@@ -61,11 +61,11 @@ export const getMyCars = async (supabase: SupabaseClient): Promise<Car[]> => {
       const count = (reviewsArray && reviewsArray.length > 0)
         ? reviewsArray[0].count
         : 0;
-      const { reviews, ...restOfCar } = car; 
-
+      const { reviews, car_conditionrating, ...restOfCar } = car; 
       return {
         ...restOfCar,
-        reviewCount: count, 
+        reviewCount: count,
+        rating:car_conditionrating
       };
     });
       return carsWithCount as Car[]
