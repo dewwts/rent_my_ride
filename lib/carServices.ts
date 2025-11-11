@@ -318,15 +318,21 @@ export const carAvailable = async (
 
     const { data: carData, error } = await supabase
       .from("renting")
-      .select("renting_id, sdate, edate")
+      .select(`
+        renting_id, 
+        sdate, 
+        edate,
+        status`)
       .eq("car_id", carid)
       .lte("sdate", endISO)
       .gte("edate", startISO);
-
     if (error) {
       throw error;
     }
-    const available = carData.length === 0;
+    const car = carData.filter((rent)=>{
+      return rent.status === "Confirmed"
+    })
+    const available = car.length === 0;
     return available;
   } catch (err: unknown) {
     console.log(err);
