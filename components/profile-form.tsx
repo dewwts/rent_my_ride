@@ -171,25 +171,25 @@ export function ProfileForm() {
   }
 
   const busy = disabled || isSubmitting;
-  const handleConnectBank = async()=>{
-    try{
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/stripe/create-connect-account`)
-      // setStripeID(response.data.data.aid)
-      window.location.href = response.data.data.url
-    }catch(err: unknown){
-      let msg = "เกิดปัญหา"
-      if (err instanceof AxiosError){
-        msg = err.response?.data.error
-      }else if (err instanceof Error){
-        msg = err.message
-      }
-      toast({
-        variant:"destructive",
-        title:"ไม่สำเร็จ",
-        description:msg
-      })
-    }
-  }
+  // const handleConnectBank = async()=>{
+  //   try{
+  //     const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/stripe/create-connect-account`)
+  //     // setStripeID(response.data.data.aid)
+  //     window.location.href = response.data.data.url
+  //   }catch(err: unknown){
+  //     let msg = "เกิดปัญหา"
+  //     if (err instanceof AxiosError){
+  //       msg = err.response?.data.error
+  //     }else if (err instanceof Error){
+  //       msg = err.message
+  //     }
+  //     toast({
+  //       variant:"destructive",
+  //       title:"ไม่สำเร็จ",
+  //       description:msg
+  //     })
+  //   }
+  // }
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-4 m-5" noValidate>
       {/* Avatar section */}
