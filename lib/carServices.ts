@@ -311,29 +311,33 @@ export const carAvailable = async (
       "to",
       endISO
     );
-    const { data: sessionData } = await supabase.auth.getUser();
-    if (!sessionData.user) {
-      throw new Error("User not authenticated");
-    }
+    // const { data: sessionData } = await supabase.auth.getUser();
+    // if (!sessionData.user) {
+    //   throw new Error("User not authenticated");
+    // }
 
-    const { data: carData, error } = await supabase
-      .from("renting")
-      .select(`
-        renting_id, 
-        sdate, 
-        edate,
-        status`)
-      .eq("car_id", carid)
-      .lte("sdate", endISO)
-      .gte("edate", startISO);
+    // const { data: carData, error } = await supabase
+    //   .from("renting")
+    //   .select(`
+    //     renting_id, 
+    //     sdate, 
+    //     edate,
+    //     status`)
+    //   .eq("car_id", carid)
+    //   .lte("sdate", endISO)
+    //   .gte("edate", startISO);
+    const { data, error } = await supabase.rpc(
+      "check_car_availability",
+      {
+        p_car_id: carid,
+        p_start_date: startISO,
+        p_end_date: endISO,
+      }
+    );
     if (error) {
       throw error;
     }
-    const car = carData.filter((rent)=>{
-      return rent.status === "Confirmed"
-    })
-    const available = car.length === 0;
-    return available;
+    return data
   } catch (err: unknown) {
     console.log(err);
     return false;
