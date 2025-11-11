@@ -155,14 +155,14 @@ export default function MyCarsPage() {
                         <h3 className="text-xl font-semibold text-gray-900">
                           {car.car_brand}
                         </h3>
-                        <p className="text-gray-600">
-                          {car.model} ID: {car.car_id}
+                        <p className="text-sm text-gray-500">
+                          ID: {car.car_id}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          รุ่นรถ: {car.model}
                         </p>
                         <p className="text-sm text-gray-500">
                           จำนวนที่นั่ง: {car.number_of_seats}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          ประเภท: {car.model}
                         </p>
                         <p className="text-sm text-gray-500">
                           ปี: {car.year_created}
