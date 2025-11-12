@@ -205,9 +205,6 @@ export default function OrderPage() {
                 </button>
               </div>
 
-              <p className="text-sm text-gray-500 text-center mt-4">
-                กรุณาชำระเงินภายใน 24 ชั่วโมง
-              </p>
             </div>
           </div>
         </div>
