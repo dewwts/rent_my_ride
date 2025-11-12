@@ -67,7 +67,10 @@ export async function checkReviewExists(
     console.error('Error checking review:', error);
     return false
   }
-  return !!data;
+  if (data.length !== 0){
+    return true
+  }
+  return false;
 }
 
 /**
