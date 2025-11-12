@@ -106,6 +106,19 @@ Or to run a specific test file, use:
 ```bash
 npx playwright test tests/example.spec.ts
 ```
+**Jest (unit tests):**
+```bash
+npm test
+npm run test-coverage
+```
+
+---
+
+## Lint & Format
+```bash
+npm run lint
+# (If you use Prettier locally, run your formatter as well)
+```
 
 ## Demo
 
