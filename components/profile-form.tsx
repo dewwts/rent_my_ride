@@ -216,12 +216,12 @@ export function ProfileForm() {
           }}
         />
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 sm:flex-row">
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={busy || uploading}
-            className="px-6 py-2 bg-[#0b3d4f] text-white rounded-3xl border-2 border-black hover:bg-[#023047] transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-[#0b3d4f] text-white rounded-2xl sm:rounded-3xl border-2 border-black hover:bg-[#023047] transition-colors disabled:opacity-50"
           >
             {uploading ? "กำลังอัปโหลด..." : "เปลี่ยนรูปโปรไฟล์"}
           </button>
@@ -230,7 +230,7 @@ export function ProfileForm() {
             type="button"
             onClick={handleRemoveAvatar}
             disabled={busy || uploading}
-            className="px-6 py-2 bg-white text-black rounded-3xl border-2 border-black hover:bg-[#f01a1a] hover:text-white transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-white text-black rounded-2xl sm:rounded-3xl border-2 border-black hover:bg-[#f01a1a] hover:text-white transition-colors disabled:opacity-50"
           >
             ลบรูปโปรไฟล์
           </button>
