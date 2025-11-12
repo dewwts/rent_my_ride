@@ -141,4 +141,7 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
 - 🐞 [Report a bug](https://github.com/dewwts/rent_my_ride/issues/new?labels=bug)
 - 💡 [Feature request](https://github.com/dewwts/rent_my_ride/issues/new?labels=enhancement)
 
+---
 
+## Acknowledgements
+- [Next.js](https://nextjs.org) • [Supabase](https://supabase.com) • [Tailwind CSS](https://tailwindcss.com) • [shadcn/ui](https://ui.shadcn.com/) • [Stripe](https://stripe.com)
