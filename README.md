@@ -35,8 +35,11 @@
 
 ## Prerequisites
 Before begin the project, ensure you have installed these before on your machine.
-* **Node.js**: v18.0 or later (This includes **npm**).
-* **Git**: For cloning the repository.
+- **Node.js** v18+ (includes npm)
+- **Git**
+- **Supabase CLI** (for local Postgres + auth) — optional but recommended for local DB
+- **Stripe** account (test mode) — to exercise checkout/webhooks
+- **Docker** — optional; used by `docker-compose.yml` for running the Next.js app attached to the local Supabase network
 
 ## Clone the project
 Following these instruction
