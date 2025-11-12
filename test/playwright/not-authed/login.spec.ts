@@ -1,14 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-function generateValidEmail() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  const randomString = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  const domains = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com'];
-  const randomDomain = domains[Math.floor(Math.random() * domains.length)];
-  return `test${randomString}@${randomDomain}`;
-}
-
-
 test.describe("Login Test", () => {
     test('TC2-1 Correct Format', async ({page}) => {
         //login
