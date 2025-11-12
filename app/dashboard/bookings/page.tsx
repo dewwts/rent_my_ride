@@ -192,14 +192,14 @@ export default function RentingHistoryPage() {
         <div className="bg-white p-3 sm:p-4 rounded-lg shadow-md">
           
           {/* Header: แสดงเฉพาะในหน้าจอขนาด sm ขึ้นไป */}
-          <div className="hidden sm:grid grid-cols-[1.2fr_1.3fr_1fr_2fr_1fr_1fr_1fr] gap-x-6 px-3 py-2 text-sm font-semibold text-gray-700 border-b border-gray-200">
+          <div className="hidden sm:grid grid-cols-[1.2fr_1.4fr_1fr_2fr_1fr_1.4fr_1.2fr] gap-x-6 px-3 py-2 text-sm font-semibold text-gray-700 border-b border-gray-200">
             <div>หมายเลขการเช่า</div>
             <div>ID รถ</div>
             <div>ผู้ให้เช่า</div>
             <div>วันที่เช่า</div>
             <div>สถานะ</div>
             <div>ราคา</div>
-            <div className="text-center">การดำเนินการ</div>
+            <div>การดำเนินการ</div>
             {/* <div className="text-right">ราคา</div> */}
             {/* <div className="w-[120px]"></div> */}
           </div>
@@ -262,7 +262,7 @@ export default function RentingHistoryPage() {
                   </div>
 
                   {/* Desktop Layout - Proper grid alignment */}
-                  <div className="hidden sm:grid grid-cols-[1.2fr_1.4fr_1fr_2fr_1fr_1fr_1fr] gap-x-6 px-3 py-2 text-sm items-center">
+                  <div className="hidden sm:grid grid-cols-[1.2fr_1.4fr_1fr_2fr_1fr_1.4fr_1.2fr] gap-x-6 px-3 py-2 text-sm items-center">
                     <div className="text-sm font-medium">{booking.renting_id.slice(0, 8)+"..."}</div>
                     <div className="text-sm">
                       <button
