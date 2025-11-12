@@ -3,12 +3,21 @@
 ## Project Overview
 
 <p align="left">
- Something here
+ Rent My Ride is a modern web app for car rentals. Users can browse and filter cars by location, seats, and price; check availability for a date range; book and pay with Stripe; and leave reviews. Owners can manage listings and bookings through a dashboard. The app uses Supabase for authentication (SSR cookies), Postgres (with RLS recommended), and Next.js App Router for server actions and API routes.
 </p>
 
 ## Features
 <!-- Task create feature section do here -->
-- something here
+- 🔑 **Auth (Supabase + SSR cookies)** — session available in Client, Server, Route Handlers, and Middleware.
+- 🔎 **Search & Filters** — location autocomplete, seat count, price ranges, and (optionally) include unavailable cars.
+- 🗓️ **Availability by date range** — checks overlapping bookings to ensure only free cars are shown.
+- 🚘 **Owner Dashboard** — add/edit cars, upload images, verify status, manage bookings & history.
+- 🌟 **Reviews** — renters can submit ratings/comments after finishing a rental.
+- 💳 **Stripe Payments** — checkout sessions, connect accounts (for owner payouts), and webhook handling.
+- 📊 **Transactions** — transaction list + simple status summaries.
+- 🎨 **UI** — Tailwind CSS + shadcn/ui components; Lucide icons.
+- 🧪 **Testing** — Playwright for E2E, Jest for unit tests.
+- 🐳 **Docker dev** — optional Docker Compose setup for the Next.js app; compatible with local Supabase network.
 - Works across the entire [Next.js](https://nextjs.org) stack
   - App Router
   - Pages Router
