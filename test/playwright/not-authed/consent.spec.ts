@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const URL = "http://localhost:3000";
+const URL = "https://rentmyride-mu.vercel.app";
 
 test.describe("Consent Test", () => {
     test('TC8-1 Consent Accepted', async ({page}) => {
