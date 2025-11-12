@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { checkReviewExists } from "@/lib/reviewServices";
 import {BookingWithReview} from "@/types/rentingInterface"
 import { carAvailable } from "@/lib/carServices";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 
 export default function RentingHistoryPage() { 
   const [loading, setLoading] = useState(true);
@@ -148,7 +148,8 @@ export default function RentingHistoryPage() {
           description: "รถยนต์คันนี้มีผู้จองไปเเล้ว",
         });
       }
-    } catch(error){
+    } catch(err){
+      console.log(err)
       toast({
         variant : "destructive",
         title : "เกิดข้อผิดพลาด",
