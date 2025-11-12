@@ -11,6 +11,8 @@ import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { checkReviewExists } from "@/lib/reviewServices";
 import {BookingWithReview} from "@/types/rentingInterface"
+import { carAvailable } from "@/lib/carServices";
+import dayjs, { Dayjs } from "dayjs";
 
 export default function RentingHistoryPage() { 
   const [loading, setLoading] = useState(true);
@@ -129,6 +131,33 @@ export default function RentingHistoryPage() {
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
+  
+  const handleOnCilck = async (booking: BookingWithReview) => {
+    try{
+      setLoading(true);
+      const startDate = dayjs(booking.sdate).startOf("day").toDate();
+      const endDate = dayjs(booking.edate).startOf("day").add(1, "day").toDate();
+      const isAvailable = await carAvailable(supabase, booking.car_id, startDate, endDate);
+      if (isAvailable) {
+        router.push(`/checkout/${booking.renting_id}`);
+      }
+      else{
+        toast({
+          variant: "destructive",
+          title: "การจองไม่สำเร็จ",
+          description: "รถยนต์คันนี้มีผู้จองไปเเล้ว",
+        });
+      }
+    } catch(error){
+      toast({
+        variant : "destructive",
+        title : "เกิดข้อผิดพลาด",
+        description : "กรุณาติดต่อเจ้าหน้าที่"
+      })
+    }finally {
+        setLoading(false);
+    }
+  }
   if (loading) {
     return (
       <main className="min-h-screen grid place-items-center" style={{ backgroundColor: '#c9d1d9' }}>
@@ -206,7 +235,7 @@ export default function RentingHistoryPage() {
                     {/* if status pending show payment button*/}
                     {booking.status === RentingStatus.PENDING && (
                       <button
-                        onClick={() => router.push(`/checkout/${booking.renting_id}`)}
+                        onClick={() => handleOnCilck(booking)}
                         className="bg-orange-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex sm:hidden items-center justify-center"
                       >
                         <span>ชำระเงิน</span>
@@ -258,7 +287,7 @@ export default function RentingHistoryPage() {
                     {/* if status pending show payment button*/}
                     {booking.status === RentingStatus.PENDING && (
                       <button
-                        onClick={() => router.push(`/checkout/${booking.renting_id}`)}
+                        onClick={() => handleOnCilck(booking)}
                         className="bg-orange-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center sm:flex"
                       >
                         <span>ชำระเงิน</span>
