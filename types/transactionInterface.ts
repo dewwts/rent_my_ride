@@ -11,7 +11,7 @@ export interface Transaction {
   lessor_id: string;
   amount: number;
   status: 'Pending' | 'Done' | 'Failed';
-  date: string;
+  transaction_date: string;
   renting: {
     sdate: string;
     edate: string;

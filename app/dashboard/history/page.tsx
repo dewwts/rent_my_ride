@@ -34,7 +34,6 @@ export default function TransactionHistoryPage() {
       setLoading(true);
       setError(null);
       const response = await axios.get(`${process.env.NEXT_PUBLIC_SERVER_URL}api/transactions/summary`)
-      console.log(response.data);
       setStatusCounts({
         all:response.data.all,
         pending: response.data.pending,
@@ -234,7 +233,7 @@ export default function TransactionHistoryPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg text-gray-900">รหัสธุรกรรม: {transaction.transaction_id.slice(0, 8)}</h3>
-                      <p className="text-sm text-gray-600">วันที่ทำรายการ: {formatDate(transaction.date)}</p>
+                      <p className="text-sm text-gray-600">วันที่ทำรายการ: {formatDate(transaction.transaction_date)}</p>
                     </div>
                   </div>
                   {getStatusBadge(transaction.status)}
