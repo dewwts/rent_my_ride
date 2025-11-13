@@ -11,6 +11,8 @@ import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { checkReviewExists } from "@/lib/reviewServices";
 import {BookingWithReview} from "@/types/rentingInterface"
+import { carAvailable } from "@/lib/carServices";
+import dayjs from "dayjs";
 
 export default function RentingHistoryPage() { 
   const [loading, setLoading] = useState(true);
@@ -111,7 +113,7 @@ export default function RentingHistoryPage() {
         toast({
           variant: "destructive",
           title: "ไม่สำเร็จ",
-          description: "รถนี้ไม่ได้อณุญาตให้เข้าถึงได้อีกต่อไป"
+          description: "รถนี้ไม่ได้อนุญาตให้เข้าถึงได้อีกต่อไป"
         })
       }
     } catch (err: unknown) {
@@ -129,6 +131,34 @@ export default function RentingHistoryPage() {
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
+  
+  const handleOnCilck = async (booking: BookingWithReview) => {
+    try{
+      setLoading(true);
+      const startDate = dayjs(booking.sdate).startOf("day").toDate();
+      const endDate = dayjs(booking.edate).startOf("day").add(1, "day").toDate();
+      const isAvailable = await carAvailable(supabase, booking.car_id, startDate, endDate);
+      if (isAvailable) {
+        router.push(`/checkout/${booking.renting_id}`);
+      }
+      else{
+        toast({
+          variant: "destructive",
+          title: "การจองไม่สำเร็จ",
+          description: "รถยนต์คันนี้มีผู้จองไปเเล้ว",
+        });
+      }
+    } catch(err){
+      console.log(err)
+      toast({
+        variant : "destructive",
+        title : "เกิดข้อผิดพลาด",
+        description : "กรุณาติดต่อเจ้าหน้าที่"
+      })
+    }finally {
+        setLoading(false);
+    }
+  }
   if (loading) {
     return (
       <main className="min-h-screen grid place-items-center" style={{ backgroundColor: '#c9d1d9' }}>
@@ -162,24 +192,26 @@ export default function RentingHistoryPage() {
         <div className="bg-white p-3 sm:p-4 rounded-lg shadow-md">
           
           {/* Header: แสดงเฉพาะในหน้าจอขนาด sm ขึ้นไป */}
-          <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_2fr_1fr_1fr_auto] gap-3 px-3 py-2 text-sm font-semibold text-gray-700 border-b border-gray-200">
+          <div className="hidden sm:grid grid-cols-[1.2fr_1.4fr_1fr_2fr_1fr_1.4fr_1.2fr] gap-x-6 px-3 py-2 text-sm font-semibold text-gray-700 border-b border-gray-200">
             <div>หมายเลขการเช่า</div>
             <div>ID รถ</div>
             <div>ผู้ให้เช่า</div>
             <div>วันที่เช่า</div>
             <div>สถานะ</div>
-            <div className="text-right">ราคา</div>
-            <div className="w-[120px]"></div>
+            <div>ราคา</div>
+            <div>การดำเนินการ</div>
+            {/* <div className="text-right">ราคา</div> */}
+            {/* <div className="w-[120px]"></div> */}
           </div>
 
           {/* Table Body / Card List */}
           <div className="space-y-3 mt-2">
             {bookings.map((booking) => (
-              <div key={booking.renting_id} className="flex gap-3">
+              <div key={booking.renting_id} className="flex gap-1">
                 {/* Grey booking info card */}
-                <div className="flex-1 rounded-lg bg-[#F0F0F0] text-gray-800 transition hover:bg-[#E5E7F9] border border-gray-300 p-4 sm:p-3">
+                <div className="flex-1 rounded-lg bg-[#F0F0F0] text-gray-800 transition hover:bg-[#E5E7F9] border border-gray-300 p- sm:p-3">
                   {/* Mobile Layout */}
-                  <div className="flex flex-col gap-1 sm:hidden text-sm">
+                  <div className="flex flex-col gap-1 p-3 sm:hidden text-sm">
                     <div><span className="font-semibold">หมายเลขการเช่า:</span> {booking.renting_id.slice(0, 15)+"..."}</div>
                     <div><span className="font-semibold">ID รถ:</span>
                       <button
@@ -200,10 +232,37 @@ export default function RentingHistoryPage() {
                     <div className="font-bold text-right mt-1">
                       {formatCurrency(booking.total_price ?? 0)}
                     </div>
+                    
+                    {/* if status pending show payment button*/}
+                    {booking.status === RentingStatus.PENDING && (
+                      <button
+                        onClick={() => handleOnCilck(booking)}
+                        className="bg-orange-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex sm:hidden items-center justify-center"
+                      >
+                        <span>ชำระเงิน</span>
+                      </button>
+                    )}
+
+                    {/* Mobile Review Button */}
+                    {booking.status === RentingStatus.CONFIRMED && !booking.hasReviewed && (
+                      <button
+                        onClick={() => router.push(`/review?car_id=${booking.car_id}&renting_id=${booking.renting_id}`)}
+                        className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex sm:hidden items-center justify-center"
+                      >
+                        <span>รีวิวการเช่า</span>
+                      </button>
+                    )}
+
+                    {/* Mobile "รีวิวแล้ว" badge */}
+                    {booking.status === RentingStatus.CONFIRMED && booking.hasReviewed && (
+                      <div className="bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded-lg flex sm:hidden items-center justify-center">
+                        <span>รีวิวแล้ว</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Desktop Layout - Proper grid alignment */}
-                  <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_2fr_1fr_1fr] gap-3 items-center">
+                  <div className="hidden sm:grid grid-cols-[1.2fr_1.4fr_1fr_2fr_1fr_1.4fr_1.2fr] gap-x-6 px-3 py-2 text-sm items-center">
                     <div className="text-sm font-medium">{booking.renting_id.slice(0, 8)+"..."}</div>
                     <div className="text-sm">
                       <button
@@ -217,55 +276,43 @@ export default function RentingHistoryPage() {
                     <div className="text-sm">
                       {formatDate(booking.sdate)} - {formatDate(booking.edate)}
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex text-center">
                       <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
                         {getStatusDisplay(booking.status)}
                       </span>
                     </div>
-                    <div className="text-sm font-bold text-right">
+                    <div className="text-sm font-bold">
                       {formatCurrency(booking.total_price ?? 0)}
                     </div>
+
+                    {/* if status pending show payment button*/}
+                    {booking.status === RentingStatus.PENDING && (
+                      <button
+                        onClick={() => handleOnCilck(booking)}
+                        className="bg-orange-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center sm:flex"
+                      >
+                        <span>ชำระเงิน</span>
+                      </button>
+                    )}
+
+                    {/* Green Review Button - Only show if confirmed AND not reviewed yet */}
+                    {booking.status === RentingStatus.CONFIRMED && !booking.hasReviewed && (
+                      <button
+                        onClick={() => router.push(`/review/${booking.renting_id}`)}
+                        className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center sm:flex"
+                      >
+                        <span>รีวิวการเช่า</span>
+                      </button>
+                    )}
+
+                    {/* Show "รีวิวแล้ว" badge if already reviewed */}
+                    {booking.status === RentingStatus.CONFIRMED && booking.hasReviewed && (
+                      <div className=" bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center sm:flex">
+                        <span>รีวิวแล้ว</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {/* Green Review Button - Only show if confirmed AND not reviewed yet */}
-                {booking.status === RentingStatus.CONFIRMED && !booking.hasReviewed && (
-                  <button
-                    onClick={() => router.push(`/review/${booking.renting_id}`)}
-                    className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center sm:flex"
-                  >
-                    <span>รีวิวการเช่า</span>
-                  </button>
-                )}
-
-                {/* Mobile Review Button */}
-                {booking.status === RentingStatus.CONFIRMED && !booking.hasReviewed && (
-                  <button
-                    onClick={() => router.push(`/review?car_id=${booking.car_id}&renting_id=${booking.renting_id}`)}
-                    className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex sm:hidden items-center justify-center"
-                  >
-                    <span>รีวิวการเช่า</span>
-                  </button>
-                )}
-                
-                {/* Show "รีวิวแล้ว" badge if already reviewed */}
-                {booking.status === RentingStatus.CONFIRMED && booking.hasReviewed && (
-                  <div className="bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 whitespace-nowrap w-[120px] self-center sm:flex">
-                    <span>รีวิวแล้ว</span>
-                  </div>
-                )}
-
-                {/* Mobile "รีวิวแล้ว" badge */}
-                {booking.status === RentingStatus.CONFIRMED && booking.hasReviewed && (
-                  <div className="bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded-lg flex sm:hidden items-center justify-center">
-                    <span>รีวิวแล้ว</span>
-                  </div>
-                )}
-                
-                {/* Empty space when no review button to maintain alignment */}
-                {booking.status !== RentingStatus.CONFIRMED && (
-                  <div className="hidden sm:block w-[120px]"></div>
-                )}
               </div>
             ))}
 

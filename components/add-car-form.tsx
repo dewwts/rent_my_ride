@@ -40,7 +40,6 @@ export function AddCarForm({
       model: "",
       year_created: new Date().getFullYear(),
       number_of_seats: 4,
-      car_type: "",
       mileage: 0,
       oil_type: "",
       gear_type: "",
@@ -101,7 +100,7 @@ export function AddCarForm({
       const newCar: Car = {
         car_id:"",  // id will be ignore on create
         ...data,
-        rating: data.rating || 1,
+        rating: data.rating || 0,
         car_image: data.image_url || "",
         is_verified: false
       };
@@ -145,13 +144,12 @@ export function AddCarForm({
               
               {/* Image Preview or Upload Area */}
               {imagePreview ? (
-                <div className="relative">
+                <div className="relative w-full h-48">
                   <Image
                     src={imagePreview}
                     alt="Car preview"
-                    width={64}
-                    height={48}
-                    className="object-cover rounded-lg border-2 border-gray-200"
+                    fill={true}
+                    className="rounded-lg border-2 border-gray-200"
                   />
                   <Button
                     type="button"
@@ -223,12 +221,12 @@ export function AddCarForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="year">ปีที่ผลิต *</Label>
                   <select
                     id="year_created"
-                    {...register("year_created")}
+                    {...register("year_created",{valueAsNumber:true})}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   >
                     {Array.from({ length: 35 }, (_, i) => {
@@ -244,17 +242,7 @@ export function AddCarForm({
                     <p className="text-sm text-red-500">{errors.year_created.message}</p>
                   )}
                 </div>
-                {/* <div className="space-y-2">
-                  <Label htmlFor="car_id">เลขตัวถัง (ค.) *</Label>
-                  <Input
-                    id="car_id"
-                    {...register("car_id")}
-                    placeholder="เช่น XXXXXXXXXX"
-                  />
-                  {errors.car_id && (
-                    <p className="text-sm text-red-500">{errors.car_id.message}</p>
-                  )}
-                </div> */}
+
                 <div className="space-y-2">
                   <Label htmlFor="seats">จำนวนที่นั่ง *</Label>
                   <select
@@ -270,57 +258,6 @@ export function AddCarForm({
                   </select>
                   {errors.number_of_seats && (
                     <p className="text-sm text-red-500">{errors.number_of_seats.message}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="car_type">ประเภทรถ *</Label>
-                  <select
-                    id="car_type"
-                    {...register("car_type")}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                  >
-                    <option value="">เลือกประเภทรถ</option>
-                    <option value="เก๋ง">เก๋ง</option>
-                    <option value="SUV">SUV</option>
-                    <option value="รถตู้">รถตู้</option>
-                    <option value="รถกระบะ">รถกระบะ</option>
-                    <option value="รถสปอร์ต">รถสปอร์ต</option>
-                    <option value="รถไฟฟ้า">รถไฟฟ้า</option>
-                  </select>
-                  {errors.car_type && (
-                    <p className="text-sm text-red-500">{errors.car_type.message}</p>
-                  )}
-                </div>
-                {/* <div className="space-y-2">
-                  <Label htmlFor="color">สี *</Label>
-                  <Input
-                    id="color"
-                    {...register("color")}
-                    placeholder="เช่น ขาว, ดำ, แดง"
-                  />
-                  {errors.color && (
-                    <p className="text-sm text-red-500">{errors.color.message}</p>
-                  )}
-                </div> */}
-                <div className="space-y-2">
-                  <Label htmlFor="oil_type">ประเภทเชื้อเพลิง *</Label>
-                  <select
-                    id="oil_type"
-                    {...register("oil_type")}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                  >
-                    <option value="">เลือกประเภทเชื้อเพลิง</option>
-                    <option value="เบนซิน">เบนซิน</option>
-                    <option value="ดีเซล">ดีเซล</option>
-                    <option value="ไฟฟ้า">ไฟฟ้า</option>
-                    <option value="ไฮบริด">ไฮบริด</option>
-                    <option value="แก๊ส">แก๊ส</option>
-                  </select>
-                  {errors.oil_type && (
-                    <p className="text-sm text-red-500">{errors.oil_type.message}</p>
                   )}
                 </div>
               </div>
@@ -357,13 +294,33 @@ export function AddCarForm({
                   )}
                 </div>
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="oil_type">ประเภทเชื้อเพลิง *</Label>
+                  <select
+                    id="oil_type"
+                    {...register("oil_type")}
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  >
+                    <option value="">เลือกประเภทเชื้อเพลิง</option>
+                    <option value="เบนซิน">เบนซิน</option>
+                    <option value="ดีเซล">ดีเซล</option>
+                    <option value="ไฟฟ้า">ไฟฟ้า</option>
+                    <option value="ไฮบริด">ไฮบริด</option>
+                    <option value="แก๊ส">แก๊ส</option>
+                  </select>
+                  {errors.oil_type && (
+                    <p className="text-sm text-red-500">{errors.oil_type.message}</p>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Additional Information */}
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">ข้อมูลเพิ่มเติม</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* <div className="space-y-2">
                   <Label htmlFor="status">สถานะ *</Label>
                   <select

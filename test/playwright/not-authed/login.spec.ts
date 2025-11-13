@@ -1,21 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-function generateValidEmail() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  const randomString = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  const domains = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com'];
-  const randomDomain = domains[Math.floor(Math.random() * domains.length)];
-  return `test${randomString}@${randomDomain}`;
-}
-
-
 test.describe("Login Test", () => {
-    test('TC2-1 Correct Format', async ({page}) => {
-        //login
+    test.beforeEach(async ({page}) => {
         await page.goto('https://rentmyride-mu.vercel.app/auth/login', {
             timeout : 60000,
             waitUntil : 'domcontentloaded'
         });
+        await page.getByRole('button', { name: 'ยอมรับทั้งหมด' }).click();
+    })
+    test('TC2-1 Correct Format', async ({page}) => {
+        //login
         await page.getByRole('textbox', { name: 'ที่อยู่อีเมล' }).fill("tester@gmail.com");
         await page.getByRole('textbox', { name: 'รหัสผ่าน' }).fill('123456');
         await page.getByRole('button', { name: 'เข้าสู่ระบบ' }).click();
@@ -25,10 +19,6 @@ test.describe("Login Test", () => {
     });
 
     test('TC2-2 Email and password is empty', async ({page}) => {
-        await page.goto('https://rentmyride-mu.vercel.app/auth/login', {
-            timeout : 60000,
-            waitUntil : 'domcontentloaded'
-        });
         await page.getByRole('button', { name: 'เข้าสู่ระบบ' }).click();
         await expect(page.getByText('Email is required')).toBeVisible();
         await expect(page.getByText('Password is required')).toBeVisible();
@@ -37,10 +27,6 @@ test.describe("Login Test", () => {
     });
     
     test('TC2-3 Email is not in the system', async ({page}) => {
-        await page.goto('https://rentmyride-mu.vercel.app/auth/login', {
-            timeout : 60000,
-            waitUntil : 'domcontentloaded'
-        });
         await page.getByRole('textbox', { name: 'ที่อยู่อีเมล' }).fill('ILoveSe@gmail.com');
         await page.getByRole('textbox', { name: 'รหัสผ่าน' }).fill('123456');
         await page.getByRole('button', { name: 'เข้าสู่ระบบ' }).click();
@@ -50,10 +36,6 @@ test.describe("Login Test", () => {
     });
 
     test('TC2-4 Password is incorrect', async ({page}) => {
-        await page.goto('https://rentmyride-mu.vercel.app/auth/login', {
-            timeout : 60000,
-            waitUntil : 'domcontentloaded'
-        });
         await page.getByRole('textbox', { name: 'ที่อยู่อีเมล' }).fill('tester@gmail.com');
         await page.getByRole('textbox', { name: 'รหัสผ่าน' }).fill('abcdef');
         await page.getByRole('button', { name: 'เข้าสู่ระบบ' }).click();

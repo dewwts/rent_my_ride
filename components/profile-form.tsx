@@ -12,8 +12,8 @@ import { useRouter } from "next/navigation";
 import { getProfile, removeAvatar, updateAvatar, updateProfile } from "@/lib/authServices";
 import { parseAddress } from "@/lib/utils";
 import {MAX_BYTES, ALLOWED_TYPES} from "@/types/avatarConstraint"
-import { Button } from "./ui/button";
-import axios, { AxiosError } from "axios";
+// import { Button } from "./ui/button";
+// import axios, { AxiosError } from "axios";
 import Image from "next/image";
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
@@ -22,7 +22,7 @@ export function ProfileForm() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [stripeID, setStripeID] = useState<string | null>(null);
+  // const [stripeID, setStripeID] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -75,7 +75,7 @@ export function ProfileForm() {
         }
 
         setAvatarUrl(row?.url ?? null); 
-        setStripeID(row?.stripe_account_id ?? null)
+        // setStripeID(row?.stripe_account_id ?? null)
       } catch (e: unknown) {
         let error = "โหลดข้อมูลไม่สำเร็จ"
         if (e instanceof Error){
@@ -171,25 +171,25 @@ export function ProfileForm() {
   }
 
   const busy = disabled || isSubmitting;
-  const handleConnectBank = async()=>{
-    try{
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/stripe/create-connect-account`)
-      setStripeID(response.data.data.aid)
-      window.location.href = response.data.data.url
-    }catch(err: unknown){
-      let msg = "เกิดปัญหา"
-      if (err instanceof AxiosError){
-        msg = err.response?.data.error
-      }else if (err instanceof Error){
-        msg = err.message
-      }
-      toast({
-        variant:"destructive",
-        title:"ไม่สำเร็จ",
-        description:msg
-      })
-    }
-  }
+  // const handleConnectBank = async()=>{
+  //   try{
+  //     const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/stripe/create-connect-account`)
+  //     // setStripeID(response.data.data.aid)
+  //     window.location.href = response.data.data.url
+  //   }catch(err: unknown){
+  //     let msg = "เกิดปัญหา"
+  //     if (err instanceof AxiosError){
+  //       msg = err.response?.data.error
+  //     }else if (err instanceof Error){
+  //       msg = err.message
+  //     }
+  //     toast({
+  //       variant:"destructive",
+  //       title:"ไม่สำเร็จ",
+  //       description:msg
+  //     })
+  //   }
+  // }
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-4 m-5" noValidate>
       {/* Avatar section */}
@@ -216,12 +216,12 @@ export function ProfileForm() {
           }}
         />
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 sm:flex-row">
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={busy || uploading}
-            className="px-6 py-2 bg-[#0b3d4f] text-white rounded-3xl border-2 border-black hover:bg-[#023047] transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-[#0b3d4f] text-white rounded-2xl sm:rounded-3xl border-2 border-black hover:bg-[#023047] transition-colors disabled:opacity-50"
           >
             {uploading ? "กำลังอัปโหลด..." : "เปลี่ยนรูปโปรไฟล์"}
           </button>
@@ -230,7 +230,7 @@ export function ProfileForm() {
             type="button"
             onClick={handleRemoveAvatar}
             disabled={busy || uploading}
-            className="px-6 py-2 bg-white text-black rounded-3xl border-2 border-black hover:bg-[#f01a1a] hover:text-white transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-white text-black rounded-2xl sm:rounded-3xl border-2 border-black hover:bg-[#f01a1a] hover:text-white transition-colors disabled:opacity-50"
           >
             ลบรูปโปรไฟล์
           </button>
@@ -248,9 +248,9 @@ export function ProfileForm() {
       <InputField label="จังหวัด" placeholder="กรุงเทพมหานคร" disabled={busy} {...register("province")} error={errors.province?.message} />
       <InputField label="รหัสไปรษณีย์" placeholder="10500" disabled={busy} {...register("postcode")} error={errors.postcode?.message} />
       <InputField label="ประเทศ" placeholder="ไทย" disabled={busy} {...register("country")} error={errors.country?.message} />
-      <Button size='sm' variant={stripeID ? "secondary":"destructive"} disabled={stripeID ? true:false} onClick={handleConnectBank} type="button">
+      {/* <Button size='sm' variant={stripeID ? "secondary":"destructive"} disabled={stripeID ? true:false} onClick={handleConnectBank} type="button">
         {stripeID ? "เชื่อมต่อบัญชีธนาคารแล้ว":"เชื่อมต่อบัญชีธนาคาร"}
-      </Button>
+      </Button> */}
       {/* <div className="sm:col-span-2 mt-1">
         {formError && <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">{formError}</div>}
         {formSuccess && <div className="p-3 bg-green-50 border border-green-200 rounded-md text-sm text-green-600">{formSuccess}</div>}

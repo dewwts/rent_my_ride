@@ -3,12 +3,21 @@
 ## Project Overview
 
 <p align="left">
- Something here
+ Rent My Ride is a modern web app for car rentals. Users can browse and filter cars by location, seats, and price; check availability for a date range; book and pay with Stripe; and leave reviews. Owners can manage listings and bookings through a dashboard. The app uses Supabase for authentication (SSR cookies), Postgres (with RLS recommended), and Next.js App Router for server actions and API routes.
 </p>
 
 ## Features
 <!-- Task create feature section do here -->
-- something here
+- 🔑 **Auth (Supabase + SSR cookies)** — session available in Client, Server, Route Handlers, and Middleware.
+- 🔎 **Search & Filters** — location autocomplete, seat count, price ranges, and (optionally) include unavailable cars.
+- 🗓️ **Availability by date range** — checks overlapping bookings to ensure only free cars are shown.
+- 🚘 **Owner Dashboard** — add/edit cars, upload images, verify status, manage bookings & history.
+- 🌟 **Reviews** — renters can submit ratings/comments after finishing a rental.
+- 💳 **Stripe Payments** — checkout sessions, connect accounts (for owner payouts), and webhook handling.
+- 📊 **Transactions** — transaction list + simple status summaries.
+- 🎨 **UI** — Tailwind CSS + shadcn/ui components; Lucide icons.
+- 🧪 **Testing** — Playwright for E2E, Jest for unit tests.
+- 🐳 **Docker dev** — optional Docker Compose setup for the Next.js app; compatible with local Supabase network.
 - Works across the entire [Next.js](https://nextjs.org) stack
   - App Router
   - Pages Router
@@ -26,33 +35,94 @@
 
 ## Prerequisites
 Before begin the project, ensure you have installed these before on your machine.
-* **Node.js**: v18.0 or later (This includes **npm**).
-* **Git**: For cloning the repository.
+- **Node.js** v18+ (includes npm)
+- **Git**
+- **Supabase CLI** (for local Postgres + auth) — optional but recommended for local DB
+- **Stripe** account (test mode) — to exercise checkout/webhooks
+- **Docker** — optional; used by `docker-compose.yml` for running the Next.js app attached to the local Supabase network
 
 ## Clone the project
 Following these instruction
 
 1. Use `git clone` Clone the project to your local machine 
-  ```bash
-  git clone https://github.com/dewwts/rent_my_ride.git
-  ```
+ ```bash
+ git clone https://github.com/dewwts/rent_my_ride.git
+ ```
 
 2. Use `cd` to change into the app's directory
 
-   ```bash
-   cd rent_my_ride
-   ```
+ ```bash
+ cd rent_my_ride
+ ```
 
 3. **Install the dependencies:**
     (This command reads the `package.json` file and installs all the required libraries)
-    ```bash
-    npm install
-    ```
+ ```bash
+ npm install
+ ```
 
+## Run Development Server
+### To start the development server on client, use the following command:
+1. 
+```bash
+npm run dev
+```
+The app will be available at http://localhost:3000
+
+### To start the development server on docker, use the following command
+1. 
+```bash
+npx supabase login
+```
+2. 
+```bash
+npx supabase link --project-ref <project-id>
+# get project-id on supabase 
+```
+3. 
+```bash
+npx supabase db pull
+```
+4. 
+```bash
+npx supabase start
+```
+5. 
+```bash
+docker-compose up
+```
+Important Note: Any changes made to the database while running via `npx supabase start` are stored exclusively in the Local Docker Database, ensuring your development work is isolated from production data.
+## Run E2E Test (Playwright)
+Before running Playwright tests, make sure the development server is running.
+To execute all end-to-end tests:
+```bash
+npx playwright test
+```
+If you want to run tests in headed mode (see the browser window while testing):
+```bash
+npx playwright test --headed
+```
+Or to run a specific test file, use:
+```bash
+npx playwright test tests/example.spec.ts
+```
+**Jest (unit tests):**
+```bash
+npm test
+npm run test-coverage
+```
+
+---
+
+## Lint & Format
+```bash
+npm run lint
+# (If you use Prettier locally, run your formatter as well)
+```
 
 ## Demo
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+You can view a fully working demo at [demo](https://rentmyride-mu.vercel.app/).
 
 ## Deploy to Vercel
 
@@ -68,10 +138,10 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
 
 ## Feedback and issues
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+- 🐞 [Report a bug](https://github.com/dewwts/rent_my_ride/issues/new?labels=bug)
+- 💡 [Feature request](https://github.com/dewwts/rent_my_ride/issues/new?labels=enhancement)
 
-## More Supabase examples
+---
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+## Acknowledgements
+- [Next.js](https://nextjs.org) • [Supabase](https://supabase.com) • [Tailwind CSS](https://tailwindcss.com) • [shadcn/ui](https://ui.shadcn.com/) • [Stripe](https://stripe.com)

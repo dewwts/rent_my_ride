@@ -49,22 +49,27 @@ export const getMyCars = async (supabase: SupabaseClient): Promise<Car[]> => {
 
     const { data, error } = await supabase
       .from("car_information")
-      .select("*")
+      .select("*,reviews ( count )")
       .eq("owner_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) {
       throw new Error("เกิดข้อผิดพลาดในการดึงข้อมูลรถ");
     }
-    const castedCar: Car[] = data.map((car) => {
+    const carsWithCount = data.map(car => {
+      const { reviews, car_conditionrating, ...restOfCar } = car; 
+      const reviewsArray = reviews as { count: number }[];
+      const count = (reviewsArray && reviewsArray.length > 0)
+        ? reviewsArray[0].count
+        : 0;
       return {
-        ...car,
-        year: car.year_created,
-        rating: car.car_conditionrating,
+        ...restOfCar,
+        reviewCount: count,
+        rating:car_conditionrating
       };
     });
-    return castedCar || [];
-  } catch (err: unknown) {
+      return carsWithCount as Car[]
+    } catch (err: unknown) {
     let message = "Something went wrong";
     if (err instanceof Error) {
       message = err.message;
@@ -154,7 +159,7 @@ export const updateCar = async (
   supabase: SupabaseClient,
   carId: string,
   // carData: Omit<Car, 'id' | 'created_at' | 'updated_at'>
-  carData: Car
+  carData: Partial<Car>
 ): Promise<Car> => {
   try {
     const { data: sessionData } = await supabase.auth.getUser();
@@ -163,29 +168,33 @@ export const updateCar = async (
     if (!user) {
       throw new Error("โปรดเข้าสู่ระบบก่อน");
     }
-
+    const updatePayload = {
+      car_conditionrating: carData.rating 
+    };
     const { data, error } = await supabase
       .from("car_information")
-      .update({
-        car_brand: carData.car_brand,
-        model: carData.model,
-        // car_id: carData.car_id,
-        mileage: carData.mileage,
-        year_created: carData.year_created,
-        number_of_seats: carData.number_of_seats,
-        gear_type: carData.gear_type,
-        oil_type: carData.oil_type,
-        daily_rental_price: carData.daily_rental_price,
-        // status: carData.status,
-        location: carData.location,
-        car_conditionrating: carData.rating || 1,
-        car_image: carData.car_image || null,
-        owner_id: user.id,
-      })
+      .update(
+      //   {
+      //   car_brand: carData.car_brand,
+      //   model: carData.model,
+      //   // car_id: carData.car_id,
+      //   mileage: carData.mileage,
+      //   year_created: carData.year_created,
+      //   number_of_seats: carData.number_of_seats,
+      //   gear_type: carData.gear_type,
+      //   oil_type: carData.oil_type,
+      //   daily_rental_price: carData.daily_rental_price,
+      //   // status: carData.status,
+      //   location: carData.location,
+      //   car_conditionrating: carData.rating || 1,
+      //   car_image: carData.car_image || null,
+      //   owner_id: user.id,
+      // }
+      updatePayload
+    )
       .eq("car_id", carId)
       .select()
       .single();
-
     if (error) {
       console.error("Supabase update error:", error);
       throw new Error("เกิดข้อผิดพลาดในการอัปเดตรถ");
@@ -303,31 +312,26 @@ export const carAvailable = async (
     }
     const startISO = startAt.toISOString();
     const endISO = endAt.toISOString();
-    console.log(
-      "Checking availability for car:",
-      carid,
-      "from",
-      startISO,
-      "to",
-      endISO
+    // console.log(
+    //   "Checking availability for car:",
+    //   carid,
+    //   "from",
+    //   startISO,
+    //   "to",
+    //   endISO
+    // );
+    const { data, error } = await supabase.rpc(
+      "check_car_availability",
+      {
+        p_car_id: carid,
+        p_start_date: startISO,
+        p_end_date: endISO,
+      }
     );
-    const { data: sessionData } = await supabase.auth.getUser();
-    if (!sessionData.user) {
-      throw new Error("User not authenticated");
-    }
-
-    const { data: carData, error } = await supabase
-      .from("renting")
-      .select("renting_id, sdate, edate")
-      .eq("car_id", carid)
-      .lte("sdate", endISO)
-      .gte("edate", startISO);
-
     if (error) {
       throw error;
     }
-    const available = carData.length === 0;
-    return available;
+    return data
   } catch (err: unknown) {
     console.log(err);
     return false;

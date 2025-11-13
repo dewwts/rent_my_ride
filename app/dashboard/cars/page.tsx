@@ -73,17 +73,31 @@ export default function MyCarsPage() {
       setIsDeleting(false);
     }
   };
-
+  // const getTotal = async(car_id:string)=>{
+  //   try{
+  //     const data = getCountReview(supabase, car_id)
+  //     return data
+  //   }catch(err: unknown){
+  //     let message = "เกิดปัญหาบางอย่าง"
+  //     if (err instanceof Error){
+  //       message = err.message
+  //     }
+  //     toast({
+  //       title:"ดึงข้อมูลไม่สำเร็จ",
+  //       description:message,
+  //       variant:"destructive"
+  //     })
+  //   }
+  // }
   const handleEditClick = (car: Car) => {
     router.push(`/dashboard/cars/${car.car_id}/edit`);
   };
-
 
   const getStatusColor = (status: boolean) => {
     return status === true ? "border-green-400" : "border-red-400";
   }
   const getStatusText = (status: boolean) => {
-    return status === true ? "ว่าง" : "ไม่ว่าง";
+    return status === true ? "ได้รับการยืนยัน" : "ไม่ได้รับการยืนยัน";
   }
   if (isLoading) {
     return (
@@ -155,14 +169,14 @@ export default function MyCarsPage() {
                         <h3 className="text-xl font-semibold text-gray-900">
                           {car.car_brand}
                         </h3>
-                        <p className="text-gray-600">
-                          {car.model} ID: {car.car_id}
+                        <p className="text-sm text-gray-500">
+                          ID: {car.car_id}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          รุ่นรถ: {car.model}
                         </p>
                         <p className="text-sm text-gray-500">
                           จำนวนที่นั่ง: {car.number_of_seats}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          ประเภท: {car.model}
                         </p>
                         <p className="text-sm text-gray-500">
                           ปี: {car.year_created}
@@ -208,7 +222,7 @@ export default function MyCarsPage() {
                           </span>
                           <span className="text-gray-500">/5</span>
                         </div>
-                        <p className="text-sm text-gray-500">(200 รีวิว)</p>
+                        <p className="text-sm text-gray-500">({car.reviewCount} รีวิว)</p>
                       </div>
                     </div>
 

@@ -49,7 +49,8 @@ export async function hasDateOverlapPendingOrConfirmed(
     .from("renting")
     .select("renting_id")
     .eq("car_id", carId)
-    .in("status", ["Pending", "Confirmed"])
+    // .in("status", ["Pending", "Confirmed"])
+    .eq("status","Confirmed")
     .gte("edate", startDATE)          // edate >= start
     .lte("sdate", endExclusiveDATE)   // sdate <= end
     .returns<{ renting_id: string }[]>(); 
@@ -101,7 +102,7 @@ export async function searchAvailableCars(
         "number_of_seats",
         "oil_type",
         "gear_type",
-        "status",
+        "is_verified",
         "location",
         "year_created", // ensure year is selected
       ].join(",")
@@ -131,7 +132,6 @@ export async function searchAvailableCars(
     );
     availableCars = availableCars.filter((_, i) => verifyFlags[i] === false);
   }
-
   return availableCars;
 }
 

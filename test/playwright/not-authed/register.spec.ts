@@ -9,6 +9,7 @@ test.describe("Sign up Test", () => {
             timeout : 60000,
             waitUntil : 'domcontentloaded'
         });
+        await page.getByRole('button', { name: 'ยอมรับทั้งหมด' }).click();
     })
 
     test('TC1-1 Correct Format', async ({page}) => {

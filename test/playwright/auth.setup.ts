@@ -4,7 +4,8 @@ const authFile = 'playwright/.auth/user.json'
 const url = "https://rentmyride-mu.vercel.app/auth/login"
 setup('authenticate user and save strorage state', async({page})=>{
     await page.goto(url)
-    await page.getByLabel("ที่อยู่อีเมล").fill("peeradonthienpongkasem@gmail.com")
+    await page.getByRole('button', { name: 'ยอมรับทั้งหมด' }).click();
+    await page.getByLabel("ที่อยู่อีเมล").fill("tester@gmail.com")
     // หลักการคือ การใช้ getByLabel จะทำให้เราสามารถเข้าถึง input ที่มี label กำกับได้เลย โดยที่ argument ที่ใส่เข้าไปคือ ข้อความใน label
     // โดยที่มันรู้ว่าเป็น input ไหนจากการจับคู่ Label ที่ใช้ attribute htmlFor และ id ของ input ตรงกัน
     await page.locator('#password').fill("123456")
