@@ -13,6 +13,43 @@ if (!process.env.NEXT_PUBLIC_SERVER_URL) {
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
+/**
+ * @swagger
+ * /api/stripe/create-connect-account:
+ *   post:
+ *     tags:
+ *       - Stripe
+ *     summary: Create or retrieve Stripe Connect account
+ *     description: Creates a new Stripe Connect Express account for a user or retrieves an existing account link for onboarding. This is used for owner payouts.
+ *     operationId: createConnectAccount
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Account created or account link retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     url:
+ *                       type: string
+ *                       format: uri
+ *                       example: "https://connect.stripe.com/setup/c/..."
+ *                     aid:
+ *                       type: string
+ *                       example: "acct_1234567890"
+ *       401:
+ *         description: Unauthorized - User must be logged in
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(){
     try{
         // เช็คว่า user login แล้วหรือยัง
