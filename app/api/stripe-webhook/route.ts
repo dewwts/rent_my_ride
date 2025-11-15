@@ -14,6 +14,57 @@ if (!process.env.STRIPE_WEBHOOK_SECRET) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
+/**
+ * @swagger
+ * /api/stripe-webhook:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Stripe webhook handler
+ *     description: |
+ *       Handles Stripe webhook events. This endpoint processes:
+ *       - checkout.session.completed - When a checkout session is completed
+ *       - payment_intent.succeeded - When a payment succeeds
+ *       - payment_intent.payment_failed - When a payment fails
+ *       
+ *       **Note:** This endpoint requires Stripe signature verification.
+ *       The stripe-signature header must be included in the request.
+ *     operationId: handleStripeWebhook
+ *     parameters:
+ *       - name: stripe-signature
+ *         in: header
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "t=1234567890,v1=abc123..."
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             description: Stripe webhook event payload
+ *     responses:
+ *       200:
+ *         description: Webhook processed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "การจ่ายเงินสำเร็จ"
+ *       400:
+ *         description: Bad request - Invalid signature or missing data
+ *       404:
+ *         description: Not found - Renting or car data not found
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(req: Request){
     try{
         const supabase = await createAdminClient()
