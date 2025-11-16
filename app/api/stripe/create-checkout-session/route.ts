@@ -12,6 +12,65 @@ if (!process.env.NEXT_PUBLIC_SERVER_URL) {
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
+/**
+ * @swagger
+ * /api/stripe/create-checkout-session:
+ *   post:
+ *     tags:
+ *       - Stripe
+ *     summary: Create Stripe checkout session
+ *     description: Creates a Stripe checkout session for a rental payment. Supports both card and PromptPay payment methods.
+ *     operationId: createCheckoutSession
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *               - rid
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 description: Payment amount in THB
+ *                 minimum: 0.01
+ *                 example: 5000
+ *               rid:
+ *                 type: string
+ *                 description: Renting ID
+ *                 example: "rent_123456"
+ *     responses:
+ *       200:
+ *         description: Checkout session created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     session_id:
+ *                       type: string
+ *                       example: "cs_test_1234567890"
+ *                     url:
+ *                       type: string
+ *                       format: uri
+ *                       example: "https://checkout.stripe.com/c/pay/cs_test_1234567890"
+ *                     message:
+ *                       type: string
+ *                       example: "สร้าง Checkout Session สำเร็จ"
+ *       400:
+ *         description: Bad request - Invalid amount or missing renting ID
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(req: Request) {
     try {
         const body = await req.json()

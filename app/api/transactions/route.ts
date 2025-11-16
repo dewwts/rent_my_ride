@@ -3,6 +3,68 @@ import { isAdmin } from "@/lib/authServices";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
+/**
+ * @swagger
+ * /api/transactions:
+ *   get:
+ *     tags:
+ *       - Transactions
+ *     summary: Get paginated transactions
+ *     description: Retrieve a paginated list of transactions. This endpoint requires admin privileges. Supports filtering by transaction status.
+ *     operationId: getTransactions
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         description: Page number (1-indexed)
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         example: 1
+ *       - name: limit
+ *         in: query
+ *         description: Number of items per page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 5
+ *         example: 5
+ *       - name: filter
+ *         in: query
+ *         description: Filter by transaction status
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [all, pending, done, failed]
+ *           default: all
+ *         example: "done"
+ *     responses:
+ *       200:
+ *         description: Transactions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Transaction'
+ *       401:
+ *         description: Unauthorized - Admin privileges required
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET(req: NextRequest){
     const supabase = await createClient()
     const IsAdmin = await isAdmin(supabase)
