@@ -259,6 +259,15 @@ export default function RentingHistoryPage() {
                         <span>รีวิวแล้ว</span>
                       </div>
                     )}
+                    {/* Mobile Review Button */}
+                    {booking.status === RentingStatus.CANCELED&& (
+                      <button
+                        onClick={() => toast({})}
+                        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex sm:hidden items-center justify-center"
+                      >
+                        <span>การชำระเงินผิดพลาดโปรดทำการจองใหม่</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Desktop Layout - Proper grid alignment */}

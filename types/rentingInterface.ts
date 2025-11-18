@@ -1,7 +1,8 @@
 
 export enum RentingStatus {
   CONFIRMED = "Confirmed",
-  PENDING = "Pending"
+  PENDING = "Pending",
+  CANCELED = "Cancelled"
 }
 export interface rentingBase {
   renting_id:string,
