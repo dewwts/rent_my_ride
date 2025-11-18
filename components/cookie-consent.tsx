@@ -12,7 +12,7 @@ export function CookieConsent() {
   useEffect(() => {
     // Check if user has already given consent
     const consent = localStorage.getItem(CONSENT_KEY);
-    if (!consent) {
+    if (!consent || consent === "declined") {
       // Show consent dialog after component mounts
       setShowConsent(true);
     }
