@@ -36,7 +36,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.62.0",
     "react-toastify": "^11.0.5",
-    "stripe": "^19.1.0",
+    "stripe": "^19.2.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "swagger-ui-react": "^5.30.2",
