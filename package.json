@@ -39,7 +39,7 @@
     "stripe": "^19.1.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "swagger-ui-react": "^5.30.2",
+    "swagger-ui-react": "^5.30.3",
     "tailwind-merge": "^3.3.0",
     "zod": "^4.1.12"
   },
